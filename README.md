@@ -59,3 +59,7 @@ env.run_fed_imputation()
 ### Step 4. Evaluate imputation outcomes
 ```python
 ```
+
+## FedImputeBench - Benckmarking Analysis Using FedImpute
+
+We use FedImpute to initialize a benchmarking analysis for federated imputation algorithms. The repo for FedImputeBench can be found [here](https://github.com/sitaomin1994/FedImputeBench)
