@@ -40,21 +40,21 @@ def generate_missing_ratios(
     np.random.seed(seed)
     if dist == 'fixed':
         missing_ratios = np.ones((num_clients, num_cols)) * ms_range[0]
-    elif dist == 'uniform':
+    elif dist == 'randu':
         missing_ratios = np.random.uniform(ms_range[0], ms_range[1], (num_clients, num_cols))
-    elif dist == 'uniform_int':
+    elif dist == 'randu-int':
         start = float(ms_range[0])
         stop = float(ms_range[1])
         step = round((stop - start) / 0.1) + 1
         mr_list = np.linspace(start, stop, step, endpoint=True)
         missing_ratios = np.random.choice(mr_list, (num_clients, num_cols))
-    elif dist == 'gaussian':
+    elif dist == 'randn':
         lower, upper = ms_range[0], ms_range[1]
         mu, sigma = (lower + upper) / 2, (upper - lower) / 3  # sigma set to range/3 - 1.5 std cover range
         # truncated norm distribution
         trunc_norm_dist = stats.truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
         missing_ratios = trunc_norm_dist.rvs(size=(num_clients, num_cols))
-    elif dist == 'gaussian_int':
+    elif dist == 'randn-int':
         start = float(ms_range[0])
         stop = float(ms_range[1])
         step = round((stop - start) / 0.1) + 1
