@@ -1,7 +1,7 @@
 import numpy as np
-import mcar_simulate as mcar_simulate
-import mar_simulate as mar_simulate
-import mnar_simulate as mnar_simulate
+import fedimpute.simulator.missing_simulate.mcar_simulate as mcar_simulate
+import fedimpute.simulator.missing_simulate.mar_simulate as mar_simulate
+import fedimpute.simulator.missing_simulate.mnar_simulate as mnar_simulate
 from typing import List, Union
 from .add_missing_utils import (
     generate_missing_cols, generate_missing_ratios, generate_missing_mech_funcs
@@ -11,10 +11,13 @@ import loguru
 
 # TODO: make this to be a class
 def add_missing(
-        clients_data: List[np.ndarray], cols: List[int],
+        clients_data: List[np.ndarray],
+        cols: List[int],
         rngs: List[np.random.Generator],
+        obs_cols: List[int],
         global_missing: bool = False,
         mf_strategy: str = 'all',
+        mf_dist: str = 'identity',
         mr_dist: str = 'uniform_int',
         mr_lower: float = 0.3,
         mr_upper: float = 0.7,
@@ -33,8 +36,10 @@ def add_missing(
     :param clients_data: List of clients data
     :param cols: columns to be considered
     :param seeds: seed for each client
+    :param obs_cols: observed columns index
     :param global_missing: whether simulate missing data globally or locally
     :param mf_strategy: missing features strategy
+    :param mf_dist: missing features distribution across clients
     :param mr_dist: missing ratio distribution
     :param mr_lower: missing ratio lower bound
     :param mr_upper: missing ratio upper bound
@@ -48,6 +53,15 @@ def add_missing(
     :param seed: randomness
     :return: list of datasets with missing values
     """
+
+    # remove observed columns from ms_cols
+    if not mm_mech.startswith('mar'):
+        mm_obs = False
+
+    if mm_obs:
+        if len(obs_cols) > 0:
+            cols = np.array(cols)
+            cols = cols[~np.isin(cols, obs_cols)].tolist()
 
     # add missing to global data then split
     if global_missing:
@@ -77,6 +91,7 @@ def add_missing(
 def _add_missing_central(
         data: np.ndarray, cols: List[int],
         mf_strategy: str = 'all',
+        mf_dist: str = 'identity',
         mr_dist: str = 'uniform_int',
         mr_lower: float = 0.3,
         mr_upper: float = 0.7,
@@ -94,6 +109,7 @@ def _add_missing_central(
     :param cols: columns to add missing values
     :param mm_funcs_bank: missing mechanism functions banks
     :param mf_strategy: missing features strategy
+    :param mf_dist: missing features distribution across clients
     :param mr_dist: missing ratio distribution
     :param mr_lower: missing ratio lower bound
     :param mr_upper: missing ratio upper bound
@@ -138,7 +154,7 @@ def _add_missing_central(
     X_train_ms = simulate_nan(
         X_train, y_train, mm_mech=mm_mech, missing_features=missing_cols, missing_ratios=missing_ratios,
         mechanism_funcs=mm_funcs, mm_obs=mm_obs, mm_strictness=mm_strictness,
-        mm_feature_option=mm_feature_option, mm_beta_option=mm_beta_option, rng = rng
+        mm_feature_option=mm_feature_option, mm_beta_option=mm_beta_option, rng=rng
     )
 
     return X_train_ms
@@ -148,10 +164,11 @@ def _add_missing_central(
 def _add_missing_dist(
         clients_data: List[np.ndarray], cols: List[int], rngs: List[np.random.Generator],
         mf_strategy: str = 'all',
-        mr_dist: str = 'uniform_int',
+        mf_dist: str = 'identity',
+        mr_dist: str = 'randu-int',
         mr_lower: float = 0.3,
         mr_upper: float = 0.7,
-        mm_funcs_dist: str = 'homo',
+        mm_funcs_dist: str = 'random',
         mm_funcs_bank: str = 'lr',
         mm_mech: str = 'mcar',
         mm_strictness: bool = True,
@@ -168,6 +185,7 @@ def _add_missing_dist(
         :param mm_funcs_dist: missing mechanism functions distribution across clients and features
         :param mm_funcs_bank: missing mechanism functions banks
         :param mf_strategy: missing features strategy
+        :param mf_dist: missing features distribution across clients
         :param mr_dist: missing ratio distribution
         :param mr_lower: missing ratio lower bound
         :param mr_upper: missing ratio upper bound
@@ -193,7 +211,7 @@ def _add_missing_dist(
         mr_dist, ms_range=mr_range, num_clients=num_clients, num_cols=num_cols, seed=seed
     )
 
-    # missing mechanism funcs - 'homo', 'random'
+    # missing mechanism funcs - 'identity', 'random'
     clients_mm_funcs = generate_missing_mech_funcs(
         mm_funcs_dist, mm_funcs_bank, num_clients=num_clients, num_cols=num_cols, seed=seed
     )

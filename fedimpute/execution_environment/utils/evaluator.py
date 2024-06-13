@@ -1,12 +1,14 @@
 from typing import List, Union
 import numpy as np
-from src.client import Client
-from src.evaluation.imp_quality_metrics import rmse, sliced_ws
+from fedimpute.execution_environment.client import Client
+from fedimpute.evaluation.imp_quality_metrics import rmse, sliced_ws
 
 
 class Evaluator:
 
-    def __init__(self, evaluator_params: dict):
+    def __init__(self, evaluator_params: dict = None):
+        if evaluator_params is None:
+            evaluator_params = {}
         self.evaluator_params = evaluator_params
 
     @staticmethod

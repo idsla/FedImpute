@@ -14,18 +14,23 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
 
     def __init__(
             self,
-            imp_model_params: dict,
+            n_estimators:int = 200,
+            bootstrap: bool = True,
+            n_jobs: int = 2,
             clip: bool = True,
             use_y: bool = False,
     ):
         super().__init__()
 
         # estimator for numerical and categorical columns
+        # TODO: add more parameters for random forest model
         self.clip = clip
         self.min_values = None
         self.max_values = None
         self.use_y = use_y
-        self.imp_model_params = imp_model_params
+        self.n_estimators = n_estimators
+        self.bootstrap = bootstrap
+        self.n_jobs = n_jobs
 
         # Imputation models
         self.imp_models = None
@@ -53,9 +58,18 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         self.imp_models = []
         for i in range(data_utils['n_features']):
             if i < data_utils['num_cols']:
-                estimator = RandomForestRegressor(**self.imp_model_params, random_state=seed)
+                estimator = RandomForestRegressor(
+                    n_estimators=self.n_estimators,
+                    bootstrap=self.bootstrap,
+                    n_jobs=self.n_jobs,
+                    random_state=seed
+                )
             else:
-                estimator = RandomForestClassifier(**self.imp_model_params, class_weight='balanced', random_state=seed)
+                estimator = RandomForestClassifier(
+                    n_estimators=self.n_estimators,
+                    bootstrap=self.bootstrap,
+                    n_jobs=self.n_jobs, class_weight='balanced', random_state=seed
+                )
 
             X_train = X[:, np.arange(X.shape[1]) != i][0:10]
             y_train = X[:, i][0:10]

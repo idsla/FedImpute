@@ -18,7 +18,26 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MIWAEImputer(BaseNNImputer, JMImputerMixin):
 
-    def __init__(self, name, imp_model_params: dict, clip: bool = True):
+    def __init__(
+            self,
+            name: str = 'miwae',
+            # model params
+            latent_size: int = 8,
+            n_hidden: int = 16,
+            n_hidden_layers: int = 2,
+            out_dist='studentt',
+            K: int = 20,
+            L: int = 1000,
+            activation='tanh',
+            initializer='xavier',
+            clip: bool = True,
+            # training params
+            batch_size: int = 256,
+            learning_rate: int = 0.001,
+            weight_decay: int = 0.0001,
+            scheduler: str = "step",
+            optimizer: str = 'adam',
+    ):
 
         super().__init__()
         self.model = None
@@ -26,12 +45,34 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
 
         # imputation model parameters
         self.clip = clip
+        self.latent_size = latent_size
+        self.n_hidden = n_hidden
+        self.n_hidden_layers = n_hidden_layers
+        self.out_dist = out_dist
+        self.K = K
+        self.L = L
+        self.activation = activation
+        self.initializer = initializer
+
+        # training params
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.scheduler = scheduler
+        self.scheduler_params = {
+                "step_size": 10,
+                "gamma": 0.5,
+                "schedule_last_epoch": -1
+            }
+        self.optimizer = optimizer
+
+        # other parameters
         self.min_values = None
         self.max_values = None
-        self.imp_model_params = imp_model_params
         self.model_type = 'torch_nn'
         self.train_dataloader = None
         self.model_persistable = True
+        self.seed = None
 
     def get_imp_model_params(self, params: dict) -> OrderedDict:
         """
@@ -67,27 +108,32 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
         :param seed: int - seed for randomization
         :return: None
         """
+        self.seed = seed
         if self.name == 'miwae':
-            self.model = MIWAE(num_features=data_utils['n_features'], **self.imp_model_params)
-        elif self.name == 'notmiwae':
-            self.model = NOTMIWAE(num_features=data_utils['n_features'], **self.imp_model_params)
-        elif self.model == 'gnr':
-            self.model = GNR(num_features=data_utils['n_features'], **self.imp_model_params)
+            self.model = MIWAE(
+                num_features=data_utils['n_features'],
+                latent_size=self.latent_size,
+                n_hidden=self.n_hidden,
+                n_hidden_layers=self.n_hidden_layers,
+                out_dist=self.out_dist,
+                K=self.K,
+                L=self.L,
+                activation=self.activation,
+                initializer=self.initializer,
+            )
+        # elif self.name == 'notmiwae':
+        #     self.model = NOTMIWAE(num_features=data_utils['n_features'], **self.imp_model_params)
+        # elif self.model == 'gnr':
+        #     self.model = GNR(num_features=data_utils['n_features'], **self.imp_model_params)
         else:
             raise ValueError(f"Model {self.name} not supported")
 
         self.model.init(seed)
-        #self.model = torch.compile(self.model)
         self.min_values, self.max_values = self.get_clip_thresholds(data_utils)
 
     def configure_model(
             self, params: dict, X: np.ndarray, y: np.ndarray, missing_mask: np.ndarray
     ) -> Tuple[torch.nn.Module, torch.utils.data.DataLoader]:
-
-        try:
-            batch_size = params['batch_size']
-        except KeyError as e:
-            raise ValueError(f"Parameter {str(e)} not found in params")
 
         # if self.train_dataloader is not None:
         #     return self.model, self.train_dataloader
@@ -95,7 +141,7 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
         n = X.shape[0]
         X_imp = X.copy()
         X_mask = missing_mask.copy()
-        bs = min(batch_size, n)
+        bs = min(self.batch_size, n)
 
         train_dataset = torch.utils.data.TensorDataset(
             torch.from_numpy(X_imp).float(), torch.from_numpy(~X_mask).float()
@@ -108,17 +154,8 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
             self, params: dict, model: torch.nn.Module
     ) -> tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler]]:
 
-        try:
-            learning_rate = params['learning_rate']
-            weight_decay = params['weight_decay']
-            optimizer_name = params['optimizer']
-            scheduler_name = params['scheduler']
-            scheduler_params = params['scheduler_params']
-        except KeyError as e:
-            raise ValueError(f"Parameter {str(e)} not found in params")
-
-        optimizer = load_optimizer(optimizer_name, model.parameters(), learning_rate, weight_decay)
-        lr_scheduler = load_lr_scheduler(scheduler_name, optimizer, scheduler_params)
+        optimizer = load_optimizer(self.optimizer, model.parameters(), self.learning_rate, self.weight_decay)
+        lr_scheduler = load_lr_scheduler(self.scheduler, optimizer, self.scheduler_params)
 
         return [optimizer], [lr_scheduler]
 

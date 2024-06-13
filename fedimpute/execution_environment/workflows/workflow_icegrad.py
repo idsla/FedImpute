@@ -1,13 +1,13 @@
 import loguru
 import numpy as np
 
-from src.server import Server
+from fedimpute.execution_environment.server import Server
 from typing import List
-from src.client import Client
-from src.imputation.initial_imputation import initial_imputation_num, initial_imputation_cat
+from fedimpute.execution_environment.client import Client
+from fedimpute.execution_environment.imputation.initial_imputation import initial_imputation_num, initial_imputation_cat
 from .utils import formulate_centralized_client, update_clip_threshold
 from .workflow import BaseWorkflow
-from ..evaluation.evaluator import Evaluator
+from fedimpute.execution_environment.utils.evaluator import Evaluator
 from tqdm.auto import trange
 
 from ..imputation.initial_imputation.initial_imputation import initial_imputation

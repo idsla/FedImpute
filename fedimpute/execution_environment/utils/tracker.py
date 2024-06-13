@@ -1,5 +1,4 @@
 from typing import List
-
 import numpy as np
 
 
@@ -14,7 +13,15 @@ class Tracker:
     }
     """
 
-    def __init__(self, tracker_params: dict):
+    def __init__(self, tracker_params: dict = None):
+
+        if tracker_params is None:
+            tracker_params = {
+                "track_data": False,
+                "track_model_params": False,
+                "track_misc": False,
+                "persist": 'none'
+            }
 
         # options
         if 'track_data' not in tracker_params:

@@ -1,8 +1,8 @@
-from src.utils.tracker import Tracker
+from fedimpute.execution_environment.utils.tracker import Tracker
 
 
 class ResultAnalyzer:
-    def __init__(self, params: dict):
+    def __init__(self):
         pass
 
     @staticmethod

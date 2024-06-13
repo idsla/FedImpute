@@ -1,16 +1,14 @@
 import logging
-
-import delu
 import loguru
 import numpy as np
 from tqdm import tqdm
 
-import src.utils.nn_utils as nn_utils
+import fedimpute.execution_environment.utils.nn_utils as nn_utils
 
-from src.server import Server
+from fedimpute.execution_environment.server import Server
 from typing import List
-from src.client import Client
-from src.evaluation.evaluator import Evaluator
+from fedimpute.execution_environment.client import Client
+from fedimpute.execution_environment.utils.evaluator import Evaluator
 from .utils import formulate_centralized_client, update_clip_threshold
 from .workflow import BaseWorkflow
 from tqdm.auto import trange
@@ -23,14 +21,35 @@ class WorkflowJM(BaseWorkflow):
 
     def __init__(
             self,
-            workflow_params: dict
+            initial_zero_impute:bool = True,
+            global_epoch:int = 300,
+            local_epoch:int = 5,
+            use_early_stopping: bool = True,
+            log_interval:int = 10,
+            imp_interval:int = 1000,
+            save_model_interval: int = 200,
+            model_converge: dict = {
+                "tolerance": 0.001,
+                "tolerance_patience": 20,
+                "increase_patience": 20,
+                "window_size": 20,
+                "check_steps": 1,
+                "back_steps": 1
+            },
     ):
         super().__init__()
-        self.workflow_params = workflow_params
         self.tracker = None
+        self.initial_zero_impute = initial_zero_impute
+        self.global_epoch = global_epoch
+        self.local_epoch = local_epoch
+        self.use_early_stopping = use_early_stopping
+        self.model_converge = model_converge
+        self.log_interval = log_interval
+        self.imp_interval = imp_interval
+        self.save_model_interval = save_model_interval
 
     def fed_imp_sequential(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
+            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker
     ) -> Tracker:
 
         ############################################################################################################
@@ -39,7 +58,7 @@ class WorkflowJM(BaseWorkflow):
             clients.append(formulate_centralized_client(clients))
 
         # clients = initial_imputation(server.fed_strategy.strategy_params['initial_impute'], clients)
-        if train_params['initial_zero_impute']:
+        if self.initial_zero_impute:
             clients = initial_imputation('zero', clients)
         else:
             clients = initial_imputation(server.fed_strategy.strategy_params['initial_impute'], clients)
@@ -52,19 +71,19 @@ class WorkflowJM(BaseWorkflow):
 
         ############################################################################################################
         # Federated Imputation Workflow
-        use_early_stopping = train_params['use_early_stopping']
+        use_early_stopping = self.use_early_stopping
         # if server.fed_strategy.name == 'local':
         #     early_stopping_mode = 'local'
         # else:
         #     early_stopping_mode = 'global'
         early_stopping_mode = 'local'
 
-        model_converge_tol = train_params['model_converge']['tolerance']
-        model_converge_tolerance_patience = train_params['model_converge']['tolerance_patience']
-        model_converge_increase_patience = train_params['model_converge']['increase_patience']
-        model_converge_window_size = train_params['model_converge']['window_size']
-        model_converge_steps = train_params['model_converge']['check_steps']
-        model_converge_back_steps = train_params['model_converge']['back_steps']
+        model_converge_tol = self.model_converge['tolerance']
+        model_converge_tolerance_patience = self.model_converge['tolerance_patience']
+        model_converge_increase_patience = self.model_converge['increase_patience']
+        model_converge_window_size = self.model_converge['window_size']
+        model_converge_steps = self.model_converge['check_steps']
+        model_converge_back_steps = self.model_converge['back_steps']
 
         early_stoppings, all_clients_converged_sign = self.setup_early_stopping(
             early_stopping_mode, model_converge_tol, model_converge_tolerance_patience,
@@ -74,11 +93,14 @@ class WorkflowJM(BaseWorkflow):
 
         ################################################################################################################
         # Federated Training
-        global_model_epochs = train_params['global_epoch']
-        log_interval = train_params['log_interval']
-        imp_interval = train_params['imp_interval'] if 'imp_interval' in train_params else 1e8
-        save_model_interval = train_params['save_model_interval']
-        fit_params_list = [train_params.copy() for _ in clients]
+        global_model_epochs = self.global_epoch
+        log_interval = self.log_interval
+        imp_interval = self.imp_interval
+        save_model_interval = self.save_model_interval
+
+        fit_params_list = [{
+            'local_epoch': self.local_epoch
+        } for _ in clients]
 
         for epoch in trange(global_model_epochs, desc='Global Epoch', colour='blue'):
 
@@ -128,7 +150,7 @@ class WorkflowJM(BaseWorkflow):
                     loguru.logger.info("All clients have converged. Stopping training at {}.".format(epoch))
                     break
 
-            if epoch == 0 and train_params['initial_zero_impute'] == False:
+            if epoch == 0 and self.initial_zero_impute == False:
                 for client in clients:
                     client.local_imputation(params={})
 
@@ -154,8 +176,9 @@ class WorkflowJM(BaseWorkflow):
         )
 
         fine_tune_epochs = server.fed_strategy.fine_tune_epochs
-        train_params['local_epoch'] = 1
-        fit_params_list = [train_params.copy() for _ in clients]
+        fit_params_list = [{
+            'local_epoch': 1
+        } for _ in clients]
         for epoch in trange(fine_tune_epochs, desc='Fine Tuning Epoch', colour='blue'):
 
             clients_fit_res = []
@@ -207,7 +230,7 @@ class WorkflowJM(BaseWorkflow):
         return tracker
 
     def fed_imp_parallel(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
+            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker
     ) -> Tracker:
         return tracker
 

@@ -6,13 +6,13 @@ import numpy as np
 
 from .utils import formulate_centralized_client, update_clip_threshold
 from .workflow import BaseWorkflow
-from src.server import Server
+from fedimpute.execution_environment.server import Server
 from typing import List
-from src.client import Client
-from ..evaluation.evaluator import Evaluator
+from fedimpute.execution_environment.client import Client
+from fedimpute.execution_environment.utils.evaluator import Evaluator
 
 from tqdm.auto import trange
-from src.utils.tracker import Tracker
+from fedimpute.execution_environment.utils.tracker import Tracker
 from ..imputation.initial_imputation.initial_imputation import initial_imputation
 
 
@@ -20,14 +20,22 @@ class WorkflowEM(BaseWorkflow):
 
     def __init__(
             self,
-            workflow_params: dict
+            max_iterations: int = 100,
+            convergence_thres: float = 0.003,
+            local_epoch: int = 1,
+            evaluation_interval: int = 1,
+            save_model_interval: int = 10
     ):
         super().__init__()
-        self.workflow_params = workflow_params
+        self.max_iterations = max_iterations
+        self.convergence_thres = convergence_thres
+        self.local_epoch = local_epoch
+        self.evaluation_interval = evaluation_interval
+        self.save_model_interval = save_model_interval
         self.tracker = None
 
     def fed_imp_sequential(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
+            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker,
     ) -> Tracker:
 
         """
@@ -35,9 +43,9 @@ class WorkflowEM(BaseWorkflow):
         """
         ############################################################################################################
         # Workflow Parameters
-        evaluation_interval = train_params['evaluation_interval']
-        max_iterations = train_params['max_iterations']
-        save_model_interval = train_params['save_model_interval']
+        evaluation_interval = self.evaluation_interval
+        max_iterations = self.max_iterations
+        save_model_interval = self.save_model_interval
 
         ############################################################################################################
         # Centralized Initialization
@@ -56,7 +64,10 @@ class WorkflowEM(BaseWorkflow):
 
         ########################################################################################################
         # federated EM imputation
-        fit_params_list = [train_params.copy() for _ in range(len(clients))]
+        fit_params_list = [{
+                "local_epoch": self.local_epoch, "convergence_thres": self.convergence_thres
+            } for _ in range(len(clients))
+        ]
 
         # central and local training
         if server.fed_strategy.name == 'central' or server.fed_strategy.name == 'local':
@@ -65,7 +76,7 @@ class WorkflowEM(BaseWorkflow):
             for client_id in trange(len(clients), desc='Clients', colour='green'):
                 client = clients[client_id]
                 fit_params = fit_params_list[client_id]
-                fit_params['local_epoch'] = max_iterations * train_params['local_epoch']
+                fit_params['local_epoch'] = max_iterations * self.local_epoch
                 fit_params['save_model_interval'] = save_model_interval
                 fit_params.update(fit_instruction[client_id])
                 model_parameter, fit_res = client.fit_local_imp_model(params=fit_params)
@@ -111,7 +122,7 @@ class WorkflowEM(BaseWorkflow):
                 if iteration > 5:
                     clients_converged_signs = self.check_convergence(
                         old_parameters=clients_local_models_temp, new_parameters=local_models,
-                        tolerance=train_params['convergence_thres']
+                        tolerance=self.convergence_thres
                     )
                     clients_local_models_temp = deepcopy(local_models)
 
@@ -152,7 +163,7 @@ class WorkflowEM(BaseWorkflow):
         return tracker
 
     def fed_imp_parallel(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
+            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker
     ) -> Tracker:
         pass
 

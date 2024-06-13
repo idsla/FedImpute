@@ -17,12 +17,25 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class GAINImputer(BaseNNImputer, JMImputerMixin):
 
-    def __init__(self, imp_model_params: dict, clip: bool = True):
+    def __init__(
+            self,
+            h_dim: int = 20,
+            n_layers: int = 2,
+            activation: str = 'relu',
+            initializer: str = 'kaiming',
+            loss_alpha: float = 10,
+            hint_rate: float = 0.9,
+            clip: bool = True,
+            # training params
+            batch_size: int = 256,
+            learning_rate: int = 0.001,
+            weight_decay: int = 0.0001,
+            scheduler: str = "step",
+            optimizer: str = 'adam',
+    ):
         super().__init__()
         self.name = 'gain'
         self.model_type = 'torch_nn'
-        self.imp_model_params = imp_model_params
-        self.clip = clip
         self.min_values = None
         self.max_values = None
         self.norm_parameters: Union[dict, None] = None
@@ -31,6 +44,27 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
         self.train_dataloader = None
         self.model = None
         self.model_persistable = True
+
+        # model parameters
+        self.h_dim = h_dim
+        self.n_layers = n_layers
+        self.activation = activation
+        self.initializer = initializer
+        self.loss_alpha = loss_alpha
+        self.hint_rate = hint_rate
+        self.clip = clip
+
+        # training params
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.scheduler = scheduler
+        self.scheduler_params = {
+            "step_size": 10,
+            "gamma": 0.5,
+            "schedule_last_epoch": -1
+        }
+        self.optimizer = optimizer
 
     def initialize(
             self, X: np.array, missing_mask: np.array, data_utils: dict, params: dict, seed: int
@@ -45,7 +79,15 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
         :return: None
         """
 
-        self.model = GainModel(dim=data_utils['n_features'], **self.imp_model_params)
+        self.model = GainModel(
+            dim=data_utils['n_features'],
+            h_dim=self.h_dim,
+            n_layers=self.n_layers,
+            activation=self.activation,
+            initializer=self.initializer,
+            loss_alpha=self.loss_alpha,
+            hint_rate=self.hint_rate
+        )
         self.model.init(seed)
 
         Xmiss = X.copy()
@@ -82,10 +124,6 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
         :return: model, train_dataloader
         """
         # set up train and test data for a training imputation model
-        try:
-            batch_size = params['batch_size']
-        except KeyError as e:
-            raise ValueError(f"Parameter {str(e)} not found in params")
 
         if self.train_dataloader is not None:
             return self.model, self.train_dataloader
@@ -93,7 +131,7 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
             n = X.shape[0]
             X_imp = X.copy()
             X_mask = missing_mask.copy()
-            bs = min(batch_size, n)
+            bs = min(self.batch_size, n)
 
             train_dataset = torch.utils.data.TensorDataset(
                 torch.from_numpy(X_imp).float(), torch.from_numpy(~X_mask).float()
@@ -112,25 +150,17 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
         :param params: params for optmizer
         :return: List of optimizers and List of lr_schedulers
         """
-        try:
-            optimizer_name = params['optimizer']
-            learning_rate = params['learning_rate']
-            weight_decay = params['weight_decay']
-            scheduler_name = params['scheduler']
-            scheduler_params = params['scheduler_params']
-        except KeyError as e:
-            raise ValueError(f"Parameter {str(e)} not found in params")
 
         g_solver = load_optimizer(
-            optimizer_name, model.generator_layer.parameters(), learning_rate, weight_decay
+            self.optimizer, model.generator_layer.parameters(), self.learning_rate, self.weight_decay
         )
 
         d_solver = load_optimizer(
-            optimizer_name, model.discriminator_layer.parameters(), learning_rate, weight_decay
+            self.optimizer, model.discriminator_layer.parameters(), self.learning_rate, self.weight_decay
         )
 
-        d_lr_scheduler = load_lr_scheduler(scheduler_name, d_solver, scheduler_params)
-        g_lr_scheduler = load_lr_scheduler(scheduler_name, g_solver, scheduler_params)
+        d_lr_scheduler = load_lr_scheduler(self.scheduler, d_solver, self.scheduler_params)
+        g_lr_scheduler = load_lr_scheduler(self.scheduler, g_solver, self.scheduler_params)
 
         return (
             [d_solver, g_solver], [d_lr_scheduler, g_lr_scheduler]

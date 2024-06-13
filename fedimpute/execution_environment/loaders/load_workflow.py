@@ -16,14 +16,14 @@ def load_workflow(
     Load the workflow based on the workflow name
     """
     if workflow_name == 'simple':
-        return WorkflowSimple(workflow_params)
+        return WorkflowSimple()
     elif workflow_name == 'em':
-        return WorkflowEM(workflow_params)
+        return WorkflowEM(**workflow_params)
     elif workflow_name == 'ice':
-        return WorkflowICE(workflow_params)
+        return WorkflowICE(**workflow_params)
     elif workflow_name == 'icegrad':
-        return WorkflowICEGrad(workflow_params)
+        return WorkflowICEGrad(**workflow_params)
     elif workflow_name == 'jm':
-        return WorkflowJM(workflow_params)
+        return WorkflowJM(**workflow_params)
     else:
         raise ValueError(f"Workflow {workflow_name} not supported")

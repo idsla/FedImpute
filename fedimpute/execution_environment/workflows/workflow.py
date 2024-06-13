@@ -12,25 +12,24 @@ class BaseWorkflow(ABC):
 
     @abstractmethod
     def fed_imp_sequential(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
+            self, clients: List[Client], server: Server, evaluator, tracker: Tracker
     ) -> Tracker:
         pass
 
     @abstractmethod
     def fed_imp_parallel(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
+            self, clients: List[Client], server: Server, evaluator, tracker: Tracker
     ) -> Tracker:
         pass
 
     def run_fed_imp(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker,
-            run_type: str, train_params: dict,
+            self, clients: List[Client], server: Server, evaluator, tracker: Tracker, run_type: str
     ) -> Tracker:
 
         if run_type == 'sequential':
-            return self.fed_imp_sequential(clients, server, evaluator, tracker, train_params)
+            return self.fed_imp_sequential(clients, server, evaluator, tracker)
         elif run_type == 'parallel':
-            return self.fed_imp_parallel(clients, server, evaluator, tracker, train_params)
+            return self.fed_imp_parallel(clients, server, evaluator, tracker)
         else:
             raise ValueError('Invalid workflow run type')
 

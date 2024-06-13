@@ -9,7 +9,10 @@ import pickle
 
 class SimpleImputer(BaseMLImputer):
 
-    def __init__(self, strategy: str = 'mean'):
+    def __init__(
+            self,
+            strategy: str = 'mean'
+    ):
         super().__init__()
         if strategy not in ['mean']:
             raise ValueError(f"Strategy {strategy} not supported")

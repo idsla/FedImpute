@@ -1,10 +1,10 @@
 from .workflow import BaseWorkflow
-from src.server import Server
+from fedimpute.execution_environment.server import Server
 from typing import List
-from src.client import Client
-from src.imputation.initial_imputation.initial_imputation import initial_imputation
-from ..evaluation.evaluator import Evaluator
-from src.utils.tracker import Tracker
+from fedimpute.execution_environment.client import Client
+from fedimpute.execution_environment.imputation.initial_imputation.initial_imputation import initial_imputation
+from fedimpute.execution_environment.utils.evaluator import Evaluator
+from fedimpute.execution_environment.utils.tracker import Tracker
 from .utils import formulate_centralized_client, update_clip_threshold
 
 
@@ -12,10 +12,8 @@ class WorkflowSimple(BaseWorkflow):
 
     def __init__(
             self,
-            workflow_params: dict
     ):
         super().__init__()
-        self.workflow_params = workflow_params
         self.tracker = None
 
     def fed_imp_sequential(

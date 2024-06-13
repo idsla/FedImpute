@@ -8,11 +8,6 @@ from ..base.base_imputer import BaseMLImputer
 import numpy as np
 
 
-# TODO:
-#  1. singular matrix convergence logic
-#  2. global convergence checking logic
-
-
 class EMImputer(BaseMLImputer, ICEImputerMixin):
 
     def __init__(
@@ -84,8 +79,8 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
 
         # TODO: SAVE MODEL INTERVAL FOR LOCAL STRATEGY
         local_epochs = params['local_epoch']
-        converged = False
         convergence_threshold = params['convergence_thres']
+        converged = False
 
         for iteration in range(local_epochs):
             try:

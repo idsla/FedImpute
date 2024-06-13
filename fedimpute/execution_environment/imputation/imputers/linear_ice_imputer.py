@@ -15,16 +15,16 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
 
     def __init__(
             self,
-            estimator_num,
-            estimator_cat,
-            mm_model,
-            mm_model_params,
+            estimator_num: str = 'ridge_cv',
+            estimator_cat: str = 'logistic',
+            mm_model: str = 'logistic',
+            mm_model_params=None,
             clip: bool = True,
             use_y: bool = False,
     ):
         super().__init__()
 
-        # estimator for numerical and categorical columns
+        # model parameters
         self.estimator_num = estimator_num
         self.estimator_cat = estimator_cat
         self.mm_model_name = mm_model
@@ -73,10 +73,10 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
             self.imp_models.append(estimator)
 
         # Missing Mechanism Model
-        if self.mm_model_name == 'logistic':  # TODO: make mechanism model as a separate component
+        if self.mm_model_name == 'logistic':  # TODO: mm model params
             self.mm_model = LogisticRegressionCV(
-                Cs=self.mm_model_params['Cs'], class_weight=self.mm_model_params['class_weight'],
-                cv=StratifiedKFold(self.mm_model_params['cv']), random_state=seed, max_iter=1000, n_jobs=-1
+                Cs=[1e-1], class_weight='balanced',
+                cv=StratifiedKFold(3), random_state=seed, max_iter=1000, n_jobs=-1
             )
         else:
             raise ValueError("Invalid missing mechanism model")
@@ -156,7 +156,6 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
 
         return {
             'coef': coef,
-            # 'mm_coef': mm_coef,
             'loss': {},
             'sample_size': X_train.shape[0]
         }
