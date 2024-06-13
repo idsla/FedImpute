@@ -42,12 +42,7 @@ class FedImputeEnv:
             workflow_params: Union[None, dict] = None,
             fit_mode: str = 'fed', save_dir_path: str = './fedimp/'
     ):
-
-        if fed_strategy_params is None:
-            fed_strategy_params = {}
-        if imputer_params is None:
-            imputer_params = {}
-
+        # check if fit mode is supported
         if fit_mode not in ['local', 'central', 'fed']:
             raise ValueError(f"Fit mode {fit_mode} not supported")
 
@@ -78,9 +73,19 @@ class FedImputeEnv:
         self.imputer_name = imputer_name
         self.fed_strategy_name = fed_strategy_name
         self.workflow_name = workflow_name
+
+        # set default values
+        if fed_strategy_params is None:
+            fed_strategy_params = {}
+        if imputer_params is None:
+            imputer_params = {}
+        if workflow_params is None:
+            workflow_params = {}
         self.imputer_params = imputer_params
         self.fed_strategy_params = fed_strategy_params
         self.workflow_params = workflow_params
+
+        # save directory path
         self.env_dir_path = save_dir_path
 
     def setup(
