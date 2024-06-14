@@ -758,6 +758,21 @@ python-dateutil = ">=2.8.1"
 dev = ["flake8", "markdown", "twine", "wheel"]
 
 [[package]]
+name = "gower"
+version = "0.1.2"
+description = "Python implementation of Gowers distance, pairwise between records in two data sets"
+optional = false
+python-versions = ">=2.7"
+files = [
+    {file = "gower-0.1.2-py3-none-any.whl", hash = "sha256:cb46e18243e1d88d2fa0a23d20afb71e5469f25db4ee6236db40f897dfea9e6f"},
+    {file = "gower-0.1.2.tar.gz", hash = "sha256:34ddb5158f0e8bfba093dca06b9f887bda244998d10af2a3ad8c74a6efa1b5f6"},
+]
+
+[package.dependencies]
+numpy = "*"
+scipy = "*"
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
@@ -3576,4 +3591,4 @@ dev = ["black (>=19.3b0)", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.0"
-content-hash = "b07045028091bd5191e82c15d5aa4009baf57c509405cdbd69a936afa568d2b7"
+content-hash = "ce14ad75ab875669e48a523267c3b00006784d996c3de8d3365353cad9bb99ee"

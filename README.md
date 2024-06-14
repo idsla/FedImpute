@@ -57,7 +57,7 @@ env.run_fed_imputation()
 from fedimpute.evaluation import Evaluator
 
 evaluator = Evaluator()
-eval_results = evaluator.evaluate(env, ['imp_quality', 'pred_downstream', 'pred_downstream_fed'])
+evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed'])
 ```
 
 ## FedImputeBench - Benckmarking Analysis Using FedImpute

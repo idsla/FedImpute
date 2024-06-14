@@ -9,7 +9,7 @@ from .utils.evaluator import Evaluator
 from .utils.result_analyzer import ResultAnalyzer
 from .utils.tracker import Tracker
 from fedimpute.simulator import Simulator
-
+import gc
 
 class FedImputeEnv:
 
@@ -27,6 +27,7 @@ class FedImputeEnv:
         self.imputer_params = {}
         self.fed_strategy_params = {}
         self.workflow_params = {}
+        self.data_config = {}
 
         # other components
         self.simulator = None
@@ -91,9 +92,11 @@ class FedImputeEnv:
 
     def setup(
             self, clients_train_data: List[np.ndarray], clients_test_data: List[np.ndarray],
-            clients_train_data_ms: List[np.ndarray], clients_seeds: List[int], data_config: dict, verbose: int = 0
+            clients_train_data_ms: List[np.ndarray], clients_seeds: List[int], global_test: np.ndarray,
+            data_config: dict, verbose: int = 0
     ):
 
+        self.data_config = data_config
         # setup clients
         clients_data = list(zip(clients_train_data, clients_test_data, clients_train_data_ms))
         if verbose > 0:
@@ -110,7 +113,8 @@ class FedImputeEnv:
         if verbose > 0:
             print(f"Setting up server...")
         self.server = setup_server(
-            fed_strategy=self.fed_strategy_name, fed_strategy_params=self.fed_strategy_params, server_config={}
+            fed_strategy=self.fed_strategy_name, fed_strategy_params=self.fed_strategy_params, global_test=global_test,
+            server_config={}
         )
 
         # setup workflow
@@ -130,8 +134,18 @@ class FedImputeEnv:
 
         self.setup(
             simulator.clients_train_data, simulator.clients_test_data, simulator.clients_train_data_ms,
-            simulator.clients_seeds, simulator.data_config, verbose
+            simulator.clients_seeds, simulator.global_test, simulator.data_config, verbose
         )
+
+    def clear_env(self):
+        del self.clients
+        del self.server
+        del self.workflow
+        del self.evaluator
+        del self.tracker
+        del self.result_analyzer
+        del self.data_config
+        gc.collect()
 
     def run_fed_imputation(self, run_type: str = 'sequential'):
 
