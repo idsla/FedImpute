@@ -57,7 +57,7 @@ class WorkflowICE(BaseWorkflow):
 
         ############################################################################################################
         # Initial Imputation and update clip threshold
-        clients = initial_imputation(server.fed_strategy.strategy_params['initial_impute'], clients)
+        clients = initial_imputation(server.fed_strategy.initial_impute, clients)
         if server.fed_strategy.name != 'local':
             update_clip_threshold(clients)
 

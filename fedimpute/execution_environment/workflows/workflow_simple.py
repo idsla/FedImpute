@@ -17,7 +17,7 @@ class WorkflowSimple(BaseWorkflow):
         self.tracker = None
 
     def fed_imp_sequential(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
+            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker
     ) -> Tracker:
 
         """
@@ -30,7 +30,7 @@ class WorkflowSimple(BaseWorkflow):
 
         ############################################################################################################
         # Initial Imputation
-        clients = initial_imputation(server.fed_strategy.strategy_params['initial_impute'], clients)
+        clients = initial_imputation(server.fed_strategy.initial_impute, clients)
 
         # initial evaluation and tracking
         self.eval_and_track(
@@ -42,6 +42,7 @@ class WorkflowSimple(BaseWorkflow):
         params_list, fit_rest_list = [], []
         fit_instruction = server.fed_strategy.fit_instruction([{} for _ in range(len(clients))])
         for client in clients:
+            train_params = {}
             train_params.update(fit_instruction[client.client_id])
             params, fit_res = client.fit_local_imp_model(train_params)
             params_list.append(params)
@@ -65,6 +66,6 @@ class WorkflowSimple(BaseWorkflow):
         return tracker
 
     def fed_imp_parallel(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
+            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker
     ) -> Tracker:
         pass

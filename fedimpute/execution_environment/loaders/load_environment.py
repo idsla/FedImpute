@@ -30,27 +30,27 @@ def setup_clients(
 
 
 def setup_server(
-        fed_strategy: str, fed_strategy_params: dict, server_config: dict
+        fed_strategy: str, fed_strategy_params: dict, global_test: np.ndarray, server_config: dict
 ) -> Server:
     server = Server(
-        fed_strategy, fed_strategy_params, server_config
+        fed_strategy, fed_strategy_params, global_test, server_config
     )
 
     return server
 
 
-def load_workflow(
-        workflow_name: str,
-        workflow_params: dict,
-) -> Union[WorkflowICE, WorkflowICEGrad, WorkflowJM]:
-    """
-    Load the workflow based on the workflow name
-    """
-    if workflow_name == 'ice':
-        return WorkflowICE(workflow_params)
-    elif workflow_name == 'icegrad':
-        return WorkflowICEGrad(workflow_params)
-    elif workflow_name == 'vae':
-        return WorkflowJM(workflow_params)
-    else:
-        raise ValueError(f"Workflow {workflow_name} not supported")
+# def load_workflow(
+#         workflow_name: str,
+#         workflow_params: dict,
+# ) -> Union[WorkflowICE, WorkflowICEGrad, WorkflowJM]:
+#     """
+#     Load the workflow based on the workflow name
+#     """
+#     if workflow_name == 'ice':
+#         return WorkflowICE(**workflow_params)
+#     elif workflow_name == 'icegrad':
+#         return WorkflowICEGrad(workflow_params)
+#     elif workflow_name == 'vae':
+#         return WorkflowJM(workflow_params)
+#     else:
+#         raise ValueError(f"Workflow {workflow_name} not supported")

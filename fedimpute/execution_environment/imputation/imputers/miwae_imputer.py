@@ -27,7 +27,7 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
             n_hidden_layers: int = 2,
             out_dist='studentt',
             K: int = 20,
-            L: int = 1000,
+            L: int = 100,
             activation='tanh',
             initializer='xavier',
             clip: bool = True,
@@ -36,7 +36,7 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
             learning_rate: int = 0.001,
             weight_decay: int = 0.0001,
             scheduler: str = "step",
-            optimizer: str = 'adam',
+            optimizer: str = 'sgd',
     ):
 
         super().__init__()

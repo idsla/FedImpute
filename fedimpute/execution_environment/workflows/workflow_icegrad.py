@@ -25,7 +25,7 @@ class WorkflowICEGrad(BaseWorkflow):
         self.tracker = None
 
     def fed_imp_sequential(
-            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
+            self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker
     ) -> Tracker:
 
         """

@@ -22,7 +22,7 @@ class WorkflowJM(BaseWorkflow):
     def __init__(
             self,
             initial_zero_impute:bool = True,
-            global_epoch:int = 300,
+            global_epoch:int = 150,
             local_epoch:int = 5,
             use_early_stopping: bool = True,
             log_interval:int = 10,
@@ -61,7 +61,7 @@ class WorkflowJM(BaseWorkflow):
         if self.initial_zero_impute:
             clients = initial_imputation('zero', clients)
         else:
-            clients = initial_imputation(server.fed_strategy.strategy_params['initial_impute'], clients)
+            clients = initial_imputation(server.fed_strategy.initial_impute, clients)
         if server.fed_strategy.name != 'local':
             update_clip_threshold(clients)
 

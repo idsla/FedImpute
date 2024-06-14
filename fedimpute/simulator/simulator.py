@@ -1,5 +1,7 @@
+import sys
 from typing import Tuple, List, Union, Dict
 
+import loguru
 import numpy as np
 from .data_partition import load_data_partition
 from .missing_simulate import add_missing
@@ -8,7 +10,7 @@ from ..utils.reproduce_utils import setup_clients_seed
 
 class Simulator:
 
-    def __init__(self):
+    def __init__(self, debug_mode: bool = False):
 
         # data
         self.data = None
@@ -23,7 +25,7 @@ class Simulator:
         self.stats = None
 
         # parameters
-        pass
+        self.debug_mode = debug_mode
 
     def simulate_scenario(
             self,
@@ -58,6 +60,7 @@ class Simulator:
             ms_mm_feature_option: str = 'allk=0.2',
             ms_mm_beta_option: str = None,
             seed: int = 100330201,
+            verbose: int = 0
     ) -> Dict[str, List[np.ndarray]]:
 
         """
@@ -125,6 +128,12 @@ class Simulator:
         :param seed:
         :return:
         """
+        if self.debug_mode:
+            loguru.logger.remove()
+            loguru.logger.add(sys.stdout, level="DEBUG")
+        else:
+            loguru.logger.remove()
+            loguru.logger.add(sys.stdout, level="INFO")
 
         # ========================================================================================
         # setup clients seeds
@@ -133,6 +142,8 @@ class Simulator:
         client_seeds = setup_clients_seed(num_clients, rng=global_rng)
         client_rngs = [np.random.default_rng(seed) for seed in client_seeds]
 
+        if verbose > 0:
+            print("Data partitioning...")
         # ========================================================================================
         # data partition
         clients_train_data_list, clients_backup_data_list, clients_test_data_list, global_test_data, stats = (
@@ -184,7 +195,8 @@ class Simulator:
         else:
             raise ValueError(f'Invalid obs_cols options, it should be list of indices or options ("random", "rest")')
 
-
+        if verbose > 0:
+            print("Missing data simulation...")
         client_train_data_ms_list = add_missing(
             clients_train_data_list, ms_cols, client_rngs,
             obs_cols=obs_cols,
@@ -217,9 +229,12 @@ class Simulator:
         self.clients_test_data = clients_test_data
         self.clients_train_data_ms = clients_train_data_ms
         self.global_test = global_test_data
-        self.client_seeds = client_seeds
+        self.clients_seeds = client_seeds
         self.data = data
         self.data_config = data_config
+
+        if verbose > 0:
+            print("Simulation done. Using summary function to check the simulation results.")
 
         return {
             'clients_train_data': clients_train_data,

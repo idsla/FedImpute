@@ -26,7 +26,6 @@ def setup_clients_seed(num_clients, rng: np.random.Generator):
     """
     # Set seeds for each client
     client_seeds = rng.integers(0, 10000, num_clients)
-    loguru.logger.debug(f"{client_seeds}")
     return list(client_seeds)
 
 

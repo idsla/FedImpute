@@ -21,19 +21,19 @@ from ..fed_strategy.fed_strategy_server import (
 def load_fed_strategy_client(strategy_name: str, strategy_params: dict) -> StrategyClient:
 
     if strategy_name == 'local':
-        return LocalStrategyClient(strategy_params)
+        return LocalStrategyClient()
     elif strategy_name == 'central':
-        return CentralStrategyClient(strategy_params)
+        return CentralStrategyClient()
     elif strategy_name == 'fedavg':
-        return FedAvgStrategyClient(strategy_params)
+        return FedAvgStrategyClient()
     elif strategy_name == 'fedtree':
-        return FedAvgStrategyClient(strategy_params)
+        return FedAvgStrategyClient()
     elif strategy_name == 'fedavg_ft':
-        return FedAvgFtStrategyClient(strategy_params)
+        return FedAvgFtStrategyClient()
     elif strategy_name == 'fedprox':
-        return FedProxStrategyClient(strategy_params)
+        return FedProxStrategyClient(**strategy_params)
     elif strategy_name == 'fedavg_ft':
-        return FedProxStrategyClient(strategy_params)
+        return FedProxStrategyClient()
     else:
         raise ValueError(f"Invalid strategy name: {strategy_name}")
 
@@ -41,19 +41,19 @@ def load_fed_strategy_client(strategy_name: str, strategy_params: dict) -> Strat
 def load_fed_strategy_server(strategy_name: str, strategy_params: dict) -> StrategyServer:
 
     if strategy_name == 'local':
-        return LocalStrategyServer(strategy_params)
+        return LocalStrategyServer()
     elif strategy_name == 'central':
-        return CentralStrategyServer(strategy_params)
+        return CentralStrategyServer()
     elif strategy_name == 'fedavg':
-        return FedAvgStrategyServer(strategy_params)
+        return FedAvgStrategyServer()
     elif strategy_name == 'fedtree':
-        return FedTreeStrategyServer(strategy_params)
+        return FedTreeStrategyServer()
     elif strategy_name == 'fedprox':
-        return FedProxStrategyServer(strategy_params)
+        return FedProxStrategyServer()
     elif strategy_name == 'fedavg_ft':
-        return FedAvgFtStrategyServer(strategy_params)
+        return FedAvgFtStrategyServer(**strategy_params)
     elif strategy_name == 'fedprox_ft':
-        return FedAvgFtStrategyServer(strategy_params)
+        return FedAvgFtStrategyServer(**strategy_params)
     else:
         raise ValueError(f"Invalid strategy name: {strategy_name}")
 
