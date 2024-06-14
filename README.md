@@ -61,6 +61,18 @@ evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstrea
 evaluator.show_results()
 ```
 
+## Supported Federated Imputation Algorithms
+
+| Method   | Type | API        | Fed Strategy             | Reference                                                                                                                                               |
+|----------|----|------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Fed-Mean | Non-NN | `fed_mean` | -                        | -                                                                                                                                                       |
+| Fed-EM   | Non-NN | `fed_em`   | -                        | [EM](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_EM.py), [FedEM](https://arxiv.org/abs/2108.10252) |
+| Fed-ICE  | Non-NN | `fed_ice`  | -                        | [FedICE](https://pubmed.ncbi.nlm.nih.gov/33122624/)                                                                                                     |
+| Fed-MissForest | Non-NN | `fed_missforest` | -                        | [MissForest](), [Fed Randomforest]()                                                                                                                    |
+| MIWAE    | NN | `miwae`    | `fedavg`, `fedprox`, `fedavg_ft` | [MIWAE]()                                                                                                                                               |
+| GAIN     | NN | `gain`     | `fedavg`, `fedprox`, `fedavg_ft` | [GAIN]()                                                                                                                                                |
+
+
 ## FedImputeBench - Benckmarking Analysis Using FedImpute
 
 We use `FedImpute` to initialize a benchmarking analysis for federated imputation algorithms. The repo for **FedImputeBench** can be found [here](https://github.com/sitaomin1994/FedImputeBench)
