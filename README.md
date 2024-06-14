@@ -65,7 +65,7 @@ evaluator.show_results()
 
 Federated Imputation Algorithms:
 
-|      Method       |   Type    |      Supported Fed Strategy      |  Imputer (code)  | Reference                                                                                                                                                                                   |
+|      Method       |   Type    |           Fed Strategy           |  Imputer (code)  | Reference                                                                                                                                                                                   |
 |:-----------------:|:---------:|:--------------------------------:|:----------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 |     Fed-Mean      |  Non-NN   |                -                 |    `fed_mean`    | -                                                                                                                                                                                           |
 |      Fed-EM       |  Non-NN   |                -                 |     `fed_em`     | [EM](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_EM.py), [FedEM](https://arxiv.org/abs/2108.10252)                                     |
