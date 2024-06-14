@@ -63,14 +63,26 @@ evaluator.show_results()
 
 ## Supported Federated Imputation Algorithms
 
-| Method   | Type | API        | Fed Strategy             | Reference                                                                                                                                               |
-|----------|----|------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Fed-Mean | Non-NN | `fed_mean` | -                        | -                                                                                                                                                       |
-| Fed-EM   | Non-NN | `fed_em`   | -                        | [EM](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_EM.py), [FedEM](https://arxiv.org/abs/2108.10252) |
-| Fed-ICE  | Non-NN | `fed_ice`  | -                        | [FedICE](https://pubmed.ncbi.nlm.nih.gov/33122624/)                                                                                                     |
-| Fed-MissForest | Non-NN | `fed_missforest` | -                        | [MissForest](), [Fed Randomforest]()                                                                                                                    |
-| MIWAE    | NN | `miwae`    | `fedavg`, `fedprox`, `fedavg_ft` | [MIWAE]()                                                                                                                                               |
-| GAIN     | NN | `gain`     | `fedavg`, `fedprox`, `fedavg_ft` | [GAIN]()                                                                                                                                                |
+Federated Imputation Algorithms:
+
+|      Method       |   Type    |      Supported Fed Strategy      |  Imputer (code)  | Reference                                                                                                                                                                                   |
+|:-----------------:|:---------:|:--------------------------------:|:----------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|     Fed-Mean      |  Non-NN   |                -                 |    `fed_mean`    | -                                                                                                                                                                                           |
+|      Fed-EM       |  Non-NN   |                -                 |     `fed_em`     | [EM](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_EM.py), [FedEM](https://arxiv.org/abs/2108.10252)                                     |
+|      Fed-ICE      |  Non-NN   |                -                 |    `fed_ice`     | [FedICE](https://pubmed.ncbi.nlm.nih.gov/33122624/)                                                                                                                                         |
+|  Fed-MissForest   |  Non-NN   |                -                 | `fed_missforest` | [MissForest](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_missforest.py), [Fed Randomforest](https://pubmed.ncbi.nlm.nih.gov/35139148/) |
+|       MIWAE       |    NN     | `fedavg`, `fedprox`, `fedavg_ft` |     `miwae`      | [MIWAE](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_miwae.py)                                                                          |
+|       GAIN        |    NN     | `fedavg`, `fedprox`, `fedavg_ft` |      `gain`      | [GAIN](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_gain.py)                                                                            |
+
+Federated Strategies:
+
+|   Method    |       Type        | Fed_strategy(code) | Reference     |
+|:-----------:|:-----------------:|:------------------:|:--------------|
+|   FedAvg    |     global Fl     |      `fedavg`      | [FedAvg]()    |
+|   FedProx   |     global Fl     |     `fedprox`      | [FedProx]()   |
+|  Scaffold   |     global Fl     |     `scaffold`     | [FedAvg-FT]() |
+|  FedAvg-FT  |  personalized Fl  |    `fedavg_ft`     | [FedAvg-FT]() |
+
 
 
 ## FedImputeBench - Benckmarking Analysis Using FedImpute
