@@ -7,7 +7,7 @@ from sklearn.metrics import (
 
 def task_eval(metric, task_type, clf_type, y_pred, y_test, y_pred_proba=None):
     if task_type == 'classification':
-        if metric == 'accuracy':
+        if metric == 'accu':
             return np.mean(y_pred == y_test)
         elif metric == 'f1':
             if clf_type == 'binary-class' or clf_type == 'binary':

@@ -67,12 +67,66 @@ class Evaluator:
         print("Evaluation completed.")
         self.results = results
 
+        return results
+
     def save_results(self, results: Dict, save_path: str):
         with open(save_path, 'w') as f:
             json.dump(results, f, indent=4)
 
     def show_results(self):
-        print("===========================================================")
+
+        # check empty
+        if self.results is None or len(self.results) == 0:
+            print("Evaluation results is empty. Run evaluation first.")
+        else:
+            # setup formatting widths
+            metrics_w = []
+            if 'imp_quality' in self.results:
+                metrics = list(self.results['imp_quality']['imp_quality'].keys())
+                metrics_w.append([len(m) for m in metrics])
+            if 'pred_downstream_local' in self.results:
+                metrics = list(self.results['pred_downstream_local']['pred_performance'].keys())
+                metrics_w.append([len(m) for m in metrics])
+            if 'pred_downstream_fed' in self.results:
+                metrics = list(self.results['pred_downstream_fed']['global'].keys())
+                metrics_w.append([len(m) for m in metrics])
+
+            metrics_w_array = np.zeros([len(metrics_w), len(max(metrics_w, key=lambda x: len(x)))])
+            for i, j in enumerate(metrics_w):
+                metrics_w_array[i][0:len(j)] = j
+
+            widths = np.max(metrics_w_array, axis=0).astype(int).tolist()
+            total_width = 30 + 3 + sum(widths) + 15 * len(widths) + 5
+            print("=" * total_width)
+            print("Evaluation Results")
+            print("=" * total_width)
+
+            # print results
+            if 'imp_quality' in self.results:
+                stdout = f"{'Imputation Quality':30} | "
+                for idx, (metric, values) in enumerate(self.results['imp_quality']['imp_quality'].items()):
+                    mean = np.mean(values)
+                    std = np.std(values)
+                    stdout += f"{metric:>{widths[idx]}}: {mean:.3f} ({std:.2f}) "
+                print(stdout)
+
+            if 'pred_downstream_local' in self.results:
+                stdout = f"{'Downstream Prediction (Local)':30} | "
+                for idx, (metric, values) in enumerate(self.results['pred_downstream_local']['pred_performance'].items()):
+                    mean = np.mean(values)
+                    std = np.std(values)
+                    stdout += f"{metric:>{widths[idx]}}: {mean:.3f} ({std:.2f}) "
+                print(stdout)
+
+            if 'pred_downstream_fed' in self.results:
+                stdout = f"{'Downstream Prediction (Fed)':30} | "
+                for idx, (metric, values) in enumerate(self.results['pred_downstream_fed']['global'].items()):
+                    mean = np.mean(values)
+                    std = np.std(values)
+                    stdout += f"{metric:>{widths[idx]}}: {mean:.3f} ({std:.2f}) "
+                print(stdout)
+
+            print("=" * total_width)
 
     def run_evaluation_imp(
             self, X_train_imps: List[np.ndarray], X_train_origins: List[np.ndarray], X_train_masks: List[np.ndarray],
@@ -81,7 +135,7 @@ class Evaluator:
 
         # imputation quality
         if imp_quality_metrics is None:
-            imp_quality_metrics = ['rmse', 'sliced-ws', 'nrmse']
+            imp_quality_metrics = ['rmse', 'nrmse', 'sliced-ws']
         if imp_fairness_metrics is None:
             imp_fairness_metrics = ['variance', 'jain-index']
         imp_qualities = self._evaluate_imp_quality(
@@ -259,9 +313,9 @@ class Evaluator:
         ################################################################################################################
         # Evaluation
         if task_type == 'classification':
-            eval_metrics = ['accuracy', 'f1', 'auc', 'prc']
+            eval_metrics = ['accu', 'f1', 'auc', 'prc']
         else:
-            eval_metrics = ['mse', 'mae', 'r2', 'msle']
+            eval_metrics = ['mse', 'mae', 'msle']
 
         ret = {eval_metric: [] for eval_metric in eval_metrics}
         y_min = np.concatenate(y_trains).min()
@@ -328,7 +382,7 @@ class Evaluator:
         if task_type == 'classification':
             eval_metrics = ['accuracy', 'f1', 'auc', 'prc']
         else:
-            eval_metrics = ['mse', 'mae', 'r2']
+            eval_metrics = ['mse', 'mae', 'msle']
 
         models = [deepcopy(clf) for _ in range(len(X_train_imps))]
         weights = [len(X_train_imp) for X_train_imp in X_train_imps]

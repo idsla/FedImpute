@@ -58,6 +58,7 @@ from fedimpute.evaluation import Evaluator
 
 evaluator = Evaluator()
 evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed'])
+evaluator.show_results()
 ```
 
 ## FedImputeBench - Benckmarking Analysis Using FedImpute
