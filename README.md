@@ -80,7 +80,7 @@ Federated Strategies:
 |:-----------:|:---------------:|:------------------:|:--------------|
 |   FedAvg    |    global FL    |      `fedavg`      | [FedAvg]()    |
 |   FedProx   |    global FL    |     `fedprox`      | [FedProx]()   |
-|  Scaffold   |    global FL    |     `scaffold`     | [FedAvg-FT]() |
+|  Scaffold   |    global FL    |     `scaffold`     | [Scaffold]()  |
 |  FedAvg-FT  | personalized FL |    `fedavg_ft`     | [FedAvg-FT]() |
 
 
