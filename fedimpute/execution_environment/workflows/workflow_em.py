@@ -54,7 +54,7 @@ class WorkflowEM(BaseWorkflow):
 
         ############################################################################################################
         # Initial Imputation and evaluation
-        clients = initial_imputation(server.fed_strategy.strategy_params['initial_impute'], clients)
+        clients = initial_imputation(server.fed_strategy.initial_impute, clients)
         self.eval_and_track(
             evaluator, tracker, clients, phase='initial', central_client=server.fed_strategy.name == 'central'
         )

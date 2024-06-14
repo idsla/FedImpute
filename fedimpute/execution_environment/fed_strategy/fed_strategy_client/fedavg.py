@@ -5,8 +5,7 @@ from typing import Tuple
 
 class FedAvgStrategyClient(StrategyClient):
 
-    def __init__(self, strategy_params):
-        self.strategy_params = strategy_params
+    def __init__(self):
         super().__init__('fedavg')
 
     def pre_training_setup(self, model: torch.nn.Module, params: dict):

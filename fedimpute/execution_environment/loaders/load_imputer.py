@@ -9,9 +9,9 @@ def load_imputer(name, imputer_params):
 
     ####################################################################################################################
     # Traditional ML Imputation Models
-    if name == 'simple':
+    if name == 'mean':
         return SimpleImputer(**imputer_params)
-    elif name == 'linear_ice':
+    elif name == 'ice':
         return LinearICEImputer(**imputer_params)
     # elif name == 'linear_sgd_ice':
     #     return ICEGradImputer(**imputer_params)

@@ -38,7 +38,9 @@ data_config = {
 ```python
 from fedimpute.simulator import Simulator
 simulator = Simulator()
-simulation_results = simulator.simulate_scenario(data, data_config, num_clients = 10, dp_strategy='iid-even', ms_mech_type='mcar')
+simulation_results = simulator.simulate_scenario(
+    data, data_config, num_clients = 10, dp_strategy='iid-even', ms_mech_type='mcar', verbose=1
+)
 ```
 
 ### Step 3. Execute Federated Imputation Algorithms
@@ -46,13 +48,7 @@ simulation_results = simulator.simulate_scenario(data, data_config, num_clients 
 from fedimpute.execution_environment import FedImputeEnv
 env = FedImputeEnv()
 env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
-env.setup(
-    clients_train_data=simulation_results['clients_train_data'],
-    clients_train_data_ms=simulation_results['clients_train_data_ms'],
-    clients_test_data=simulation_results['clients_test_data'],
-    clients_seeds=simulation_results['clients_seeds'],
-    data_config=data_config,
-)
+env.setup_from_simulator(simulator = simulator, verbose=1)
 
 env.run_fed_imputation()
 ```

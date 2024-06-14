@@ -13,11 +13,10 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 class FedProxStrategyClient(StrategyClient):
 
-    def __init__(self, strategy_params: dict):
-        self.strategy_params = strategy_params
+    def __init__(self, mu: float = 1.0):
         super().__init__('fedprox')
 
-        self.mu = strategy_params.get('mu', 1)
+        self.mu = mu
         self.global_model_params = None
 
     def pre_training_setup(self, model: torch.nn.Module, params: dict):

@@ -6,8 +6,7 @@ import torch
 
 class CentralStrategyClient(StrategyClient):
 
-    def __init__(self, strategy_params: dict):
-        self.strategy_params = strategy_params
+    def __init__(self):
         super().__init__('central')
 
     def pre_training_setup(self, model: torch.nn.Module, params: dict):

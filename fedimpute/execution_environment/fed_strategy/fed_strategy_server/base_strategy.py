@@ -4,8 +4,9 @@ from typing import List, OrderedDict, Tuple
 
 class StrategyServer(ABC):
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, initial_impute: str):
         self.name = name
+        self.initial_impute = initial_impute
 
     @abstractmethod
     def aggregate_parameters(

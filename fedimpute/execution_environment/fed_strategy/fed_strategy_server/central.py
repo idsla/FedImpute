@@ -6,10 +6,10 @@ from ...fed_strategy.fed_strategy_server.base_strategy import StrategyServer
 
 class CentralStrategyServer(StrategyServer):
 
-    def __init__(self, strategy_params):
-        super(CentralStrategyServer, self).__init__('central')
-        self.strategy_params = strategy_params
-        self.fine_tune_epochs = strategy_params.get('fine_tune_steps', 0)
+    def __init__(self):
+        super(CentralStrategyServer, self).__init__('central', 'central')
+        self.intial_impute = 'central'
+        self.fine_tune_epochs = 0
 
     def aggregate_parameters(
             self, local_model_parameters: List[OrderedDict], fit_res: List[dict], params: dict, *args, **kwargs

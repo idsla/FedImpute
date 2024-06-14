@@ -8,6 +8,7 @@ from .loaders.load_workflow import load_workflow
 from .utils.evaluator import Evaluator
 from .utils.result_analyzer import ResultAnalyzer
 from .utils.tracker import Tracker
+from fedimpute.simulator import Simulator
 
 
 class FedImputeEnv:
@@ -85,16 +86,19 @@ class FedImputeEnv:
         self.fed_strategy_params = fed_strategy_params
         self.workflow_params = workflow_params
 
-        # save directory path
+        # save a directory path
         self.env_dir_path = save_dir_path
 
     def setup(
             self, clients_train_data: List[np.ndarray], clients_test_data: List[np.ndarray],
-            clients_train_data_ms: List[np.ndarray], clients_seeds: List[int], data_config: dict
+            clients_train_data_ms: List[np.ndarray], clients_seeds: List[int], data_config: dict, verbose: int = 0
     ):
 
         # setup clients
         clients_data = list(zip(clients_train_data, clients_test_data, clients_train_data_ms))
+        if verbose > 0:
+            print(f"Setting up clients...")
+
         self.clients = setup_clients(
             clients_data, clients_seeds, data_config,
             imp_model_name=self.imputer_name, imp_model_params=self.imputer_params,
@@ -103,11 +107,15 @@ class FedImputeEnv:
         )
 
         # setup server
+        if verbose > 0:
+            print(f"Setting up server...")
         self.server = setup_server(
             fed_strategy=self.fed_strategy_name, fed_strategy_params=self.fed_strategy_params, server_config={}
         )
 
         # setup workflow
+        if verbose > 0:
+            print(f"Setting up workflow...")
         self.workflow = load_workflow(self.workflow_name, self.workflow_params)
 
         # evaluator, tracker, result analyzer
@@ -115,14 +123,21 @@ class FedImputeEnv:
         self.tracker = Tracker()  # initialize tracker
         self.result_analyzer = ResultAnalyzer()  # initialize result analyzer
 
-    def setup_from_simulator(self, simulator):
-        pass
+        if verbose > 0:
+            print(f"Environment setup complete.")
+
+    def setup_from_simulator(self, simulator: Simulator, verbose: int = 0):
+
+        self.setup(
+            simulator.clients_train_data, simulator.clients_test_data, simulator.clients_train_data_ms,
+            simulator.clients_seeds, simulator.data_config, verbose
+        )
 
     def run_fed_imputation(self, run_type: str = 'sequential'):
 
         ###########################################################################################################
         # Run Federated Imputation
-        self.workflow.run_fed_imp(self.clients, self.server, self.evaluator,  self.tracker, run_type)
+        self.workflow.run_fed_imp(self.clients, self.server, self.evaluator, self.tracker, run_type)
 
     def save_env(self):
         pass
