@@ -76,12 +76,12 @@ Federated Imputation Algorithms:
 
 Federated Strategies:
 
-|   Method    |       Type        | Fed_strategy(code) | Reference     |
-|:-----------:|:-----------------:|:------------------:|:--------------|
-|   FedAvg    |     global Fl     |      `fedavg`      | [FedAvg]()    |
-|   FedProx   |     global Fl     |     `fedprox`      | [FedProx]()   |
-|  Scaffold   |     global Fl     |     `scaffold`     | [FedAvg-FT]() |
-|  FedAvg-FT  |  personalized Fl  |    `fedavg_ft`     | [FedAvg-FT]() |
+|   Method    |      Type       | Fed_strategy(code) | Reference     |
+|:-----------:|:---------------:|:------------------:|:--------------|
+|   FedAvg    |    global FL    |      `fedavg`      | [FedAvg]()    |
+|   FedProx   |    global FL    |     `fedprox`      | [FedProx]()   |
+|  Scaffold   |    global FL    |     `scaffold`     | [FedAvg-FT]() |
+|  FedAvg-FT  | personalized FL |    `fedavg_ft`     | [FedAvg-FT]() |
 
 
 
