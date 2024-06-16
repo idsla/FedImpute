@@ -244,6 +244,151 @@ class Simulator:
             'global_test_data': global_test_data,
         }
 
+    def simulate_scenario_lite(
+            self, data: np.array, data_config: dict, num_clients: int,
+            dp_strategy: str = 'iid-even',
+            ms_scenario: str = 'mcar',
+            dp_split_col_option: str = 'target',
+            ms_cols: Union[str, List[int]] = 'all',
+            obs_cols: Union[str, List[int]] = 'random',
+            dp_min_samples: Union[float, int] = 50,
+            dp_max_samples: Union[float, int] = 8000,
+            ms_mr_lower: float = 0.3,
+            ms_mr_upper: float = 0.7,
+            seed: int = 100330201,
+            verbose: int = 0,
+    ):
+        """
+        Simulate missing data scenario
+        :param data: data: numpy ndarray
+        :param data_config: data configuration dictionary
+        :param num_clients: number of clients
+        :param dp_strategy: data partition strategy - iid-even, iid-dir@<alpha>, niid-dir@<alpha>, niid-path@<k>
+        :param ms_scenario: predefined missing data scenario - mcar, mar-heter, mar-homo,mnar-heter,mnar-homo
+        :param dp_split_col_option: iid/niid column strategy partition base on - 'target', 'feature'
+        :param ms_cols: missing columns - 'all', 'all-num', 'random'
+        :param obs_cols: fully obsevered columns for MAR - 'rest', 'random'
+        :param dp_min_samples: minimum sample sizes for clients
+        :param dp_max_samples: maximum sample sizes for clients
+        :param ms_mr_lower:  minimum missing ratio for each feature
+        :param ms_mr_upper: maxinum missing ratio for each feature
+        :param verbose: whether verbose the simulation process
+        :param seed: random seed
+        :return:
+        """
+
+        ##################################################################################################
+        # Partition Strategy - iid-even, iid-dir@0.1, niid-dir@0.1, niid-path@2
+        dp_strategy, dp_params = dp_strategy.split('@')
+        if dp_strategy not in ['iid-even', 'iid-dir', 'niid-dir', 'niid-path']:
+            raise ValueError(f"Invalid data partition strategy.")
+
+        if dp_params != '':
+            try:
+                dp_params = float(dp_params)
+            except ValueError:
+                raise ValueError(f"Invalid data partition strategy.")
+
+        dp_size_niid_alpha, dp_niid_alpha = 0.1, 0.1
+        if dp_strategy == 'iid-dir':
+            assert isinstance(dp_params, float), "Invalid data partition strategy."
+            dp_size_niid_alpha = dp_params
+        elif dp_strategy == 'niid-dir':
+            assert isinstance(dp_params, float), "Invalid data partition strategy."
+            dp_niid_alpha = dp_params
+        elif dp_strategy == 'niid-path':
+            raise NotImplementedError("Not implemented yet.")
+            # assert isinstance(dp_params, int), "Invalid data partition strategy."
+            # dp_max_samples = dp_params
+
+        ################################################################################################
+        # Data Partition - Split Columns Option
+        if dp_split_col_option == 'target':
+            dp_split_cols = data.shape[1] - 1
+        elif dp_split_col_option == 'feature':
+            dp_split_cols = 0
+        else:
+            raise ValueError(f"Invalid data partition split columns option.")
+
+        ################################################################################################
+        # Predefined Missing Scenario - mcar, mar, mnar
+        ms_mech_type = 'mcar'
+        ms_global_mechanism = False
+        ms_mr_dist_clients = 'randu-int'
+        ms_mm_dist_clients = 'identity'
+        ms_mm_beta_option = None
+        ms_mm_obs = False
+
+        if ms_scenario == 'mcar':
+            ms_mech_type = 'mcar'
+            ms_global_mechanism = False
+            ms_mr_dist_clients = 'randu-int'
+
+        elif ms_scenario == 'mar-homo':
+            ms_mech_type = 'mar_sigmoid'
+            ms_global_mechanism = True
+            ms_mr_dist_clients = 'randu-int'
+            ms_mm_beta_option = 'fixed'
+            ms_mm_obs = True
+
+        elif ms_scenario == 'mar-heter':
+            ms_mech_type = 'mar_sigmoid'
+            ms_global_mechanism = False
+            ms_mr_dist_clients = 'randu-int'
+            ms_mm_dist_clients = 'random2'
+            ms_mm_beta_option = 'randu'
+            ms_mm_obs = True
+
+        elif ms_scenario == 'mnar-homo':
+            ms_mech_type = 'mnar_sigmoid'
+            ms_global_mechanism = True
+            ms_mr_dist_clients = 'randu-int'
+            ms_mm_beta_option = 'self'
+
+        elif ms_scenario == 'mnar-heter':
+            ms_mech_type = 'mnar_sigmoid'
+            ms_global_mechanism = False
+            ms_mr_dist_clients = 'randu-int'
+            ms_mm_beta_option = 'self'
+            ms_mm_dist_clients = 'random2'
+
+        elif ms_scenario == 'mnar2-homo':
+            ms_mech_type = 'mar_sigmoid'
+            ms_global_mechanism = True
+            ms_mr_dist_clients = 'randu-int'
+            ms_mm_beta_option = 'randu'
+            ms_mm_obs = False
+
+        elif ms_scenario == 'mnar2-heter':
+            ms_mech_type = 'mar_sigmoid'
+            ms_global_mechanism = False
+            ms_mr_dist_clients = 'randu-int'
+            ms_mm_beta_option = 'randu'
+            ms_mm_obs = False
+            ms_mm_dist_clients = 'random2'
+
+        return self.simulate_scenario(
+            data, data_config, num_clients,
+            dp_strategy=dp_strategy,
+            dp_split_cols=dp_split_cols,
+            dp_niid_alpha=dp_niid_alpha,
+            dp_size_niid_alpha=dp_size_niid_alpha,
+            dp_min_samples=dp_min_samples,
+            dp_max_samples=dp_max_samples,
+            ms_mech_type=ms_mech_type,
+            ms_cols=ms_cols,
+            obs_cols=obs_cols,
+            ms_global_mechanism=ms_global_mechanism,
+            ms_mr_dist_clients=ms_mr_dist_clients,
+            ms_mm_dist_clients=ms_mm_dist_clients,
+            ms_mr_lower=ms_mr_lower,
+            ms_mr_upper=ms_mr_upper,
+            ms_mm_obs=ms_mm_obs,
+            ms_mm_beta_option=ms_mm_beta_option,
+            seed=100330201,
+            verbose=0
+        )
+
     def save(self, save_path: str):
         pass
 
