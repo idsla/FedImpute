@@ -14,7 +14,9 @@ from .twonn import TwoNNRegressor, TwoNNClassifier
 from .pred_model_metrics import task_eval
 from ..utils.reproduce_utils import set_seed
 from ..utils.nn_utils import EarlyStopping
-from fedimpute.execution_environment import FedImputeEnv
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from fedimpute.execution_environment import FedImputeEnv
 
 warnings.filterwarnings("ignore")
 from tqdm.auto import trange
@@ -25,7 +27,7 @@ class Evaluator:
     def __init__(self):
         self.results = None
 
-    def evaluate(self, env: FedImputeEnv, metrics: Union[List, None] = None, seed: int = 0):
+    def evaluate(self, env: 'FedImputeEnv', metrics: Union[List, None] = None, seed: int = 0):
 
         if metrics is None:
             metrics = ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed']

@@ -1,0 +1,18 @@
+site_name: FedImpute
+nav:
+  - 'Quick Start':
+    - 'Overview of FedImpute': 'overview.md'
+    - 'Install & Basic Usage': 'get_started.md'
+  - 'User Guide':
+      - 'Data Preparation': 'user-guide/data_prep.md'
+      - 'Federated Missing Data Scenario Simulation': 'user-guide/scenario_simulation.md'
+      - 'Federated Imputation': 'user-guide/fed_imp.md'
+      - 'Evaluation of Imputation Outcome': 'user-guide/evaluation.md'
+  - 'Tutorials':
+      - 'Basic Usage': 'tutorial/basic_usage.md'
+  - 'API Reference':
+      - 'Scenario simulation': 'api/simulation.md'
+      - 'Federated imputation': 'api/fed_impute.md'
+  # Contributing
+  # Release Log
+theme: readthedocs
