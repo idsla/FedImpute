@@ -8,8 +8,10 @@
 
 </div>
 
-## Documentation
-Learning Details of Fedimpute from [Fedimpute Documentation](https://idsla.github.io/FedImpute/)!!
+FedImpute is a benchmarking tool for the evaluation of federated imputation algorithms over various missing data scenarios under horizontally partitioned data.
+
+- **Documentation:**: [Fedimpute Documentation](https://idsla.github.io/FedImpute/)
+- **Paper**: [FedImpute]()
 
 ## Installation
 Install python >= 3.8.0
