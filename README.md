@@ -1,11 +1,11 @@
 <h1 align="center">
 <p align="center"><img src="docs/icon.jpg" width="400" height="240"></p>
 </h1><br>
-# FedImpute: A Benchmarking and Evaluation Tool for Federated Imputation
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Docs site](https://img.shields.io/badge/docs-GitHub_Pages-blue)](https://idsla.github.io/FedImpute/)
 
+# FedImpute: A Benchmarking and Evaluation Tool for Federated Imputation
 FedImpute is a benchmarking and evaluation tool to assess the effectiveness of federated imputation across various missing data scenarios.
 
 ## Documentation
