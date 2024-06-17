@@ -2,8 +2,10 @@
 <h3 align='center'> FedImpute: a benchmarking and evaluation tool for federated imputation across various missing data scenarios. </h3>
 
 <div align="center">
+    
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Docs site](https://img.shields.io/badge/docs-GitHub_Pages-blue)](https://idsla.github.io/FedImpute/)
+
 </div>
 
 ## Documentation
