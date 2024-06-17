@@ -1,5 +1,5 @@
-<h2> <p align="center"><img src="docs/icon.jpg" width="400" height="240"></p> </h2>
-<h3 align='center'> FedImpute: a benchmarking and evaluation tool for federated imputation across various missing data scenarios. </h3>
+<p align="center"><img src="docs/icon.jpg" width="400" height="240"></p>
+<h2 align='center'> FedImpute: a benchmarking and evaluation tool for federated imputation across various missing data scenarios. </h2>
 
 <div align="center">
     
