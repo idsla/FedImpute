@@ -35,6 +35,7 @@ mkdocs-swan = "^0.4.0"
 mkdocs-cinder = "^1.2.0"
 mkdocs-material = "^9.5.27"
 mkdocstrings = "^0.25.1"
+python-markdown-math = "^0.8"
 
 [build-system]
 requires = ["poetry-core"]

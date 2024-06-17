@@ -4,59 +4,26 @@
 
 FedImpute is a benchmarking and evaluation tool to assess the effectiveness of federated imputation across various missing data scenarios.
 
+## Features of FedImpute
+* **Flexible Missing Data Simulation**: Provide flexible API to simulate missing data scenarios under various missing data distribution and data partition strategies.
+* **Built-in Federated Imputation Methods**: Supports multiple imputation techniques, including mean, and model-based approaches, 
+tailored for distributed data.
+* **Easy Integration**: Designed to be easily extended with federated imputation algorithms and workflows.
+* **Customizability**: Offers extensive configuration options to adapt the imputation process to specific needs.
 
-## Installation
+## Quick Start
 
-Install python >= 3.8.0
-```bash
-python -m venv ./venv
+- [Overview of FedImpute](overview.md)
 
-# window gitbash
-source ./venv/Scripts/activate
+- [Installation and Basic Usage](get_started.md)
 
-# linux/unix
-source ./venv/bin/activate
-```
-Install the required packages
-```bash
-pip install -r requirements.txt
-```
+## User Guide
 
-## Basic Usage
+- [Data Preparation](user-guide/data_preparation.md)
+- [Federated Missing Data Scenario Simulation](user-guide/scenario_simulation.md)
+- [Federated Imputation](user-guide/fed_imp.md)
+- [Evaluation](user-guide/evaluation.md)
 
-### Step 1. Prepare Data
-```python
-import numpy as np
-data = np.random.rand(10000, 10)
-data_config = {
-    'task_type': 'regression',
-    'num_cols': 9,
-}
-```
+## Support and Contact
 
-### Step 2. Simulate Federated Missing Data Scenario
-```python
-from fedimpute.simulator import Simulator
-simulator = Simulator()
-simulation_results = simulator.simulate_scenario(
-    data, data_config, num_clients = 10, dp_strategy='iid-even', ms_mech_type='mcar', verbose=1
-)
-```
-
-### Step 3. Execute Federated Imputation Algorithms
-```python
-from fedimpute.execution_environment import FedImputeEnv
-env = FedImputeEnv()
-env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
-env.setup_from_simulator(simulator = simulator, verbose=1)
-
-env.run_fed_imputation()
-```
-### Step 4. Evaluate imputation outcomes
-```python
-from fedimpute.evaluation import Evaluator
-
-evaluator = Evaluator()
-evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed'])
-evaluator.show_results()
-```
+FedImpute is developed by Rutgers [Institute for Data Science, Learning, and Applications (i-DLSA)](https://sites.rutgers.edu/idsla/), lead by Professor [Jaideep Vaidya](https://www.business.rutgers.edu/faculty/jaideep-vaidya). For any questions, please contact [Sitao Min](mailto:sm2370@rutgers.edu) for support.

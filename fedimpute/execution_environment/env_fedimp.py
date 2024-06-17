@@ -91,7 +91,7 @@ class FedImputeEnv:
         # save a directory path
         self.env_dir_path = save_dir_path
 
-    def setup(
+    def setup_from_data(
             self, clients_train_data: List[np.ndarray], clients_test_data: List[np.ndarray],
             clients_train_data_ms: List[np.ndarray], clients_seeds: List[int], global_test: np.ndarray,
             data_config: dict, verbose: int = 0
