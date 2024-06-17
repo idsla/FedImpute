@@ -39,19 +39,16 @@
       </div>
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-                <li class="toctree-l1 current"><a class="reference internal current" href="#">Home</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#what-is-missing-data-under-federated-data-scenario">What is Missing Data Under Federated Data Scenario?</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
-    </li>
-    </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="overview/">Overview</a>
                 </li>
               </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
               <ul>
-                <li class="toctree-l1"><a class="reference internal" href="about/">About</a>
-                </li>
+                  <li class="toctree-l1"><a class="reference internal" href="user-guide/aa/">aa</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="user-guide/bb/">bb</a>
+                  </li>
               </ul>
       </div>
     </div>
@@ -76,9 +73,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="welcome-to-fedimpute">Welcome to FedImpute</h1>
+                <p><img src="icon.jpg" width="300" height="180"></p>
+<h1 id="welcome-to-fedimpute">Welcome to FedImpute</h1>
 <p>FedImpute is a benchmarking and evaluation tool to assess the effectiveness of federated imputation across various missing data scenarios.</p>
-<h2 id="what-is-missing-data-under-federated-data-scenario">What is Missing Data Under Federated Data Scenario?</h2>
 <h2 id="installation">Installation</h2>
 <p>Install python &gt;= 3.8.0</p>
 <pre><code class="language-bash">python -m venv ./venv
@@ -92,12 +89,40 @@ source ./venv/bin/activate
 <p>Install the required packages</p>
 <pre><code class="language-bash">pip install -r requirements.txt
 </code></pre>
+<h2 id="basic-usage">Basic Usage</h2>
+<h3 id="step-1-prepare-data">Step 1. Prepare Data</h3>
+<pre><code class="language-python">import numpy as np
+data = np.random.rand(10000, 10)
+data_config = {
+    'task_type': 'regression',
+    'num_cols': 9,
+}
+</code></pre>
+<h3 id="step-2-simulate-federated-missing-data-scenario">Step 2. Simulate Federated Missing Data Scenario</h3>
+<pre><code class="language-python">from fedimpute.simulator import Simulator
+simulator = Simulator()
+simulation_results = simulator.simulate_scenario(
+    data, data_config, num_clients = 10, dp_strategy='iid-even', ms_mech_type='mcar', verbose=1
+)
+</code></pre>
+<h3 id="step-3-execute-federated-imputation-algorithms">Step 3. Execute Federated Imputation Algorithms</h3>
+<pre><code class="language-python">from fedimpute.execution_environment import FedImputeEnv
+env = FedImputeEnv()
+env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
+env.setup_from_simulator(simulator = simulator, verbose=1)
+
+env.run_fed_imputation()
+</code></pre>
+<h3 id="step-4-evaluate-imputation-outcomes">Step 4. Evaluate imputation outcomes</h3>
+<pre><code class="language-python">from fedimpute.evaluation import Evaluator
+
+evaluator = Evaluator()
+evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed'])
+evaluator.show_results()
+</code></pre>
               
             </div>
           </div><footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="about/" class="btn btn-neutral float-right" title="About">Next <span class="icon icon-circle-arrow-right"></span></a>
-    </div>
 
   <hr/>
 
@@ -120,8 +145,6 @@ source ./venv/bin/activate
     
     
     
-      <span><a href="about/" style="color: #fcfcfc">Next &raquo;</a></span>
-    
   </span>
 </div>
     <script src="js/jquery-3.6.0.min.js"></script>
@@ -140,5 +163,5 @@ source ./venv/bin/activate
 
 <!--
 MkDocs version : 1.6.0
-Build Date UTC : 2024-06-17 02:08:30.857714+00:00
+Build Date UTC : 2024-06-17 03:37:17.528137+00:00
 -->
