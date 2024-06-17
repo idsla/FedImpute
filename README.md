@@ -9,7 +9,7 @@
 FedImpute is a benchmarking and evaluation tool to assess the effectiveness of federated imputation across various missing data scenarios.
 
 ## Documentation
-Start learning Fedimpute from [Fedimpute Documentation](https://idsla.github.io/FedImpute/)!!
+Learning Details of Fedimpute from [Fedimpute Documentation](https://idsla.github.io/FedImpute/)!!
 
 ## Installation
 Install python >= 3.8.0
