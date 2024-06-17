@@ -63,6 +63,12 @@
         </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#lite-simulation-function-simluting-with-predefined-strategies-and-scenarios">Lite Simulation Function - Simluting with Predefined Strategies and Scenarios</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#data-partitioning-options-dp_strategy">Data Partitioning Options - dp_strategy</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#missing-data-simulation-scenarios-ms_scenario">Missing Data Simulation Scenarios - ms_scenario</a>
+    </li>
+        </ul>
     </li>
     </ul>
                   </li>
@@ -110,7 +116,7 @@
                 <h1 id="simulating-federated-missing-data-scenarios">Simulating Federated Missing Data Scenarios</h1>
 <p>In this section, we will demonstrate how to simulate federated missing data scenarios using the <code>fedimpute.simulator</code> module.</p>
 <p>The input to this module is a <code>&lt;np.ndarray&gt;</code> dataset and a data configuration dictionary <code>data_config</code>. 
-Details on how to preparing the dataset and the data configuration dictionary are provided in the <a href="user-guid/data_prep.md">Data Preparation</a> section.</p>
+Details on how to preparing the dataset and the data configuration dictionary are provided in the <a href="../data_prep/">Data Preparation</a> section.</p>
 <h2 id="overview-and-basic-usage">Overview and Basic Usage</h2>
 <p><img src="../../img/fmiss.png" width="600" height="380"></p>
 <p>The <code>fedimpute.simulator</code> module include the following core functionalities: (1) <strong>Data Partition</strong>: Partition the dataset horizontally into multiple clients.
@@ -129,6 +135,12 @@ Initialize the <code>Simulator</code> class and call the <code>simulate_scenario
 simulator = Simulator()
 simulation_results = simulator.simulate_scenario(
     data, data_config, num_clients = 10, dp_strategy='iid-even', ms_mech_type='mcar', verbose=1
+)
+
+# or use the lite simulation function
+simulation_results = simulator.simulate_scenario_lite(
+  data, data_config, num_clients = 10, dp_strategy='iid-even', ms_scenario='mar-homo', 
+  dp_split_col_option = 'target', verbose=1
 )
 </code></pre>
 <h2 id="classical-simulation-function-simulate_scenario">Classical Simulation Function - <code>simulate_scenario</code></h2>
@@ -233,6 +245,73 @@ The core concept here is the <strong>missing data heterogeneity</strong> which m
 <h2 id="lite-simulation-function-simluting-with-predefined-strategies-and-scenarios">Lite Simulation Function - Simluting with Predefined Strategies and Scenarios</h2>
 <p>We provide a lite version of simulation function <code>simulate_scenario_lite</code> 
 which can be used to simulate the missing data scenario with predefined strategies and scenarios with way fewer parameters for ease of use.</p>
+<pre><code class="language-python">from fedimpute.simulator import Simulator
+
+simulator = Simulator()
+simulation_results = simulator.simulate_scenario_lite(
+  data, data_config, num_clients = 10, dp_strategy='iid-even', ms_scenario='mar-heter', 
+  dp_split_col_option = 'target', verbose=1
+)
+</code></pre>
+<p>The <code>simulate_scenario_lite</code> method has the following major parameters for data partitioning and missing data simulation.</p>
+<h3 id="data-partitioning-options-dp_strategy">Data Partitioning Options - <code>dp_strategy</code></h3>
+<ul>
+<li><strong>iid-even</strong>: Partition the data samples i.i.d across the clients with equal sample sizes.</li>
+<li><strong>iid-dir@&lt;alpha&gt;</strong>: Partition the data samples i.i.d across the clients with sample sizes follows dirichlet distribution with parameter <code>alpha</code>,e.g. <code>iid-dir@0.5</code>.</li>
+<li><strong>niid-dir@&lt;alpha&gt;</strong>: Partition the data samples non-i.i.d across the clients with dirichlet distribution with parameter <code>alpha</code>,e.g. <code>niid-dir@0.5</code></li>
+<li><strong>niid-path@&lt;k&gt;</strong>: Partition the data samples non-i.i.d across the clients with pathological distribution with parameter <code>k</code>,e.g. <code>niid-path@2</code>.</li>
+</ul>
+<h3 id="missing-data-simulation-scenarios-ms_scenario">Missing Data Simulation Scenarios - <code>ms_scenario</code></h3>
+<ul>
+<li><strong><code>mcar</code></strong> - Missing Completely At Random (MCAR) mechanism.</li>
+</ul>
+<pre><code class="language-python">    ms_mech_type = 'mcar'
+    ms_global_mechanism = False
+    ms_mr_dist_clients = 'randu-int'
+    ms_mm_dist_clients = 'identity'
+    ms_mm_beta_option = None
+    ms_mm_obs = False
+</code></pre>
+<ul>
+<li><strong><code>mar-heter</code></strong> - Missing At Random (MAR) mechanism with heterogeneous missing data scenario.</li>
+</ul>
+<pre><code class="language-python">    ms_mech_type = 'mar_sigmoid'
+    ms_global_mechanism = False
+    ms_mr_dist_clients = 'randu-int'
+    ms_mm_dist_clients = 'identity'
+    ms_mm_beta_option = 'randu'
+    ms_mm_obs = True
+</code></pre>
+<ul>
+<li><strong><code>mar-homo</code></strong> - Missing At Random (MAR) mechanism with homogeneous missing data scenario.</li>
+</ul>
+<pre><code class="language-python">    ms_mech_type = 'mar_sigmoid'
+    ms_global_mechanism = True
+    ms_mr_dist_clients = 'randu-int'
+    ms_mm_dist_clients = 'identity'
+    ms_mm_beta_option = 'fixed'
+    ms_mm_obs = True
+</code></pre>
+<ul>
+<li><strong><code>mnar-heter</code></strong> - Missing Not At Random (MNAR) mechanism with heterogeneous missing data scenario.</li>
+</ul>
+<pre><code class="language-python">    ms_mech_type = 'mnar_sigmoid'
+    ms_global_mechanism = False
+    ms_mr_dist_clients = 'randu-int'
+    ms_mm_dist_clients = 'identity'
+    ms_mm_beta_option = 'self'
+    ms_mm_obs = False
+</code></pre>
+<ul>
+<li><strong><code>mnar-homo</code></strong> - Missing Not At Random (MNAR) mechanism with homogeneous missing data scenario.</li>
+</ul>
+<pre><code class="language-python">    ms_mech_type = 'mnar_sigmoid'
+    ms_global_mechanism = True
+    ms_mr_dist_clients = 'randu-int'
+    ms_mm_dist_clients = 'identity'
+    ms_mm_beta_option = 'self'
+    ms_mm_obs = False
+</code></pre>
               
             </div>
           </div><footer>

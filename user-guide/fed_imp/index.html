@@ -53,6 +53,20 @@
                   <li class="toctree-l1"><a class="reference internal" href="../scenario_simulation/">Federated Missing Data Scenario Simulation</a>
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Federated Imputation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview-and-basic-usage">Overview and Basic Usage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#environment-configuration">Environment Configuration</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#supported-federated-imputation-algorithms">Supported Federated Imputation Algorithms</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment Setup</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#execute-federated-imputation">Execute Federated Imputation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#miscellaneous">Miscellaneous</a>
+    </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../evaluation/">Evaluation of Imputation Outcome</a>
                   </li>
@@ -93,7 +107,176 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="executing-federated-imputation-algorithms">Executing Federated Imputation Algorithms</h1>
+<p>The <code>FedImputeEnv</code> class is the <code>execution_environment</code> module's main class. 
+It is used to configure the federated imputation environment and execute federated imputation algorithms.</p>
+<h2 id="overview-and-basic-usage">Overview and Basic Usage</h2>
+<p>Use needs to initialize the <code>FedImputeEnv</code> class and configure the environment using the <code>configuration</code> 
+method - what imputer to use, what federated strategy to use, and what fitting mode to use. 
+Then, use the <code>setup_from_simulator</code> method to set up the environment using the simulated data from <code>simulator</code> class, 
+see <a href="../scenario_simulation/">Scenario Simulation Section</a>. 
+Finally, use the <code>run_fed_imputation</code> method to execute the federated imputation algorithms.</p>
+<pre><code class="language-python">from fedimpute.execution_environment import FedImputeEnv
+
+env = FedImputeEnv()
+env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
+env.setup_from_simulator(simulator = simulator, verbose=1)
+env.run_fed_imputation()
+</code></pre>
+<h2 id="environment-configuration">Environment Configuration</h2>
+<p>The <code>env.configuration()</code> method is used to configure the environment. It takes the following arguments:</p>
+<p><strong>Options</strong>:</p>
+<ul>
+<li><strong>imputer</strong> (str) - name of imputation algorithm to use. Options: <code>fed_mean</code>, <code>fed_em</code>, <code>fed_ice</code>, <code>fed_missforest</code>, <code>gain</code>, <code>miwae</code></li>
+<li><strong>fed_strategy</strong> (str) - name of federated strategy to use. Options: <code>fedavg</code>, <code>fedprox</code>, <code>scaffold</code>, <code>fedavg_ft</code></li>
+<li><strong>fit_mode</strong> (str) - name of fitting mode to use - federated imputation, local-only imputation or centralized imputation. Options: <code>fed</code>, <code>local</code>, <code>central</code></li>
+<li><strong>save_dir_path</strong> (str) - path to persist clients and server training process information (imputation models, imputed data etc.) for future use.</li>
+</ul>
+<p><strong>Other Params</strong>:</p>
+<ul>
+<li><strong>imputer_params</strong> (Union[None, dict]) = None - parameters for imputer </li>
+<li><strong>fed_strategy_params</strong> (Union[None, dict]) = None - parameters for federated strategy</li>
+<li><strong>workflow_params</strong> (Union[None, dict]) = None - parameters for workflow - 
+<code>Workflow</code> class contains the logic for federated imputation workflow. It is associated with each <code>Imputer</code> class. </li>
+<li>The built-in workflows are: <code>ice</code> - for ICE based imputation, <code>em</code> - for EM imputation, <code>jm</code> - for joint modeling based imputation such as VAE or GAN based imputation.</li>
+</ul>
+<h2 id="supported-federated-imputation-algorithms">Supported Federated Imputation Algorithms</h2>
+<p>Federated Imputation Algorithms:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Method</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Fed Strategy</th>
+<th style="text-align: center;">Imputer (code)</th>
+<th style="text-align: left;">Workflow</th>
+<th style="text-align: left;">Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">Fed-Mean</td>
+<td style="text-align: center;">Non-NN</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;"><code>fed_mean</code></td>
+<td style="text-align: left;"><code>simple</code></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr>
+<td style="text-align: center;">Fed-EM</td>
+<td style="text-align: center;">Non-NN</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;"><code>fed_em</code></td>
+<td style="text-align: left;"><code>em</code></td>
+<td style="text-align: left;"><a href="https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_EM.py">EM</a>, <a href="https://arxiv.org/abs/2108.10252">FedEM</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Fed-ICE</td>
+<td style="text-align: center;">Non-NN</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;"><code>fed_ice</code></td>
+<td style="text-align: left;"><code>ice</code></td>
+<td style="text-align: left;"><a href="https://pubmed.ncbi.nlm.nih.gov/33122624/">FedICE</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Fed-MissForest</td>
+<td style="text-align: center;">Non-NN</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;"><code>fed_missforest</code></td>
+<td style="text-align: left;"><code>ice</code></td>
+<td style="text-align: left;"><a href="https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_missforest.py">MissForest</a>, <a href="https://pubmed.ncbi.nlm.nih.gov/35139148/">Fed Randomforest</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">MIWAE</td>
+<td style="text-align: center;">NN</td>
+<td style="text-align: center;"><code>fedavg</code>, <code>fedprox</code>, <code>fedavg_ft</code></td>
+<td style="text-align: center;"><code>miwae</code></td>
+<td style="text-align: left;"><code>jm</code></td>
+<td style="text-align: left;"><a href="https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_miwae.py">MIWAE</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">GAIN</td>
+<td style="text-align: center;">NN</td>
+<td style="text-align: center;"><code>fedavg</code>, <code>fedprox</code>, <code>fedavg_ft</code></td>
+<td style="text-align: center;"><code>gain</code></td>
+<td style="text-align: left;"><code>jm</code></td>
+<td style="text-align: left;"><a href="https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_gain.py">GAIN</a></td>
+</tr>
+</tbody>
+</table>
+<p>Federated Strategies:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Method</th>
+<th style="text-align: center;">Type</th>
+<th style="text-align: center;">Fed_strategy(code)</th>
+<th style="text-align: left;">Reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">FedAvg</td>
+<td style="text-align: center;">global FL</td>
+<td style="text-align: center;"><code>fedavg</code></td>
+<td style="text-align: left;"><a href="">FedAvg</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">FedProx</td>
+<td style="text-align: center;">global FL</td>
+<td style="text-align: center;"><code>fedprox</code></td>
+<td style="text-align: left;"><a href="">FedProx</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">Scaffold</td>
+<td style="text-align: center;">global FL</td>
+<td style="text-align: center;"><code>scaffold</code></td>
+<td style="text-align: left;"><a href="">Scaffold</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">FedAvg-FT</td>
+<td style="text-align: center;">personalized FL</td>
+<td style="text-align: center;"><code>fedavg_ft</code></td>
+<td style="text-align: left;"><a href="">FedAvg-FT</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="environment-setup">Environment Setup</h2>
+<p>After configuring environment, we need to initialize the environment -  initialize <code>Client</code>s, <code>Server</code> objects with simulated data from simulation module.
+Currently, the <code>FedImputeEnv</code> class supports the two ways to set up the environment. First way is to directly setup the environment from <code>simulator</code> 
+class by using <code>env.setup_from_simulator(simulator)</code> method. </p>
+<pre><code class="language-python">env.setup_from_simulator(simulator, verbose=1)
+</code></pre>
+<p>The second way is to setup the environment by using <code>env.setup_from_data()</code> method. It can be used
+in the scenario where user have their own data that not simulated from simulator class. Example:</p>
+<pre><code class="language-python">import numpy as np
+
+clients_train_data = [np.random.rand(100, 10) for _ in range(10)]
+clients_train_data_ms = [np.random.rand(100, 10) for _ in range(10)]
+clients_test_data = [np.random.rand(100, 10) for _ in range(10)]
+global_test = np.random.rand(100, 10)
+data_config = {
+    'target': 9,
+    'task_type': 'regression',
+    'clf_type': None,
+    'num_cols': 9,
+}
+clients_seeds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+env.setup_from_data(
+    clients_train_data, clients_test_data, clients_train_data_ms, clients_seeds, global_test, data_config, verbose=1
+)
+</code></pre>
+<h2 id="execute-federated-imputation">Execute Federated Imputation</h2>
+<p>After setting up the environment, we can execute the federated imputation algorithms using <code>run_fed_imputation()</code> method.</p>
+<pre><code class="language-python">env.run_fed_imputation()
+</code></pre>
+<h2 id="miscellaneous">Miscellaneous</h2>
+<ul>
+<li><strong>verbose</strong> (int) - Verbosity level. 0: no output, 1: minimal output, 2: detailed output</li>
+<li><strong>seed</strong> (int) - Seed for reproducibility</li>
+<li><strong>logging</strong> (bool) - Whether to log the training process</li>
+</ul>
               
             </div>
           </div><footer>
