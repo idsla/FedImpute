@@ -385,8 +385,8 @@ class Simulator:
             ms_mr_upper=ms_mr_upper,
             ms_mm_obs=ms_mm_obs,
             ms_mm_beta_option=ms_mm_beta_option,
-            seed=100330201,
-            verbose=0
+            seed=seed,
+            verbose=verbose
         )
 
     def save(self, save_path: str):

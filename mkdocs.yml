@@ -7,7 +7,7 @@ nav:
       - 'Data Preparation': 'user-guide/data_prep.md'
       - 'Federated Missing Data Scenario Simulation': 'user-guide/scenario_simulation.md'
       - 'Federated Imputation': 'user-guide/fed_imp.md'
-      - 'Evaluation of Imputation Outcome': 'user-guide/evaluation.md'
+      - 'Evaluation': 'user-guide/evaluation.md'
   - 'Tutorials':
       - 'Basic Usage': 'tutorial/basic_usage.md'
   - 'API Reference':
@@ -15,4 +15,12 @@ nav:
       - 'Federated imputation': 'api/fed_impute.md'
   # Contributing
   # Release Log
+markdown_extensions:
+    - extra
+    - mdx_math
+    - extra
+    - tables
+    - fenced_code
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML
 theme: readthedocs

@@ -46,13 +46,6 @@ Under HFL, effective strategies for handling missing data must consider how to u
 Due to the reason of the complexity of the problem, it is important to have a benchmarking tool to rapidly evaluate the performance of federated imputation algorithms under different missing data scenarios. **FedImpute** is designed to address this need.
 
 
-## Features of FedImpute
-* **Flexible Missing Data Simulation**: Provide flexible API to simulate missing data scenarios under various missing data distribution and data partition strategies.
-* **Built-in Federated Imputation Methods**: Supports multiple imputation techniques, including mean, and model-based approaches, 
-tailored for distributed data.
-* **Easy Integration**: Designed to be easily extended with federated imputation algorithms and workflows.
-* **Customizability**: Offers extensive configuration options to adapt the imputation process to specific needs.
-
 ## Architecture and Components
 <img src="../img/fedimpute.png" width="600" height="400">
 
