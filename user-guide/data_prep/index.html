@@ -49,6 +49,26 @@
               <p class="caption"><span class="caption-text">User Guide</span></p>
               <ul class="current">
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Data Preparation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#input-data-format-and-preprocessing">Input Data Format and Preprocessing</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#required-preprocessing-steps">Required Preprocessing Steps</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#ordering-features">Ordering Features</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#one-hot-encoding-categorical-features">One-hot Encoding Categorical Features</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#data-normalization-optional">Data Normalization (Optional)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#helper-functions-for-preprocessing">Helper Functions for Preprocessing</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#data-configuration-dictionary">Data Configuration Dictionary</a>
+    </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../scenario_simulation/">Federated Missing Data Scenario Simulation</a>
                   </li>
@@ -93,7 +113,79 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="dataset-and-preprocessing">Dataset and Preprocessing</h1>
+<p>The first step for using FedImpute is to prepare the data. </p>
+<h2 id="input-data-format-and-preprocessing">Input Data Format and Preprocessing</h2>
+<p>The data should be in the form of a <strong>numpy array</strong> (<code>&lt;np.ndarray&gt;</code>), where each row represents an observation and each column represents a feature. 
+It will be the input to the simulation process, where it will be partitioned into subset as local dataset for each party and the missing data will be introduced.</p>
+<h3 id="required-preprocessing-steps">Required Preprocessing Steps</h3>
+<p>There are some basic <strong>preprocessing steps</strong> that you need to follow before using FedImpute, 
+The final dataset should be in the form of a numpy array with the columns ordered as follows format: </p>
+<pre><code class="language-text">| --------------------- | ------------------ | ------ |
+| numerical features... | binary features... | target |
+| --------------------- | ------------------ | ------ |
+| 0.1 3 5 ...           | 1 0 1 0 0 0        | ...    |
+...
+| 0.5 10 1 ...          | 0 0 1 0 0 1        | ...    |
+| --------------------- | ------------------ | ------ |
+</code></pre>
+<h6 id="ordering-features">Ordering Features</h6>
+<p>To facilitate the ease of use for FedImpute, you have to order the features in the dataset such that the <strong>numerical features</strong> are placed first, followed by the <strong>binary features</strong>.
+The <strong>target variable</strong> should be the <strong><em>last</em></strong> column in the dataset.</p>
+<h6 id="one-hot-encoding-categorical-features">One-hot Encoding Categorical Features</h6>
+<p>Currently, FedImpute only supports <strong>numerical</strong> and <strong>binary</strong> features, does <strong><em>not</em></strong> support <strong>categorical</strong> features in the dataset.
+So you have to one-hot encode the categorical features into binary features before using FedImpute.</p>
+<h6 id="data-normalization-optional">Data Normalization (Optional)</h6>
+<p>It is recommended to normalize the numerical features in the dataset within range of 0 and 1.</p>
+<h3 id="helper-functions-for-preprocessing">Helper Functions for Preprocessing</h3>
+<p>FedImpute provides several helper functions to perform the required preprocessing steps. Example of the helper functions are as follows:</p>
+<pre><code class="language-python">from fedimpute.data_prep.helper import ordering_features, one_hot_encoding
+
+# Example for data with numpy array 
+data = ...
+data = ordering_features(data, numerical_cols=[0, 1, 3, 4, 8], target_col=-1)
+data = one_hot_encoding(data, numerical_cols_num=5, max_cateogories=10)
+
+# Example data with pandas dataframe
+data = ...
+data = ordering_features(
+    data, numerical_cols=['age', 'income', 'height', 'weight', 'temperature'], 
+    target_col='house_price'
+)
+data = one_hot_encoding(data, numerical_cols_num=5, max_cateogories=10)
+
+</code></pre>
+<ul>
+<li><code>ordering_features(data, numerical_cols: List[str or int], target_col: int or str)</code>: This function will order the features in the dataset such that the numerical features are placed first, followed by the binary features. The target variable should be the last column in the dataset.</li>
+<li><code>one_hot_encoding(data, numerical_cols_num: int)</code>: This function will one-hot encode the categorical features into binary features. It assumes you data is already orderd as numerical cols + cat_cols + target, so You just need to specify the number of numerical columns.
+<strong><em>Note</em></strong>: The <code>ordering_features</code> function is required to be called before the <code>one_hot_encoding</code> function.</li>
+</ul>
+<p>We also provide a one-for-all function to perform all the preprocessing steps at once. </p>
+<pre><code class="language-python">from fedimpute.data_prep import prep_data
+
+data = ...
+data = prep_data(
+    data, numerical_cols=['age', 'income', 'height', 'weight', 'temperature'], target_col='house_price'
+)
+
+</code></pre>
+<h2 id="data-configuration-dictionary">Data Configuration Dictionary</h2>
+<p>To allow FedImpute to understand the data and the task type, you need to provide a configuration dictionary called <code>data_config</code>.
+The example of the <code>data_config</code> dictionary is as follows:</p>
+<pre><code class="language-python">data_config = {
+    'target': 'house_price',
+    'task_type': 'classification',
+    'clf_type': 'binary',
+    'num_cols': 10,
+}
+</code></pre>
+<p>The <code>data_config</code> dictionary should contain the following keys:</p>
+<ul>
+<li><code>target</code>: The target variable name. </li>
+<li><code>task_type</code>: The task type of the target variable. It can be either <code>classification</code> or <code>regression</code>.</li>
+<li><code>clf_type</code>: The classification type of the target variable. It can be either <code>binary</code> or <code>multi-class</code> for classification task. And set it to <code>None</code> for the regression task.</li>
+<li><code>num_cols</code>: The number of columns which are numerical (continous variable). </li>
+</ul>
               
             </div>
           </div><footer>
