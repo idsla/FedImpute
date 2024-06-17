@@ -4,7 +4,7 @@ The first step for using FedImpute is to prepare the data.
 
 ## Input Data Format and Preprocessing
 
-The data should be in the form of a **numpy array** (`<np.ndarray>`), where each row represents an observation and each column represents a feature. 
+The data should be tabular data in the form of a **numpy array** (`<np.ndarray>`), where each row represents an observation and each column represents a feature. 
 It will be the input to the simulation process, where it will be partitioned into subset as local dataset for each party and the missing data will be introduced.
 
 ### Required Preprocessing Steps
