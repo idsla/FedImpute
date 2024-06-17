@@ -5,14 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Evaluation of Imputation Outcome - FedImpute</title>
+    <title>Evaluation - FedImpute</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Evaluation of Imputation Outcome";
+        var mkdocs_page_name = "Evaluation";
         var mkdocs_page_input_path = "user-guide\\evaluation.md";
         var mkdocs_page_url = null;
       </script>
@@ -54,7 +54,21 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../fed_imp/">Federated Imputation</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Evaluation of Imputation Outcome</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Evaluation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#supported-evaluation-metrics">Supported Evaluation Metrics</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#imputation-quality">Imputation Quality</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#downstream-prediction">Downstream Prediction</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#variance-metrics-measure-the-variance-of-imputationa-and-prediction-outcomes">Variance Metrics (Measure the variance of imputationa and prediction outcomes)</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -84,7 +98,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">User Guide</li>
-      <li class="breadcrumb-item active">Evaluation of Imputation Outcome</li>
+      <li class="breadcrumb-item active">Evaluation</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -93,7 +107,85 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="evaluation-of-imputation-outcomes">Evaluation of Imputation Outcomes</h1>
+<p>Fedimpute provides a comprehensive evaluation module to assess the effectiveness of federated imputation algorithms across various missing data scenarios. 
+The evaluation can be categorized into the following aspects:</p>
+<ul>
+<li><strong>Imputation Quality</strong>: Evaluate the quality of imputed data.</li>
+<li><strong>Downstream Prediction</strong>: Evaluate the performance of downstream prediction tasks using imputed data (supports both local or federated prediction).</li>
+</ul>
+<h2 id="basic-usage">Basic Usage</h2>
+<p>The <code>Evaluator</code> class is the <code>evaluation</code> module's main class, use its <code>evaluation()</code> function to perform evaluation.</p>
+<pre><code class="language-python">from fedimpute.evaluation import Evaluator
+
+evaluator = Evaluator()
+evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed'])
+evaluator.show_results()
+</code></pre>
+<p>The <code>Evaluator.evaluate()</code> method is used to evaluate the imputation outcomes. It takes the <code>FedImpEnv</code> object (see <a href="../fed_imp/">Federated Imputaton</a> and a list of evaluation aspects as input.
+The evaluation aspects can be one or more of the following:</p>
+<ul>
+<li><code>imp_quality</code>: Evaluate the quality of imputed data.</li>
+<li><code>pred_downstream_local</code>: Evaluate the performance of downstream prediction tasks using imputed data in a local setting.</li>
+<li><code>pred_downstream_fed</code>: Evaluate the performance of downstream prediction tasks using imputed data in a federated setting.</li>
+</ul>
+<p>The <code>Evaluator.show_results()</code> method is used to display the evaluation results. It prints the evaluation results for each evaluation aspect.</p>
+<h2 id="supported-evaluation-metrics">Supported Evaluation Metrics</h2>
+<p>The following evaluation metrics are supported for each evaluation aspect:</p>
+<h3 id="imputation-quality">Imputation Quality</h3>
+<ul>
+<li><strong>Root Mean Squared Error (RMSE) <code>rmse</code></strong>: RMSE is calculated by taking the square root of the mean of </li>
+<li>
+<p>the squared differences between the imputed and original values. A lower RMSE indicates better imputation accuracy.</p>
+</li>
+<li>
+<p><strong>Normalized RMSE <code>nrmse</code></strong>: Normalized RMSE is an extension of the standard RMSE that 
+allows for a more intuitive interpretation and comparison of imputation qualities. It is 
+calculated by dividing the RMSE by the range (i.e., standard deviation) of the original data. 
+This normalization process scales the RMSE to a value between 0 and 1 to provide a standardized metric independent of the data scale.</p>
+</li>
+<li>
+<p><strong>Sliced Wasserstein Distance <code>sliced-ws</code></strong>: Sliced Wasserstein distance is a metric 
+that measures the dissimilarity between two high-dimensional probability distributions. 
+We use sliced Wasserstein distance to assess the discrepancy between the probability distributions
+of the imputed data and the original data for each client.
+A smaller Wasserstein distance indicates a higher similarity between the imputed and original data distributions. </p>
+</li>
+</ul>
+<h3 id="downstream-prediction">Downstream Prediction</h3>
+<p>After missing data are imputed, 
+the downstream task prediction can be performed on imputed data. 
+During the data partition stage, we retain a local test dataset for each client and a global test dataset for global data. 
+These test datasets can be used to evaluate downstream prediction models trained on clients' local imputed datasets to measure 
+the goodness of imputation and how it influences the prediction.<br />
+We contains three built-in local downstream prediction models (Linear regression <code>linear</code>, Random Forest <code>tree</code>, and two-layer neural network <code>nn</code>) 
+and various metrics such as accuracy <code>accu</code>, AUROC <code>auroc</code>, f1 score <code>f1</code> for evaluation of classification tasks, and 
+mean square error <code>mse</code>, r2 score <code>r2</code>, mean square log error <code>msle</code>, mean abusolute error <code>mae</code> for evaluation of regression tasks. {\fedimpute} also supports federated downstream task evaluation for a two-layer neural network with  \textbf{FedAvg} as federated learning strategies. By assessing the performance of the downstream tasks, we can gain insights into how different imputation methods impact the overall effectiveness of the learning process in the presence of missing data.</p>
+<h3 id="variance-metrics-measure-the-variance-of-imputationa-and-prediction-outcomes">Variance Metrics (Measure the variance of imputationa and prediction outcomes)</h3>
+<ul>
+<li>
+<p><strong>Variance <code>variance</code></strong>: Variance is a statistical measure that quantifies the spread of 
+a set of values around their mean. We calculate the variance of each 
+client's imputation quality metric value. </p>
+</li>
+<li>
+<p><strong>Jain Index <code>jain-index</code></strong>:The Jain index, 
+also known as the Jain fairness index, is a metric used to evaluate the fairness or 
+equality of resource allocation in distributed systems. We adopt this metric to assess the equality of imputation 
+quality across clients. The Jain index ranges from $1/N$
+to $1$, where $1$ is the number of clients. A value of $1$ indicates perfect equality, 
+meaning that all clients have the same imputation quality, while a value of $1/N$ </p>
+</li>
+<li>
+<p>represents the worst-case scenario, where one client dominates the imputation performance. </p>
+</li>
+<li>
+<p><strong>Entropy <code>entropy</code> </strong>: We utilize entropy 
+to capture the distributional variation of imputation quality across clients.
+We compute the entropy of this distribution using the standard formula: $-\sum(p_i * log(p_i))$, where $p_i$ is the normalized imputation 
+quality metric value for client $i$. A higher entropy value indicates a more </p>
+</li>
+</ul>
               
             </div>
           </div><footer>
