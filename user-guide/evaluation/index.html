@@ -160,7 +160,9 @@ These test datasets can be used to evaluate downstream prediction models trained
 the goodness of imputation and how it influences the prediction.<br />
 We contains three built-in local downstream prediction models (Linear regression <code>linear</code>, Random Forest <code>tree</code>, and two-layer neural network <code>nn</code>) 
 and various metrics such as accuracy <code>accu</code>, AUROC <code>auroc</code>, f1 score <code>f1</code> for evaluation of classification tasks, and 
-mean square error <code>mse</code>, r2 score <code>r2</code>, mean square log error <code>msle</code>, mean abusolute error <code>mae</code> for evaluation of regression tasks. {\fedimpute} also supports federated downstream task evaluation for a two-layer neural network with  \textbf{FedAvg} as federated learning strategies. By assessing the performance of the downstream tasks, we can gain insights into how different imputation methods impact the overall effectiveness of the learning process in the presence of missing data.</p>
+mean square error <code>mse</code>, r2 score <code>r2</code>, mean square log error <code>msle</code>, mean abusolute error <code>mae</code> for 
+evaluation of regression tasks. Fedimpute also supports federated downstream task evaluation for a 
+two-layer neural network with FedAvg <code>fedavg</code> as federated learning strategies. By assessing the performance of the downstream tasks, we can gain insights into how different imputation methods impact the overall effectiveness of the learning process in the presence of missing data.</p>
 <h3 id="variance-metrics-measure-the-variance-of-imputationa-and-prediction-outcomes">Variance Metrics (Measure the variance of imputationa and prediction outcomes)</h3>
 <ul>
 <li>
@@ -225,6 +227,7 @@ quality metric value for client $i$. A higher entropy value indicates a more </p
     <script>var base_url = "../..";</script>
     <script src="../../js/theme_extra.js"></script>
     <script src="../../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
       <script src="../../search/main.js"></script>
     <script>
         jQuery(function () {

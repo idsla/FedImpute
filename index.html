@@ -95,50 +95,32 @@
                 <p><img src="icon.jpg" width="300" height="180"></p>
 <h1 id="welcome-to-fedimpute">Welcome to FedImpute</h1>
 <p>FedImpute is a benchmarking and evaluation tool to assess the effectiveness of federated imputation across various missing data scenarios.</p>
-<h2 id="installation">Installation</h2>
-<p>Install python &gt;= 3.8.0</p>
-<pre><code class="language-bash">python -m venv ./venv
-
-# window gitbash
-source ./venv/Scripts/activate
-
-# linux/unix
-source ./venv/bin/activate
-</code></pre>
-<p>Install the required packages</p>
-<pre><code class="language-bash">pip install -r requirements.txt
-</code></pre>
-<h2 id="basic-usage">Basic Usage</h2>
-<h3 id="step-1-prepare-data">Step 1. Prepare Data</h3>
-<pre><code class="language-python">import numpy as np
-data = np.random.rand(10000, 10)
-data_config = {
-    'task_type': 'regression',
-    'num_cols': 9,
-}
-</code></pre>
-<h3 id="step-2-simulate-federated-missing-data-scenario">Step 2. Simulate Federated Missing Data Scenario</h3>
-<pre><code class="language-python">from fedimpute.simulator import Simulator
-simulator = Simulator()
-simulation_results = simulator.simulate_scenario(
-    data, data_config, num_clients = 10, dp_strategy='iid-even', ms_mech_type='mcar', verbose=1
-)
-</code></pre>
-<h3 id="step-3-execute-federated-imputation-algorithms">Step 3. Execute Federated Imputation Algorithms</h3>
-<pre><code class="language-python">from fedimpute.execution_environment import FedImputeEnv
-env = FedImputeEnv()
-env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
-env.setup_from_simulator(simulator = simulator, verbose=1)
-
-env.run_fed_imputation()
-</code></pre>
-<h3 id="step-4-evaluate-imputation-outcomes">Step 4. Evaluate imputation outcomes</h3>
-<pre><code class="language-python">from fedimpute.evaluation import Evaluator
-
-evaluator = Evaluator()
-evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed'])
-evaluator.show_results()
-</code></pre>
+<h2 id="features-of-fedimpute">Features of FedImpute</h2>
+<ul>
+<li><strong>Flexible Missing Data Simulation</strong>: Provide flexible API to simulate missing data scenarios under various missing data distribution and data partition strategies.</li>
+<li><strong>Built-in Federated Imputation Methods</strong>: Supports multiple imputation techniques, including mean, and model-based approaches, 
+tailored for distributed data.</li>
+<li><strong>Easy Integration</strong>: Designed to be easily extended with federated imputation algorithms and workflows.</li>
+<li><strong>Customizability</strong>: Offers extensive configuration options to adapt the imputation process to specific needs.</li>
+</ul>
+<h2 id="quick-start">Quick Start</h2>
+<ul>
+<li>
+<p><a href="overview/">Overview of FedImpute</a></p>
+</li>
+<li>
+<p><a href="get_started/">Installation and Basic Usage</a></p>
+</li>
+</ul>
+<h2 id="user-guide">User Guide</h2>
+<ul>
+<li><a href="user-guide/data_preparation.md">Data Preparation</a></li>
+<li><a href="user-guide/scenario_simulation/">Federated Missing Data Scenario Simulation</a></li>
+<li><a href="user-guide/fed_imp/">Federated Imputation</a></li>
+<li><a href="user-guide/evaluation/">Evaluation</a></li>
+</ul>
+<h2 id="support-and-contact">Support and Contact</h2>
+<p>FedImpute is developed by Rutgers <a href="https://sites.rutgers.edu/idsla/">Institute for Data Science, Learning, and Applications (i-DLSA)</a>, lead by Professor <a href="https://www.business.rutgers.edu/faculty/jaideep-vaidya">Jaideep Vaidya</a>. For any questions, please contact <a href="mailto:sm2370@rutgers.edu">Sitao Min</a> for support.</p>
               
             </div>
           </div><footer>
@@ -170,6 +152,7 @@ evaluator.show_results()
     <script>var base_url = ".";</script>
     <script src="js/theme_extra.js"></script>
     <script src="js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
       <script src="search/main.js"></script>
     <script>
         jQuery(function () {
@@ -182,5 +165,5 @@ evaluator.show_results()
 
 <!--
 MkDocs version : 1.6.0
-Build Date UTC : 2024-06-17 16:58:28.012417+00:00
+Build Date UTC : 2024-06-17 17:26:19.735869+00:00
 -->

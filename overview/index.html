@@ -53,8 +53,6 @@
     </li>
         </ul>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#features-of-fedimpute">Features of FedImpute</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#architecture-and-components">Architecture and Components</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#license">License</a>
@@ -147,14 +145,6 @@ for example, hospitals, banks, or research institutions. In these scenarios, mis
 More details of imputation methods and their performance can be found in the <a href="https://rmisstastic.netlify.app/workflows/">How to deal with missing values?</a>, <a href="https://stefvanbuuren.name/fimd/ch-practice.html">Imputation Book</a>, <a href="https://github.com/vanderschaarlab/hyperimpute">Hyperimpute</a>.</p>
 <p>Under HFL, effective strategies for handling missing data must consider how to unify the decentralized or local imputation techniques, where each party performed independently. By using common federated learning solutions to allow for collaborative imputation without exposing individual data points, we call it <strong>Federated Imputation</strong>.
 Due to the reason of the complexity of the problem, it is important to have a benchmarking tool to rapidly evaluate the performance of federated imputation algorithms under different missing data scenarios. <strong>FedImpute</strong> is designed to address this need.</p>
-<h2 id="features-of-fedimpute">Features of FedImpute</h2>
-<ul>
-<li><strong>Flexible Missing Data Simulation</strong>: Provide flexible API to simulate missing data scenarios under various missing data distribution and data partition strategies.</li>
-<li><strong>Built-in Federated Imputation Methods</strong>: Supports multiple imputation techniques, including mean, and model-based approaches, 
-tailored for distributed data.</li>
-<li><strong>Easy Integration</strong>: Designed to be easily extended with federated imputation algorithms and workflows.</li>
-<li><strong>Customizability</strong>: Offers extensive configuration options to adapt the imputation process to specific needs.</li>
-</ul>
 <h2 id="architecture-and-components">Architecture and Components</h2>
 <p><img src="../img/fedimpute.png" width="600" height="400"></p>
 <p>FedImpute is built on top of the following components: <strong>Federated Missing Data Scenario Simulation</strong>, <strong>Federated Imputation Execution Environment</strong>, and <strong>Evaluation</strong>.</p>
@@ -202,6 +192,7 @@ This license encourages open collaboration by permitting the incorporation of th
     <script>var base_url = "..";</script>
     <script src="../js/theme_extra.js"></script>
     <script src="../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
       <script src="../search/main.js"></script>
     <script>
         jQuery(function () {
