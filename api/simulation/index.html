@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkdocstrings.css" rel="stylesheet" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+        <link href="../../css/mkapi.css" rel="stylesheet" />
     
       <script>
         // Current page data
@@ -57,16 +61,15 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../user-guide/evaluation/">Evaluation</a>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">Tutorials</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../tutorial/basic_usage/">Basic Usage</a>
-                  </li>
-              </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul class="current">
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Scenario simulation</a>
+    <ul class="current">
+    </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../fed_impute/">Federated imputation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../fed_impute/">FedImpute Execution Environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imputation_models/">Imputation Models</a>
                   </li>
               </ul>
       </div>
@@ -93,13 +96,455 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                
+                <h1 id="simulator">Simulator</h1>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.simulator.simulator.Simulator">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.simulator">simulator</span>.<span class="mkapi-tooltip" title="fedimpute.simulator.simulator">simulator</span>.Simulator</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">Simulator</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">debug_mode</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-paren">)</span></span></p>
+<p>Simulator class for simulating missing data scenarios in federated learning environment</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">data</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span> &mdash;
+data to be used for simulation
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_config</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+data configuration dictionary
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">clients_train_data</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.List">List</span>[<span class="mkapi-tooltip" title="numpy">np</span>.ndarray]</span> &mdash;
+list of clients training data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">clients_test_data</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.List">List</span>[<span class="mkapi-tooltip" title="numpy">np</span>.ndarray]</span> &mdash;
+list of clients test data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">clients_train_data_ms</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.List">List</span>[<span class="mkapi-tooltip" title="numpy">np</span>.ndarray]</span> &mdash;
+list of clients training data with missing values
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">global_test</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span> &mdash;
+global test data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">client_seeds</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.List">List</span>[int]</span> &mdash;
+list of seeds for clients
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">stats</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+simulation statistics
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">debug_mode</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether to enable debug mode
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.simulator.simulator.Simulator.simulate_scenario">simulate_scenario</span></span> &mdash;
+Simulate missing data scenario
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.simulator.simulator.Simulator.simulate_scenario_lite">simulate_scenario_lite</span></span> &mdash;
+Simulate missing data scenario
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.simulator.simulator.Simulator.save">save</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.simulator.simulator.Simulator.load">load</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.simulator.simulator.Simulator.export_data">export_data</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.simulator.simulator.Simulator.summarize">summarize</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.simulator.simulator.Simulator.visualization">visualization</span></span>
+  </p>
+</li>
+</ul>
+</div>
+<h1 id="core-simulation-function">Core Simulation Function</h1>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.simulator.simulator.Simulator.simulate_scenario">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.simulator">simulator</span>.<span class="mkapi-tooltip" title="fedimpute.simulator.simulator">simulator</span>.<span class="mkapi-tooltip" title="fedimpute.simulator.simulator.Simulator">Simulator</span>.simulate_scenario</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">Simulator</span><span class="mkapi-dot">.</span><span class="mkapi-name">simulate_scenario</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">data</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">num_clients</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_strategy</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'iid-even'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_split_cols</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, int, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'target'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_niid_alpha</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.1</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_size_niid_alpha</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.1</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_min_samples</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[float, int]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">50</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_max_samples</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[float, int]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">2000</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_even_sample_size</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">1000</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_sample_iid_direct</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_local_test_size</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.1</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_global_test_size</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.1</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_local_backup_size</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.05</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_reg_bins</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">50</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mech_type</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'mcar'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_cols</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'all'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">obs_cols</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'random'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_global_mechanism</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mr_dist_clients</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'randu-int'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mf_dist_clients</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'identity'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mm_dist_clients</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'random'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_missing_features</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'all'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mr_lower</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.3</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mr_upper</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.7</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mm_funcs_bank</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'lr'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mm_strictness</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">True</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mm_obs</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mm_feature_option</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'allk=0.2'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mm_beta_option</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">100330201</span><span class="mkapi-comma">, </span><span class="mkapi-arg">verbose</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="typing.Dict">Dict</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[<span class="mkapi-tooltip" title="numpy">np</span>.ndarray]]</span></span></p>
+<p>Simulate missing data scenario</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">data</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+data to be used for simulation
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_config</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+data configuration dictionary
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">num_clients</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+number of clients
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_strategy</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+data partition strategy, default: 'iid-even'
+- <code>iid-even</code>, <code>iid-dir</code>, <code>niid-dir</code>, <code>niid-path</code>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_split_cols</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, int, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span> &mdash;
+split columns option
+- <code>target</code>, <code>first</code>, default: <code>target</code>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_niid_alpha</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+non-iid alpha for data partition, default: 0.1
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_size_niid_alpha</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+size niid alpha for data partition, default: 0.1
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_min_samples</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[float, int]</span> &mdash;
+minimum samples for clients, default: 50
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_max_samples</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[float, int]</span> &mdash;
+maximum samples for clients, default: 2000
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_even_sample_size</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+even sample size for data partition, default: 1000
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_sample_iid_direct</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+sample iid data directly, default: False
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_local_test_size</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+local test size ratio, default: 0.1
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_global_test_size</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+global test size ratio, default: 0.1
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_local_backup_size</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+local backup size ratio, default: 0.05
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_reg_bins</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+regression bins, default: 50
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mech_type</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+missing mechanism type, default: 'mcar'
+- <code>mcar</code>, <code>mar_sigmoid</code>, <code>mnar_sigmoid</code>, <code>mar_quantile</code>, <code>mnar_quantile</code>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_cols</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span> &mdash;
+missing columns, default: 'all' - <code>all</code>, <code>all-num</code>, <code>random</code>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">obs_cols</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span> &mdash;
+fully observed columns for MAR, default: 'random' - <code>random</code>, <code>rest</code>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_global_mechanism</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+global missing mechanism, default: False
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mr_dist_clients</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+missing ratio distribution, default: 'randu-int' - 'fixed', 'uniform', 'uniform_int', 'gaussian', 'gaussian_int'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mf_dist_clients</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+missing features distribution, default: 'identity' - 'identity', 'random', 'random2'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mm_dist_clients</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+missing mechanism functions distribution, default: 'random' - 'identity', 'random', 'random2'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_missing_features</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+missing features strategy, default: 'all' - 'all', 'all-num'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mr_lower</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+minimum missing ratio for each feature, default: 0.3
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mr_upper</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+maximum missing ratio for each feature, default: 0.7
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mm_funcs_bank</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+missing mechanism functions banks, default: 'lr' - None, 'lr', 'mt', 'all'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mm_strictness</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+missing adding probabilistic or deterministic, default: True
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mm_obs</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+missing adding based on observed data, default: False
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mm_feature_option</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+missing mechanism associated with which features, default: 'allk=0.2' - 'self', 'all', 'allk=0.1'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mm_beta_option</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+mechanism beta coefficient option, default: None - (mnar) self, sphere, randu, (mar) fixed, randu, randn
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">seed</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+random seed, default: 100330201
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">verbose</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+whether verbose the simulation process, default: 0
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Returns</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Dict">Dict</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[<span class="mkapi-tooltip" title="numpy">np</span>.ndarray]]</span> &mdash;
+dictionary of clients training data, test data, training data with missing values, global test data
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Raises</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type">ValueError</span>
+  </p>
+</li>
+</ul>
+</div>
+<h1 id="lite-simulation-function">Lite Simulation Function</h1>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.simulator.simulator.Simulator.simulate_scenario_lite">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.simulator">simulator</span>.<span class="mkapi-tooltip" title="fedimpute.simulator.simulator">simulator</span>.<span class="mkapi-tooltip" title="fedimpute.simulator.simulator.Simulator">Simulator</span>.simulate_scenario_lite</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">Simulator</span><span class="mkapi-dot">.</span><span class="mkapi-name">simulate_scenario_lite</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">data</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">num_clients</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_strategy</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'iid-even'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_scenario</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'mcar'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_split_col_option</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'target'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_cols</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'all'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">obs_cols</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'random'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_min_samples</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[float, int]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">50</span><span class="mkapi-comma">, </span><span class="mkapi-arg">dp_max_samples</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[float, int]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">8000</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mr_lower</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.3</span><span class="mkapi-comma">, </span><span class="mkapi-arg">ms_mr_upper</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.7</span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">100330201</span><span class="mkapi-comma">, </span><span class="mkapi-arg">verbose</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0</span><span class="mkapi-paren">)</span></span></p>
+<p>Simulate missing data scenario</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">data</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+data to be used for simulation
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_config</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+data configuration dictionary
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">num_clients</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+number of clients
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_strategy</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+data partition strategy, default: 'iid-even' - <code>iid-even</code>, <code>iid-dir</code>, <code>niid-dir</code>, <code>niid-path</code>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_scenario</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+predefined missing data scenario, default: 'mcar'
+- <code>mcar</code>, <code>mar-heter</code>， <code>mar-homo</code>, <code>mnar-heter</code>, <code>mnar-homo</code>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_split_col_option</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+iid/niid column strategy partition base on - 'target', 'feature', default: 'target'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_cols</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span> &mdash;
+missing columns, default: 'all' - 'all', 'all-num', 'random'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">obs_cols</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[str, <span class="mkapi-tooltip" title="typing.List">List</span>[int]]</span> &mdash;
+fully observed columns for MAR, default: 'random' - 'random', 'rest'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_min_samples</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[float, int]</span> &mdash;
+minimum samples for clients, default: 50
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">dp_max_samples</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[float, int]</span> &mdash;
+maximum samples for clients, default: 8000
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mr_lower</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+minimum missing ratio for each feature, default: 0.3
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">ms_mr_upper</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+maximum missing ratio for each feature, default: 0.7
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">seed</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+random seed, default: 100330201
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">verbose</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+whether verbose the simulation process, default: 0
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Returns</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type">dict</span> &mdash;
+dictionary of clients training data, test data, training data with missing values, global test data
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Raises</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type">ValueError</span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type">NotImplementedError</span>
+  </p>
+</li>
+</ul>
+</div>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../tutorial/basic_usage/" class="btn btn-neutral float-left" title="Basic Usage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../fed_impute/" class="btn btn-neutral float-right" title="Federated imputation">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../user-guide/evaluation/" class="btn btn-neutral float-left" title="Evaluation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../fed_impute/" class="btn btn-neutral float-right" title="FedImpute Execution Environment">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -122,7 +567,7 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../tutorial/basic_usage/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../user-guide/evaluation/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../fed_impute/" style="color: #fcfcfc">Next &raquo;</a></span>

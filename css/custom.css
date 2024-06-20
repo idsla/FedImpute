@@ -1,0 +1,26 @@
+div.autodoc-docstring {
+  padding-left: 20px;
+  padding-top: 20px;
+  margin-bottom: 30px;
+  border-left: 5px solid rgba(230, 230, 230);
+}
+
+div.autodoc-members {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+div.autodoc-signature {
+    background-color: lightblue;
+    border-top: 0.5rem solid darkcyan;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+
+div.autodoc-signature code {
+    background-color: lightblue;
+    border: 0;
+    color: black;
+    font-weight: bold;
+}

@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkdocstrings.css" rel="stylesheet" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+        <link href="../../css/mkapi.css" rel="stylesheet" />
     
       <script>
         // Current page data
@@ -71,16 +75,13 @@
     </ul>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">Tutorials</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../tutorial/basic_usage/">Basic Usage</a>
-                  </li>
-              </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario simulation</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">Federated imputation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">FedImpute Execution Environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/imputation_models/">Imputation Models</a>
                   </li>
               </ul>
       </div>
@@ -116,12 +117,12 @@ The evaluation can be categorized into the following aspects:</p>
 </ul>
 <h2 id="basic-usage">Basic Usage</h2>
 <p>The <code>Evaluator</code> class is the <code>evaluation</code> module's main class, use its <code>evaluation()</code> function to perform evaluation.</p>
-<pre><code class="language-python">from fedimpute.evaluation import Evaluator
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
 
-evaluator = Evaluator()
-evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed'])
-evaluator.show_results()
-</code></pre>
+<span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
+<span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_local&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">])</span>
+<span class="n">evaluator</span><span class="o">.</span><span class="n">show_results</span><span class="p">()</span>
+</code></pre></div>
 <p>The <code>Evaluator.evaluate()</code> method is used to evaluate the imputation outcomes. It takes the <code>FedImpEnv</code> object (see <a href="../fed_imp/">Federated Imputaton</a> and a list of evaluation aspects as input.
 The evaluation aspects can be one or more of the following:</p>
 <ul>
@@ -193,7 +194,7 @@ quality metric value for client $i$. A higher entropy value indicates a more </p
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../fed_imp/" class="btn btn-neutral float-left" title="Federated Imputation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../tutorial/basic_usage/" class="btn btn-neutral float-right" title="Basic Usage">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../../api/simulation/" class="btn btn-neutral float-right" title="Scenario simulation">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -219,7 +220,7 @@ quality metric value for client $i$. A higher entropy value indicates a more </p
       <span><a href="../fed_imp/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../tutorial/basic_usage/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../../api/simulation/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

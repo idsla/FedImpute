@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkdocstrings.css" rel="stylesheet" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+        <link href="../../css/mkapi.css" rel="stylesheet" />
     
       <script>
         // Current page data
@@ -77,16 +81,13 @@
                   <li class="toctree-l1"><a class="reference internal" href="../evaluation/">Evaluation</a>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">Tutorials</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../tutorial/basic_usage/">Basic Usage</a>
-                  </li>
-              </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario simulation</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">Federated imputation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">FedImpute Execution Environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/imputation_models/">Imputation Models</a>
                   </li>
               </ul>
       </div>
@@ -130,19 +131,19 @@ on the parameters specified by the user and output the following:</p>
 </ul>
 <p>The following example demonstrates how to use <code>fedimpute.simulator</code> module. 
 Initialize the <code>Simulator</code> class and call the <code>simulate_scenario</code> method to <code>simulate_scenario</code> simulate the federated missing data scenario.</p>
-<pre><code class="language-python">from fedimpute.simulator import Simulator
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.simulator</span> <span class="kn">import</span> <span class="n">Simulator</span>
 
-simulator = Simulator()
-simulation_results = simulator.simulate_scenario(
-    data, data_config, num_clients = 10, dp_strategy='iid-even', ms_mech_type='mcar', verbose=1
-)
+<span class="n">simulator</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">()</span>
+<span class="n">simulation_results</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">simulate_scenario</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;iid-even&#39;</span><span class="p">,</span> <span class="n">ms_mech_type</span><span class="o">=</span><span class="s1">&#39;mcar&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
 
-# or use the lite simulation function
-simulation_results = simulator.simulate_scenario_lite(
-  data, data_config, num_clients = 10, dp_strategy='iid-even', ms_scenario='mar-homo', 
-  dp_split_col_option = 'target', verbose=1
-)
-</code></pre>
+<span class="c1"># or use the lite simulation function</span>
+<span class="n">simulation_results</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">simulate_scenario_lite</span><span class="p">(</span>
+  <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;iid-even&#39;</span><span class="p">,</span> <span class="n">ms_scenario</span><span class="o">=</span><span class="s1">&#39;mar-homo&#39;</span><span class="p">,</span> 
+  <span class="n">dp_split_col_option</span> <span class="o">=</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+</code></pre></div>
 <h2 id="classical-simulation-function-simulate_scenario">Classical Simulation Function - <code>simulate_scenario</code></h2>
 <p>The <code>simulate_scenario</code> method has the following major parameters for data partitioning and missing data simulation.</p>
 <h3 id="data-partitioning-parameters">Data Partitioning Parameters</h3>
@@ -245,14 +246,14 @@ The core concept here is the <strong>missing data heterogeneity</strong> which m
 <h2 id="lite-simulation-function-simluting-with-predefined-strategies-and-scenarios">Lite Simulation Function - Simluting with Predefined Strategies and Scenarios</h2>
 <p>We provide a lite version of simulation function <code>simulate_scenario_lite</code> 
 which can be used to simulate the missing data scenario with predefined strategies and scenarios with way fewer parameters for ease of use.</p>
-<pre><code class="language-python">from fedimpute.simulator import Simulator
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.simulator</span> <span class="kn">import</span> <span class="n">Simulator</span>
 
-simulator = Simulator()
-simulation_results = simulator.simulate_scenario_lite(
-  data, data_config, num_clients = 10, dp_strategy='iid-even', ms_scenario='mar-heter', 
-  dp_split_col_option = 'target', verbose=1
-)
-</code></pre>
+<span class="n">simulator</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">()</span>
+<span class="n">simulation_results</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">simulate_scenario_lite</span><span class="p">(</span>
+  <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;iid-even&#39;</span><span class="p">,</span> <span class="n">ms_scenario</span><span class="o">=</span><span class="s1">&#39;mar-heter&#39;</span><span class="p">,</span> 
+  <span class="n">dp_split_col_option</span> <span class="o">=</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+</code></pre></div>
 <p>The <code>simulate_scenario_lite</code> method has the following major parameters for data partitioning and missing data simulation.</p>
 <h3 id="data-partitioning-options-dp_strategy">Data Partitioning Options - <code>dp_strategy</code></h3>
 <ul>
@@ -263,55 +264,47 @@ simulation_results = simulator.simulate_scenario_lite(
 </ul>
 <h3 id="missing-data-simulation-scenarios-ms_scenario">Missing Data Simulation Scenarios - <code>ms_scenario</code></h3>
 <ul>
-<li><strong><code>mcar</code></strong> - Missing Completely At Random (MCAR) mechanism.</li>
+<li><strong><code>mcar</code></strong> - Missing Completely At Random (MCAR) mechanism.
+<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mcar&#39;</span>
+    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
+    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
+    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div></li>
+<li><strong><code>mar-heter</code></strong> - Missing At Random (MAR) mechanism with heterogeneous missing data scenario.
+<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mar_sigmoid&#39;</span>
+    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
+    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
+    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="s1">&#39;randu&#39;</span>
+    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div></li>
+<li><strong><code>mar-homo</code></strong> - Missing At Random (MAR) mechanism with homogeneous missing data scenario.
+<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mar_sigmoid&#39;</span>
+    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
+    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
+    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="s1">&#39;fixed&#39;</span>
+    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div></li>
+<li><strong><code>mnar-heter</code></strong> - Missing Not At Random (MNAR) mechanism with heterogeneous missing data scenario.
+<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mnar_sigmoid&#39;</span>
+    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
+    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
+    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="s1">&#39;self&#39;</span>
+    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div></li>
+<li><strong><code>mnar-homo</code></strong> - Missing Not At Random (MNAR) mechanism with homogeneous missing data scenario.
+<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mnar_sigmoid&#39;</span>
+    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
+    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
+    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="s1">&#39;self&#39;</span>
+    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div></li>
 </ul>
-<pre><code class="language-python">    ms_mech_type = 'mcar'
-    ms_global_mechanism = False
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = None
-    ms_mm_obs = False
-</code></pre>
-<ul>
-<li><strong><code>mar-heter</code></strong> - Missing At Random (MAR) mechanism with heterogeneous missing data scenario.</li>
-</ul>
-<pre><code class="language-python">    ms_mech_type = 'mar_sigmoid'
-    ms_global_mechanism = False
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = 'randu'
-    ms_mm_obs = True
-</code></pre>
-<ul>
-<li><strong><code>mar-homo</code></strong> - Missing At Random (MAR) mechanism with homogeneous missing data scenario.</li>
-</ul>
-<pre><code class="language-python">    ms_mech_type = 'mar_sigmoid'
-    ms_global_mechanism = True
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = 'fixed'
-    ms_mm_obs = True
-</code></pre>
-<ul>
-<li><strong><code>mnar-heter</code></strong> - Missing Not At Random (MNAR) mechanism with heterogeneous missing data scenario.</li>
-</ul>
-<pre><code class="language-python">    ms_mech_type = 'mnar_sigmoid'
-    ms_global_mechanism = False
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = 'self'
-    ms_mm_obs = False
-</code></pre>
-<ul>
-<li><strong><code>mnar-homo</code></strong> - Missing Not At Random (MNAR) mechanism with homogeneous missing data scenario.</li>
-</ul>
-<pre><code class="language-python">    ms_mech_type = 'mnar_sigmoid'
-    ms_global_mechanism = True
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = 'self'
-    ms_mm_obs = False
-</code></pre>
               
             </div>
           </div><footer>

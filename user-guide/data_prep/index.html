@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkdocstrings.css" rel="stylesheet" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+        <link href="../../css/mkapi.css" rel="stylesheet" />
     
       <script>
         // Current page data
@@ -77,16 +81,13 @@
                   <li class="toctree-l1"><a class="reference internal" href="../evaluation/">Evaluation</a>
                   </li>
               </ul>
-              <p class="caption"><span class="caption-text">Tutorials</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../tutorial/basic_usage/">Basic Usage</a>
-                  </li>
-              </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario simulation</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">Federated imputation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">FedImpute Execution Environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/imputation_models/">Imputation Models</a>
                   </li>
               </ul>
       </div>
@@ -121,14 +122,14 @@ It will be the input to the simulation process, where it will be partitioned int
 <h3 id="required-preprocessing-steps">Required Preprocessing Steps</h3>
 <p>There are some basic <strong>preprocessing steps</strong> that you need to follow before using FedImpute, 
 The final dataset should be in the form of a numpy array with the columns ordered as follows format: </p>
-<pre><code class="language-text">| --------------------- | ------------------ | ------ |
+<div class="highlight"><pre><span></span><code>| --------------------- | ------------------ | ------ |
 | numerical features... | binary features... | target |
 | --------------------- | ------------------ | ------ |
 | 0.1 3 5 ...           | 1 0 1 0 0 0        | ...    |
 ...
 | 0.5 10 1 ...          | 0 0 1 0 0 1        | ...    |
 | --------------------- | ------------------ | ------ |
-</code></pre>
+</code></pre></div>
 <h6 id="ordering-features">Ordering Features</h6>
 <p>To facilitate the ease of use for FedImpute, you have to order the features in the dataset such that the <strong>numerical features</strong> are placed first, followed by the <strong>binary features</strong>.
 The <strong>target variable</strong> should be the <strong><em>last</em></strong> column in the dataset.</p>
@@ -139,46 +140,42 @@ So you have to one-hot encode the categorical features into binary features befo
 <p>It is recommended to normalize the numerical features in the dataset within range of 0 and 1.</p>
 <h3 id="helper-functions-for-preprocessing">Helper Functions for Preprocessing</h3>
 <p>FedImpute provides several helper functions to perform the required preprocessing steps. Example of the helper functions are as follows:</p>
-<pre><code class="language-python">from fedimpute.data_prep.helper import ordering_features, one_hot_encoding
+<p><div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.data_prep.helper</span> <span class="kn">import</span> <span class="n">ordering_features</span><span class="p">,</span> <span class="n">one_hot_encoding</span>
 
-# Example for data with numpy array 
-data = ...
-data = ordering_features(data, numerical_cols=[0, 1, 3, 4, 8], target_col=-1)
-data = one_hot_encoding(data, numerical_cols_num=5, max_cateogories=10)
+<span class="c1"># Example for data with numpy array </span>
+<span class="n">data</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ordering_features</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">numerical_cols</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="n">target_col</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">one_hot_encoding</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">numerical_cols_num</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_cateogories</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 
-# Example data with pandas dataframe
-data = ...
-data = ordering_features(
-    data, numerical_cols=['age', 'income', 'height', 'weight', 'temperature'], 
-    target_col='house_price'
-)
-data = one_hot_encoding(data, numerical_cols_num=5, max_cateogories=10)
+<span class="c1"># Example data with pandas dataframe</span>
+<span class="n">data</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">ordering_features</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">numerical_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;income&#39;</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="s1">&#39;temperature&#39;</span><span class="p">],</span> 
+    <span class="n">target_col</span><span class="o">=</span><span class="s1">&#39;house_price&#39;</span>
+<span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">one_hot_encoding</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">numerical_cols_num</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_cateogories</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div>
+- <code>ordering_features(data, numerical_cols: List[str or int], target_col: int or str)</code>: This function will order the features in the dataset such that the numerical features are placed first, followed by the binary features. The target variable should be the last column in the dataset.
+- <code>one_hot_encoding(data, numerical_cols_num: int)</code>: This function will one-hot encode the categorical features into binary features. It assumes you data is already orderd as numerical cols + cat_cols + target, so You just need to specify the number of numerical columns.
+<strong><em>Note</em></strong>: The <code>ordering_features</code> function is required to be called before the <code>one_hot_encoding</code> function.</p>
+<p>We also provide a one-for-all function to perform all the preprocessing steps at once. 
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.data_prep</span> <span class="kn">import</span> <span class="n">prep_data</span>
 
-</code></pre>
-<ul>
-<li><code>ordering_features(data, numerical_cols: List[str or int], target_col: int or str)</code>: This function will order the features in the dataset such that the numerical features are placed first, followed by the binary features. The target variable should be the last column in the dataset.</li>
-<li><code>one_hot_encoding(data, numerical_cols_num: int)</code>: This function will one-hot encode the categorical features into binary features. It assumes you data is already orderd as numerical cols + cat_cols + target, so You just need to specify the number of numerical columns.
-<strong><em>Note</em></strong>: The <code>ordering_features</code> function is required to be called before the <code>one_hot_encoding</code> function.</li>
-</ul>
-<p>We also provide a one-for-all function to perform all the preprocessing steps at once. </p>
-<pre><code class="language-python">from fedimpute.data_prep import prep_data
-
-data = ...
-data = prep_data(
-    data, numerical_cols=['age', 'income', 'height', 'weight', 'temperature'], target_col='house_price'
-)
-
-</code></pre>
+<span class="n">data</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">prep_data</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">numerical_cols</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;income&#39;</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="s1">&#39;weight&#39;</span><span class="p">,</span> <span class="s1">&#39;temperature&#39;</span><span class="p">],</span> <span class="n">target_col</span><span class="o">=</span><span class="s1">&#39;house_price&#39;</span>
+<span class="p">)</span>
+</code></pre></div></p>
 <h2 id="data-configuration-dictionary">Data Configuration Dictionary</h2>
 <p>To allow FedImpute to understand the data and the task type, you need to provide a configuration dictionary called <code>data_config</code>.
 The example of the <code>data_config</code> dictionary is as follows:</p>
-<pre><code class="language-python">data_config = {
-    'target': 'house_price',
-    'task_type': 'classification',
-    'clf_type': 'binary',
-    'num_cols': 10,
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="n">data_config</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;house_price&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;task_type&#39;</span><span class="p">:</span> <span class="s1">&#39;classification&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;clf_type&#39;</span><span class="p">:</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;num_cols&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
 <p>The <code>data_config</code> dictionary should contain the following keys:</p>
 <ul>
 <li><code>target</code>: The target variable name. </li>

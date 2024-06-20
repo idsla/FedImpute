@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Imputation Models - FedImpute</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkdocstrings.css" rel="stylesheet" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+        <link href="../../css/mkapi.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Imputation Models";
+        var mkdocs_page_input_path = "api\\imputation_models.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> FedImpute
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Quick Start</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../overview/">Overview of FedImpute</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../get_started/">Install & Basic Usage</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/data_prep/">Data Preparation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/scenario_simulation/">Federated Missing Data Scenario Simulation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/fed_imp/">Federated Imputation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/evaluation/">Evaluation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../simulation/">Scenario simulation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../fed_impute/">FedImpute Execution Environment</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Imputation Models</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#non-nn-based-imputer">Non-NN Based Imputer</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#mean">Mean</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#em">EM</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#ice">ICE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#missforest">MissForest</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#nn-based-imputer">NN Based Imputer</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#gain">GAIN</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#miwae">MIWAE</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">FedImpute</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">API Reference</li>
+      <li class="breadcrumb-item active">Imputation Models</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="imputation-models">Imputation Models</h1>
+<h2 id="non-nn-based-imputer">Non-NN Based Imputer</h2>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base">base</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer">base_imputer</span>.BaseMLImputer</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">BaseMLImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span></span></p>
+<p>Abstract class for the non-NN based imputer to be used in the federated imputation environment</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.get_imp_model_params">get_imp_model_params</span></span> &mdash;
+Return model parameters
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.set_imp_model_params">set_imp_model_params</span></span> &mdash;
+Set model parameters
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.initialize">initialize</span></span> &mdash;
+Initialize imputer - statistics imputation models etc.
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.fit">fit</span></span> &mdash;
+Fit imputer to train local imputation models
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.impute">impute</span></span> &mdash;
+Impute missing values using an imputation model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.save_model">save_model</span></span> &mdash;
+Save the imputer model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.load_model">load_model</span></span> &mdash;
+Load the imputer model
+  </p>
+</li>
+</ul>
+</div>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.initialize">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base">base</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer">base_imputer</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">BaseMLImputer</span>.initialize</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">BaseMLImputer</span><span class="mkapi-dot">.</span><span class="mkapi-name">initialize</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">X</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">missing_mask</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_utils</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">None</span></span></p>
+<p>Initialize imputer - statistics imputation models etc.</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">X</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+data with intial imputed values
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">missing_mask</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+missing mask of data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_utils</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+data utils dictionary - contains information about data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">params</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+params for initialization
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">seed</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+int - seed for randomization
+  </p>
+</li>
+</ul>
+</div>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.fit">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base">base</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer">base_imputer</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">BaseMLImputer</span>.fit</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">BaseMLImputer</span><span class="mkapi-dot">.</span><span class="mkapi-name">fit</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">X</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">y</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">missing_mask</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">dict</span></span></p>
+<p>Fit imputer to train local imputation models</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">X</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+np.array - float numpy array features
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">y</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+np.array - target
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">missing_mask</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+np.array - missing mask
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">params</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+parameters for local training
+  </p>
+</li>
+</ul>
+</div>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.impute">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base">base</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer">base_imputer</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">BaseMLImputer</span>.impute</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">BaseMLImputer</span><span class="mkapi-dot">.</span><span class="mkapi-name">impute</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">X</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">y</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">missing_mask</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span></span></p>
+<p>Impute missing values using an imputation model</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">X</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+numpy array of features
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">y</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+numpy array of target
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">missing_mask</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+missing mask
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">params</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+parameters for imputation
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Returns</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span> &mdash;
+imputed data - numpy array - same dimension as X
+  </p>
+</li>
+</ul>
+</div>
+<h3 id="mean">Mean</h3>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.imputers.simple_imputer.SimpleImputer">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers">imputers</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.simple_imputer">simple_imputer</span>.SimpleImputer</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">SimpleImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">strategy</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'mean'</span><span class="mkapi-paren">)</span></span></p>
+<p class="mkapi-object-bases">Bases :
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">BaseMLImputer</span></span>
+</p>
+<p>Simple imputer class for imputing missing values in data using simple strategies like mean, median etc.</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">strategy</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+strategy for imputation - mean, median etc.
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">mean_params</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+mean parameters for imputation
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_type</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+type of the model - numpy or sklearn
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_persistable</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether model is persistable or not
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">name</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+name of the imputer
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Raises</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type">ValueError</span>
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.simple_imputer.SimpleImputer.get_imp_model_params">get_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.simple_imputer.SimpleImputer.set_imp_model_params">set_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.simple_imputer.SimpleImputer.initialize">initialize</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.simple_imputer.SimpleImputer.fit">fit</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.simple_imputer.SimpleImputer.impute">impute</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.save_model">save_model</span></span> &mdash;
+Save the imputer model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.load_model">load_model</span></span> &mdash;
+Load the imputer model
+  </p>
+</li>
+</ul>
+</div>
+<h3 id="em">EM</h3>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers">imputers</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer">em_imputer</span>.EMImputer</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">EMImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">clip</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">True</span><span class="mkapi-comma">, </span><span class="mkapi-arg">use_y</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-paren">)</span></span></p>
+<p class="mkapi-object-bases">Bases :
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">BaseMLImputer</span></span><span class="mkapi-comma">, </span>
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin">ICEImputerMixin</span></span>
+</p>
+<p>EM imputer class for imputing missing values in data using Expectation Maximization algorithm.</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">clip</span>
+   &mdash;
+bool - whether to clip the imputed values
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">use_y</span>
+   &mdash;
+bool - whether to use target variable in imputation
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">min_values</span>
+   &mdash;
+np.array - minimum values for clipping
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">max_values</span>
+   &mdash;
+np.array - maximum values for clipping
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_utils_info</span>
+   &mdash;
+dict - information about data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">seed</span>
+   &mdash;
+int - seed for randomization
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">name</span>
+   &mdash;
+str = 'em' - name of the imputer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_type</span>
+   &mdash;
+str = 'simple' - type of the imputer - simple or nn - neural network based or not
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">mu</span>
+   &mdash;
+np.array - mean of the data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">sigma</span>
+   &mdash;
+np.array - covariance matrix of the data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">miss</span>
+   &mdash;
+np.array - missing values indices
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">obs</span>
+   &mdash;
+np.array - observed values indices
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_persistable</span>
+   &mdash;
+bool - whether model is persistable or not
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer.get_imp_model_params">get_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer.set_imp_model_params">set_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer.initialize">initialize</span></span> &mdash;
+Initialize imputer - statistics imputation models etc.
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer.fit">fit</span></span> &mdash;
+Fit the imputer on the data.
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer.impute">impute</span></span> &mdash;
+Impute the missing values in the data.
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.save_model">save_model</span></span> &mdash;
+Save the imputer model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.load_model">load_model</span></span> &mdash;
+Load the imputer model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.get_clip_thresholds">get_clip_thresholds</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.set_clip_thresholds">set_clip_thresholds</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.get_visit_indices">get_visit_indices</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer._em">_em</span></span> &mdash;
+Perform the EM step for imputing missing values.
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer._converged">_converged</span></span> &mdash;
+Checks if the EM loop has converged.
+  </p>
+</li>
+</ul>
+</div>
+<h3 id="ice">ICE</h3>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers">imputers</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer">linear_ice_imputer</span>.LinearICEImputer</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">LinearICEImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">estimator_num</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'ridge_cv'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">estimator_cat</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'logistic'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">mm_model</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'logistic'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">mm_model_params</span><span class="mkapi-equal">=</span><span class="mkapi-default">None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">clip</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">True</span><span class="mkapi-comma">, </span><span class="mkapi-arg">use_y</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-paren">)</span></span></p>
+<p class="mkapi-object-bases">Bases :
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">BaseMLImputer</span></span><span class="mkapi-comma">, </span>
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin">ICEImputerMixin</span></span>
+</p>
+<p>Linear ICE imputer class for imputing missing values in data using linear models.</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">estimator_num</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+estimator for numerical columns
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">estimator_cat</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+estimator for categorical columns
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">mm_model</span>
+   &mdash;
+missing mechanism model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">mm_model_params</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+missing mechanism model parameters
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">clip</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether to clip the imputed values
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">use_y</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether to use target variable in imputation
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">imp_models</span> : 
+  <span class="mkapi-item-type">list</span> &mdash;
+list of imputation models
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_utils_info</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+information about data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">seed</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+seed for randomization
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_type</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+type of the imputer - simple or nn - neural network based or not, defaults to 'sklearn'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_persistable</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether model is persistable or not, defaults to False
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">name</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+name of the imputer, defaults to 'linear_ice'
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.get_imp_model_params">get_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.set_imp_model_params">set_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.initialize">initialize</span></span> &mdash;
+Initialize imputer - statistics imputation models etc.
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.fit">fit</span></span> &mdash;
+Fit imputer to train local imputation models
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.impute">impute</span></span> &mdash;
+Impute missing values using an imputation model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.save_model">save_model</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.load_model">load_model</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.get_clip_thresholds">get_clip_thresholds</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.set_clip_thresholds">set_clip_thresholds</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.get_visit_indices">get_visit_indices</span></span>
+  </p>
+</li>
+</ul>
+</div>
+<h3 id="missforest">MissForest</h3>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers">imputers</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer">missforest_imputer</span>.MissForestImputer</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">MissForestImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">n_estimators</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">200</span><span class="mkapi-comma">, </span><span class="mkapi-arg">bootstrap</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">True</span><span class="mkapi-comma">, </span><span class="mkapi-arg">n_jobs</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">2</span><span class="mkapi-comma">, </span><span class="mkapi-arg">clip</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">True</span><span class="mkapi-comma">, </span><span class="mkapi-arg">use_y</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-paren">)</span></span></p>
+<p class="mkapi-object-bases">Bases :
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">BaseMLImputer</span></span><span class="mkapi-comma">, </span>
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin">ICEImputerMixin</span></span>
+</p>
+<p>MissForest imputer class for the federated imputation environment</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">n_estimators</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+number of trees in the forest
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">bootstrap</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether bootstrap samples are used when building trees
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">n_jobs</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+number of jobs to run in parallel
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">clip</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether to clip the imputed values
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">use_y</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether to use target values for imputation
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">imp_models</span> : 
+  <span class="mkapi-item-type">list</span> &mdash;
+list of imputation models
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">mm_model</span> : 
+  <span class="mkapi-item-type">object</span> &mdash;
+model for missing mask imputation
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_utils_info</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+data utils information
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">seed</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+seed for randomization
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_type</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+type of the model, defaults to 'sklearn'
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">model_persistable</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether the model is persistable, defaults to False
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">name</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+name of the imputer, defaults to 'missforest'
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.get_imp_model_params">get_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.set_imp_model_params">set_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.initialize">initialize</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.fit">fit</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.impute">impute</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.save_model">save_model</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.load_model">load_model</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.get_clip_thresholds">get_clip_thresholds</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.set_clip_thresholds">set_clip_thresholds</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.get_visit_indices">get_visit_indices</span></span>
+  </p>
+</li>
+</ul>
+</div>
+<h2 id="nn-based-imputer">NN Based Imputer</h2>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base">base</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer">base_imputer</span>.BaseNNImputer</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">BaseNNImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span></span></p>
+<p>Abstract class for the NN based imputer to be used in the federated imputation environment</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.get_imp_model_params">get_imp_model_params</span></span> &mdash;
+Return model parameters
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.set_imp_model_params">set_imp_model_params</span></span> &mdash;
+Set model parameters
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.initialize">initialize</span></span> &mdash;
+Initialize imputer - statistics imputation models etc.
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.configure_model">configure_model</span></span> &mdash;
+Fetch model for training
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.configure_optimizer">configure_optimizer</span></span> &mdash;
+Configure optimizer for training
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.impute">impute</span></span> &mdash;
+Impute missing values using an imputation model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.save_model">save_model</span></span> &mdash;
+Save the imputer model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.load_model">load_model</span></span> &mdash;
+Load the imputer model
+  </p>
+</li>
+</ul>
+</div>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.initialize">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base">base</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer">base_imputer</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer">BaseNNImputer</span>.initialize</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">BaseNNImputer</span><span class="mkapi-dot">.</span><span class="mkapi-name">initialize</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">X</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">missing_mask</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_utils</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return">None</span></span></p>
+<p>Initialize imputer - statistics imputation models etc.</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">X</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+data with intial imputed values
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">missing_mask</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+missing mask of data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_utils</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+data utils dictionary - contains information about data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">params</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+params for initialization
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">seed</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+seed for randomization
+  </p>
+</li>
+</ul>
+</div>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.configure_model">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base">base</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer">base_imputer</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer">BaseNNImputer</span>.configure_model</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">BaseNNImputer</span><span class="mkapi-dot">.</span><span class="mkapi-name">configure_model</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">X</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">y</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">missing_mask</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="typing.Tuple">Tuple</span>[<span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.nn">nn</span>.<span class="mkapi-tooltip" title="torch.nn.Module">Module</span>, <span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.utils">utils</span>.<span class="mkapi-tooltip" title="torch.utils.data">data</span>.<span class="mkapi-tooltip" title="torch.utils.data.dataloader.DataLoader">DataLoader</span>]</span></span></p>
+<p>Fetch model for training</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">params</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+parameters for training
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">X</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span> &mdash;
+imputed data
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">y</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span> &mdash;
+target
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">missing_mask</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span> &mdash;
+missing mask
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Returns</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Tuple">Tuple</span>[<span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.nn">nn</span>.<span class="mkapi-tooltip" title="torch.nn.Module">Module</span>, <span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.utils">utils</span>.<span class="mkapi-tooltip" title="torch.utils.data">data</span>.<span class="mkapi-tooltip" title="torch.utils.data.dataloader.DataLoader">DataLoader</span>]</span> &mdash;
+model, train_dataloader
+  </p>
+</li>
+</ul>
+</div>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.impute">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base">base</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer">base_imputer</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer">BaseNNImputer</span>.impute</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">BaseNNImputer</span><span class="mkapi-dot">.</span><span class="mkapi-name">impute</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">X</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">y</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">missing_mask</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.array</span><span class="mkapi-comma">, </span><span class="mkapi-arg">params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span></span></p>
+<p>Impute missing values using an imputation model</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">X</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+numpy array of features
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">y</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+numpy array of target
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">missing_mask</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.array</span> &mdash;
+missing mask
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">params</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+parameters for imputation
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Returns</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span> &mdash;
+imputed data - numpy array - same dimension as X
+  </p>
+</li>
+</ul>
+</div>
+<h3 id="gain">GAIN</h3>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.imputers.gain_imputer.GAINImputer">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers">imputers</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.gain_imputer">gain_imputer</span>.GAINImputer</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">GAINImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">h_dim</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">20</span><span class="mkapi-comma">, </span><span class="mkapi-arg">n_layers</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">2</span><span class="mkapi-comma">, </span><span class="mkapi-arg">activation</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'relu'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">initializer</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'kaiming'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">loss_alpha</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">10</span><span class="mkapi-comma">, </span><span class="mkapi-arg">hint_rate</span><span class="mkapi-colon">: </span><span class="mkapi-ann">float</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.9</span><span class="mkapi-comma">, </span><span class="mkapi-arg">clip</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">True</span><span class="mkapi-comma">, </span><span class="mkapi-arg">batch_size</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">256</span><span class="mkapi-comma">, </span><span class="mkapi-arg">learning_rate</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.001</span><span class="mkapi-comma">, </span><span class="mkapi-arg">weight_decay</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.0001</span><span class="mkapi-comma">, </span><span class="mkapi-arg">scheduler</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'step'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">optimizer</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'sgd'</span><span class="mkapi-paren">)</span></span></p>
+<p class="mkapi-object-bases">Bases :
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer">BaseNNImputer</span></span><span class="mkapi-comma">, </span>
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.jm_imputer.JMImputerMixin">JMImputerMixin</span></span>
+</p>
+<p>GAIN imputer class for imputing missing values in data using Generative Adversarial Imputation Networks.</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">h_dim</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+dimension of hidden layers
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">n_layers</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+number of layers
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">activation</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+activation function
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">initializer</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+initializer for weights
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">loss_alpha</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+alpha parameter for loss
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">hint_rate</span> : 
+  <span class="mkapi-item-type">float</span> &mdash;
+hint rate for loss
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">clip</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether to clip the imputed values
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">batch_size</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+batch size for training
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">learning_rate</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+learning rate for optimizer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">weight_decay</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+weight decay for optimizer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">scheduler</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+scheduler for optimizer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">optimizer</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+optimizer for training
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">scheduler_params</span> : 
+  <span class="mkapi-item-type">dict</span> &mdash;
+scheduler parameters
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.gain_imputer.GAINImputer.get_imp_model_params">get_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.gain_imputer.GAINImputer.set_imp_model_params">set_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.gain_imputer.GAINImputer.initialize">initialize</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.gain_imputer.GAINImputer.configure_model">configure_model</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.gain_imputer.GAINImputer.configure_optimizer">configure_optimizer</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.gain_imputer.GAINImputer.impute">impute</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.save_model">save_model</span></span> &mdash;
+Save the imputer model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.load_model">load_model</span></span> &mdash;
+Load the imputer model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.jm_imputer.JMImputerMixin.get_clip_thresholds">get_clip_thresholds</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.jm_imputer.JMImputerMixin.set_clip_thresholds">set_clip_thresholds</span></span>
+  </p>
+</li>
+</ul>
+</div>
+<h3 id="miwae">MIWAE</h3>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.imputation.imputers.miwae_imputer.MIWAEImputer">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation">imputation</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers">imputers</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.miwae_imputer">miwae_imputer</span>.MIWAEImputer</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">MIWAEImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'miwae'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">latent_size</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">8</span><span class="mkapi-comma">, </span><span class="mkapi-arg">n_hidden</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">16</span><span class="mkapi-comma">, </span><span class="mkapi-arg">n_hidden_layers</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">2</span><span class="mkapi-comma">, </span><span class="mkapi-arg">out_dist</span><span class="mkapi-equal">=</span><span class="mkapi-default">'studentt'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">K</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">20</span><span class="mkapi-comma">, </span><span class="mkapi-arg">L</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">100</span><span class="mkapi-comma">, </span><span class="mkapi-arg">activation</span><span class="mkapi-equal">=</span><span class="mkapi-default">'tanh'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">initializer</span><span class="mkapi-equal">=</span><span class="mkapi-default">'xavier'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">clip</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">True</span><span class="mkapi-comma">, </span><span class="mkapi-arg">batch_size</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">256</span><span class="mkapi-comma">, </span><span class="mkapi-arg">learning_rate</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.001</span><span class="mkapi-comma">, </span><span class="mkapi-arg">weight_decay</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0.0001</span><span class="mkapi-comma">, </span><span class="mkapi-arg">scheduler</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'step'</span><span class="mkapi-comma">, </span><span class="mkapi-arg">optimizer</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-equal"> = </span><span class="mkapi-default">'sgd'</span><span class="mkapi-paren">)</span></span></p>
+<p class="mkapi-object-bases">Bases :
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer">BaseNNImputer</span></span><span class="mkapi-comma">, </span>
+<span class="mkapi-object-base"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.jm_imputer.JMImputerMixin">JMImputerMixin</span></span>
+</p>
+<p>MiWAE imputer class for imputing missing values in data using Multiple Imputation with Auxiliary Deep Generative Models.</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">name</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+name of the imputer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">clip</span> : 
+  <span class="mkapi-item-type">bool</span> &mdash;
+whether to clip the imputed values
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">latent_size</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+size of the latent space
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">n_hidden</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+number of hidden units
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">n_hidden_layers</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+number of hidden layers
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">out_dist</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+output distribution
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">K</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+number of samples
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">L</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+number of MCMC samples
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">activation</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+activation function
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">initializer</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+initializer for weights
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">batch_size</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+batch size for training
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">learning_rate</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+learning rate for optimizer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">weight_decay</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+weight decay for optimizer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">scheduler</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+scheduler for optimizer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">optimizer</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+optimizer for training
+  </p>
+</li>
+</ul>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.miwae_imputer.MIWAEImputer.get_imp_model_params">get_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.miwae_imputer.MIWAEImputer.set_imp_model_params">set_imp_model_params</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.miwae_imputer.MIWAEImputer.initialize">initialize</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.miwae_imputer.MIWAEImputer.configure_model">configure_model</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.miwae_imputer.MIWAEImputer.configure_optimizer">configure_optimizer</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.miwae_imputer.MIWAEImputer.impute">impute</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.save_model">save_model</span></span> &mdash;
+Save the imputer model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer.load_model">load_model</span></span> &mdash;
+Load the imputer model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.jm_imputer.JMImputerMixin.get_clip_thresholds">get_clip_thresholds</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.jm_imputer.JMImputerMixin.set_clip_thresholds">set_clip_thresholds</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.miwae_imputer.MIWAEImputer.fit">fit</span></span>
+  </p>
+</li>
+</ul>
+</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../fed_impute/" class="btn btn-neutral float-left" title="FedImpute Execution Environment"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../fed_impute/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
