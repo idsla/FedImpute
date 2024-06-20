@@ -19,7 +19,7 @@ tailored for distributed data.
 
 ## User Guide
 
-- [Data Preparation](user-guide/data_preparation.md)
+- [Data Preparation](user-guide/data_prep.md)
 - [Federated Missing Data Scenario Simulation](user-guide/scenario_simulation.md)
 - [Federated Imputation](user-guide/fed_imp.md)
 - [Evaluation](user-guide/evaluation.md)

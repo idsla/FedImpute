@@ -13,6 +13,25 @@ from ..model_loader_utils import load_sklearn_model
 
 class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
 
+    """
+    Linear ICE imputer class for imputing missing values in data using linear models.
+
+    Attributes:
+        estimator_num (str): estimator for numerical columns
+        estimator_cat (str): estimator for categorical columns
+        mm_model (str): missing mechanism model
+        mm_model_params (dict): missing mechanism model parameters
+        clip (bool): whether to clip the imputed values
+        use_y (bool): whether to use target variable in imputation
+        imp_models (list): list of imputation models
+        mm_model: missing mechanism model
+        data_utils_info (dict): information about data
+        seed (int): seed for randomization
+        model_type (str): type of the imputer - simple or nn - neural network based or not, defaults to 'sklearn'
+        model_persistable (bool): whether model is persistable or not, defaults to False
+        name (str): name of the imputer, defaults to 'linear_ice'
+    """
+
     def __init__(
             self,
             estimator_num: str = 'ridge_cv',
@@ -40,7 +59,6 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
         self.data_utils_info = None
         self.seed = None
         self.model_type = 'sklearn'
-        self.model_persistable = True
         self.name = 'linear_ice'
         self.model_persistable = False
 
@@ -49,12 +67,13 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
     ) -> None:
         """
         Initialize imputer - statistics imputation models etc.
-        :param X: data with intial imputed values
-        :param missing_mask: missing mask of data
-        :param data_utils:  utils dictionary - contains information about data
-        :param params: params for initialization
-        :param seed: int - seed for randomization
-        :return: None
+
+        Args:
+            X: data with intial imputed values
+            missing_mask: missing mask of data
+            data_utils: data utils dictionary - contains information about data
+            params: params for initialization
+            seed: int - seed for randomization
         """
 
         # initialized imputation models
@@ -89,13 +108,7 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
         self.data_utils_info = data_utils
 
     def set_imp_model_params(self, updated_model_dict: OrderedDict, params: dict) -> None:
-        """
-        Set model parameters
-        :param updated_model_dict: global model parameters dictionary
-        :param params: parameters for set parameters function
-            - feature idx
-        :return: None
-        """
+
         if 'feature_idx' not in params:
             raise ValueError("Feature index not found in params")
         feature_idx = params['feature_idx']
@@ -105,12 +118,7 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
         self.imp_models[feature_idx].intercept_ = updated_model_dict['w_b'][-1]
 
     def get_imp_model_params(self, params: dict) -> OrderedDict:
-        """
-        Return model parameters
-        :param params: dict contains parameters for get_imp_model_params
-            - feature_idx
-        :return: OrderedDict - model parameters dictionary
-        """
+
         if 'feature_idx' not in params:
             raise ValueError("Feature index not found in params")
         feature_idx = params['feature_idx']
@@ -124,12 +132,12 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
     def fit(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> dict:
         """
         Fit imputer to train local imputation models
-        :param X: features - float numpy array
-        :param y: target
-        :param missing_mask: missing mask
-        :param params: parameters for local training
-            - feature_idx
-        :return: fit results of local training
+
+        Args:
+            X: np.array - float numpy array features
+            y: np.array - target
+            missing_mask: np.array - missing mask
+            params: parameters for local training
         """
         try:
             feature_idx = params['feature_idx']
@@ -162,13 +170,17 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
 
     def impute(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> np.ndarray:
         """
-        Impute missing values using imputation model
-        :param X: numpy array of features
-        :param y: numpy array of target
-        :param missing_mask: missing mask
-        :param params: parameters for imputation
-        :return: imputed data - numpy array - same dimension as X
-        """
+         Impute missing values using an imputation model
+
+         Args:
+             X (np.array): numpy array of features
+             y (np.array): numpy array of target
+             missing_mask (np.array): missing mask
+             params (dict): parameters for imputation
+
+         Returns:
+             np.ndarray: imputed data - numpy array - same dimension as X
+         """
 
         if 'feature_idx' not in params:
             raise ValueError("Feature index not found in params")
@@ -197,26 +209,7 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
         return X
 
     def save_model(self, model_path: str, version: str) -> None:
-        """
-        Save the imputer model
-        :param version: version key of model
-        :param model_path: path to save the model
-        :return: None
-        """
-        # imp_model_params = []
-        # for feature_idx in range(len(self.imp_models)):
-        #     params = self.get_imp_model_params({'feature_idx': feature_idx})
-        #     imp_model_params.append(params)
-        #
-        # with open(os.path.join(model_path, f'imp_model_{version}.pkl'), 'wb') as f:
-        #     pickle.dump(imp_model_params, f)
         pass
 
     def load_model(self, model_path: str, version: str) -> None:
-        """
-        Load the imputer model
-        :param version: version key of a model
-        :param model_path: path to load the model
-        :return: None
-        """
         pass

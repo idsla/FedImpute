@@ -5,7 +5,19 @@ from fedimpute.execution_environment.utils.tracker import Tracker
 from fedimpute.execution_environment.loaders.load_strategy import load_fed_strategy_server
 import numpy as np
 
+
 class Server:
+
+    """
+    Server class to be used in the federated imputation environment
+
+    Attributes:
+        fed_strategy: str - name of the federated strategy
+        fed_strategy_params: dict - parameters of the federated strategy
+        server_config: dict - configuration of the server
+        X_test_global: np.ndarray - global test data
+
+    """
 
     def __init__(
             self,

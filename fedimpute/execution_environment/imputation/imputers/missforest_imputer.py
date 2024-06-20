@@ -12,6 +12,24 @@ import joblib
 
 class MissForestImputer(BaseMLImputer, ICEImputerMixin):
 
+    """
+    MissForest imputer class for the federated imputation environment
+
+    Attributes:
+        n_estimators (int): number of trees in the forest
+        bootstrap (bool): whether bootstrap samples are used when building trees
+        n_jobs (int): number of jobs to run in parallel
+        clip (bool): whether to clip the imputed values
+        use_y (bool): whether to use target values for imputation
+        imp_models (list): list of imputation models
+        mm_model (object): model for missing mask imputation
+        data_utils_info (dict): data utils information
+        seed (int): seed for randomization
+        model_type (str): type of the model, defaults to 'sklearn'
+        model_persistable (bool): whether the model is persistable, defaults to False
+        name (str): name of the imputer, defaults to 'missforest'
+    """
+
     def __init__(
             self,
             n_estimators:int = 200,
@@ -23,7 +41,6 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         super().__init__()
 
         # estimator for numerical and categorical columns
-        # TODO: add more parameters for random forest model
         self.clip = clip
         self.min_values = None
         self.max_values = None
@@ -44,15 +61,6 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
     def initialize(
             self, X: np.array, missing_mask: np.array, data_utils: dict, params: dict, seed: int
     ) -> None:
-        """
-        Initialize imputer - statistics imputation models etc.
-        :param X: data with initially imputed values
-        :param missing_mask: missing mask of data
-        :param data_utils:  utils dictionary - contains information about data
-        :param params: params for initialization
-        :param seed: int - seed for randomization
-        :return: None
-        """
 
         # initialized imputation models
         self.imp_models = []
@@ -83,13 +91,7 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         self.data_utils_info = data_utils
 
     def set_imp_model_params(self, updated_model_dict: OrderedDict, params: dict) -> None:
-        """
-        Set model parameters
-        :param updated_model_dict: global model parameters dictionary
-        :param params: parameters for set parameters function
-            - feature idx
-        :return: None
-        """
+
         if 'feature_idx' not in params:
             raise ValueError("Feature index not found in params")
         feature_idx = params['feature_idx']
@@ -97,12 +99,7 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         imp_model.estimators_ = updated_model_dict['estimators']
 
     def get_imp_model_params(self, params: dict) -> OrderedDict:
-        """
-        Return model parameters
-        :param params: dict contains parameters for get_imp_model_params
-            - feature_idx
-        :return: OrderedDict - model parameters dictionary
-        """
+
         if 'feature_idx' not in params:
             raise ValueError("Feature index not found in params")
         feature_idx = params['feature_idx']
@@ -113,15 +110,7 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
             return OrderedDict({"estimators": imp_model.estimators_})
 
     def fit(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> dict:
-        """
-        Fit imputer to train local imputation models
-        :param X: features - float numpy array
-        :param y: target
-        :param missing_mask: missing mask
-        :param params: parameters for local training
-            - feature_idx
-        :return: fit results of local training
-        """
+
         try:
             feature_idx = params['feature_idx']
         except KeyError:
@@ -142,14 +131,6 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         }
 
     def impute(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> np.ndarray:
-        """
-        Impute missing values using an imputation model
-        :param X: numpy array of features
-        :param y: numpy array of target
-        :param missing_mask: missing mask
-        :param params: parameters for imputation
-        :return: imputed data - numpy array - same dimension as X
-        """
 
         if 'feature_idx' not in params:
             raise ValueError("Feature index not found in params")
@@ -178,19 +159,9 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         return X
 
     def save_model(self, model_path: str, version: str) -> None:
-        """
-        Save the imputer model
-        :param version: version key of model
-        :param model_path: path to save the model
-        :return: None
-        """
+
         pass
 
     def load_model(self, model_path: str, version: str) -> None:
-        """
-        Load the imputer model
-        :param version: version key of a model
-        :param model_path: path to load the model
-        :return: None
-        """
+
         pass

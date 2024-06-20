@@ -7,6 +7,11 @@ from ..utils.tracker import Tracker
 
 
 class BaseWorkflow(ABC):
+
+    """
+    Abstract class for the workflow to be used in the federated imputation environment
+    """
+
     def __init__(self):
         pass
 
@@ -14,17 +19,55 @@ class BaseWorkflow(ABC):
     def fed_imp_sequential(
             self, clients: List[Client], server: Server, evaluator, tracker: Tracker
     ) -> Tracker:
+        """
+        Sequential federated imputation workflow
+
+        Args:
+            clients: List[Client] - list of clients
+            server: Server - server
+            evaluator: Evaluator - evaluator
+            tracker: Tracker - tracker to tracking results
+
+        Returns:
+            Tracker - tracker with tracked results
+        """
         pass
 
     @abstractmethod
     def fed_imp_parallel(
             self, clients: List[Client], server: Server, evaluator, tracker: Tracker
     ) -> Tracker:
+        """
+        Parallel federated imputation workflow
+
+        Args:
+            clients: List[Client] - list of clients
+            server: Server - server
+            evaluator: Evaluator - evaluator
+            tracker: Tracker - tracker to tracking results
+
+        Returns:
+            Tracker - tracker with tracked results
+        """
         pass
 
     def run_fed_imp(
             self, clients: List[Client], server: Server, evaluator, tracker: Tracker, run_type: str
     ) -> Tracker:
+
+        """
+        Run the federated imputation workflow based on the
+
+        Args:
+            clients: List[Client] - list of clients
+            server:  Server - server
+            evaluator: Evaluator - evaluator
+            tracker: Tracker - tracker to tracking results
+            run_type: str - type of the workflow run (sequential or parallel)
+
+        Returns:
+            Tracker - tracker with tracked results
+        """
 
         if run_type == 'sequential':
             return self.fed_imp_sequential(clients, server, evaluator, tracker)

@@ -1,0 +1,24 @@
+.doc-section-title {
+  font-weight: bold;
+}
+
+div.doc-contents:not(.first) {
+  padding-left: 25px;
+  border-left: 0.05rem solid rgba(200, 200, 200, 0.2);
+}
+
+.doc-symbol-class::after {
+  content: "CLASS";
+}
+
+.doc-symbol-method::after {
+  content: "METHOD";
+}
+
+.doc-heading {
+  background-color: grey
+}
+
+.doc-heading.doc-object-name {
+  background-color: gray;
+}

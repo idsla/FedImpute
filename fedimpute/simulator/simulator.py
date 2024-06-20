@@ -10,6 +10,21 @@ from ..utils.reproduce_utils import setup_clients_seed
 
 class Simulator:
 
+    """
+    Simulator class for simulating missing data scenarios in federated learning environment
+
+    Attributes:
+        data (np.ndarray): data to be used for simulation
+        data_config (dict): data configuration dictionary
+        clients_train_data (List[np.ndarray]): list of clients training data
+        clients_test_data (List[np.ndarray]): list of clients test data
+        clients_train_data_ms (List[np.ndarray]): list of clients training data with missing values
+        global_test (np.ndarray): global test data
+        client_seeds (List[int]): list of seeds for clients
+        stats (dict): simulation statistics
+        debug_mode (bool): whether to enable debug mode
+    """
+
     def __init__(self, debug_mode: bool = False):
 
         # data
@@ -65,69 +80,48 @@ class Simulator:
 
         """
         Simulate missing data scenario
-        :param dp_split_cols:
-        :param data: data: numpy ndarray
-        :param data_config: data configuration dictionary
-        :param num_clients: number of clients
-        :param dp_strategy:
-        :param dp_split_cols:
-        :param dp_niid_alpha:
-        :param dp_size_niid_alpha:
-        :param dp_min_samples:
-        :param dp_max_samples:
-        :param dp_even_sample_size:
-        :param dp_sample_iid_direct:
-        :param dp_local_test_size:
-        :param dp_global_test_size:
-        :param dp_local_backup_size:
-        :param dp_reg_bins:
-        :param ms_mech_type:
-        :param ms_global_mechanism:
-        :param ms_mr_dist_clients:
-        :param ms_mf_dist_clients:
-        :param ms_mm_dist_clients:
-        :param ms_missing_features:
-        :param ms_mr_lower:
-        :param ms_mr_upper:
-        :param ms_mm_funcs_bank:
-        :param ms_mm_strictness:
-        :param ms_mm_obs:
-        :param ms_mm_feature_option:
-        :param ms_mm_beta_option:
-        :param ms_cols: columns indices for adding missing values, support list of column indices or
-            string options - 'all' (add to all columns), 'all-num' (add to all numerical columns)
-        :param obs_cols: fully observed columns indices for MAR missing mechanism,
-            support list of column indices or string options - 'random', 'rest'
 
-        :param data_partition_params: data partition parameters
-            - partition_strategy: partition strategy - iid, niid_dir
-            - size_strategy: size strategy - even, even2, dir, hs
-            - size_niid_alpha: size niid alpha
-            - min_samples: minimum samples
-            - max_samples: maximum samples
-            - niid_alpha: non-iid alpha dirichlet
-            - even_sample_size: even sample size
-            - sample_iid_direct: sample iid data directly - default: False
-            - local_test_size: local test ratio - default: 0.1
-            - global_test_size: global test ratio - default: 0.1
-            - local_backup_size: local backup_size -  default: 0.1
-            - reg_bins: regression bins
-        :param missing_simulate_params: missing data simulation parameters
-            - global_missing: whether simulate missing data globally or locally
-            - mf_strategy: missing features strategy - all
-            - mr_dist: missing ratio distribution - fixed, uniform, uniform_int, gaussian, gaussian_int
-            - mr_lower: missing ratio lower bound
-            - mr_upper: missing ratio upper bound
-            - mm_funcs_dist: missing mechanism functions distribution - identity, random, random2,
-            - mm_funcs_bank: missing mechanism functions banks - None, 'lr', 'mt', 'all'
-            - mm_mech: missing mechanism - 'mcar', 'mar_quantile', 'mar_sigmoid', 'mnar_quantile', 'mnar_sigmoid'
-            - mm_strictness: missing adding probailistic or deterministic
-            - mm_obs:  missing adding based on observed data
-            - mm_feature_option: missing mechanism associated with which features - self, all, allk=0.1
-            - mm_beta_option: mechanism beta coefficient option - (mnar) self, sphere, randu, (mar) fixed, randu, randn
-        :param seed:
-        :return:
+        Args:
+            data (np.array): data to be used for simulation
+            data_config (dict): data configuration dictionary
+            num_clients (int): number of clients
+            dp_strategy (str): data partition strategy, default: 'iid-even'
+                    - `iid-even`, `iid-dir`, `niid-dir`, `niid-path`
+            dp_split_cols (Union[str, int, List[int]]): split columns option
+                    - `target`, `first`, default: `target`
+            dp_niid_alpha (float): non-iid alpha for data partition, default: 0.1
+            dp_size_niid_alpha (float): size niid alpha for data partition, default: 0.1
+            dp_min_samples (Union[float, int]): minimum samples for clients, default: 50
+            dp_max_samples (Union[float, int]): maximum samples for clients, default: 2000
+            dp_even_sample_size (int): even sample size for data partition, default: 1000
+            dp_sample_iid_direct (bool): sample iid data directly, default: False
+            dp_local_test_size (float): local test size ratio, default: 0.1
+            dp_global_test_size (float): global test size ratio, default: 0.1
+            dp_local_backup_size (float): local backup size ratio, default: 0.05
+            dp_reg_bins (int): regression bins, default: 50
+            ms_mech_type (str): missing mechanism type, default: 'mcar'
+                    - `mcar`, `mar_sigmoid`, `mnar_sigmoid`, `mar_quantile`, `mnar_quantile`
+            ms_cols (Union[str, List[int]]): missing columns, default: 'all' - `all`, `all-num`, `random`
+            obs_cols (Union[str, List[int]]): fully observed columns for MAR, default: 'random' - `random`, `rest`
+            ms_global_mechanism (bool): global missing mechanism, default: False
+            ms_mr_dist_clients (str): missing ratio distribution, default: 'randu-int' - 'fixed', 'uniform', 'uniform_int', 'gaussian', 'gaussian_int'
+            ms_mf_dist_clients (str): missing features distribution, default: 'identity' - 'identity', 'random', 'random2'
+            ms_mm_dist_clients (str): missing mechanism functions distribution, default: 'random' - 'identity', 'random', 'random2'
+            ms_missing_features (str): missing features strategy, default: 'all' - 'all', 'all-num'
+            ms_mr_lower (float): minimum missing ratio for each feature, default: 0.3
+            ms_mr_upper (float): maximum missing ratio for each feature, default: 0.7
+            ms_mm_funcs_bank (str): missing mechanism functions banks, default: 'lr' - None, 'lr', 'mt', 'all'
+            ms_mm_strictness (bool): missing adding probabilistic or deterministic, default: True
+            ms_mm_obs (bool): missing adding based on observed data, default: False
+            ms_mm_feature_option (str): missing mechanism associated with which features, default: 'allk=0.2' - 'self', 'all', 'allk=0.1'
+            ms_mm_beta_option (str): mechanism beta coefficient option, default: None - (mnar) self, sphere, randu, (mar) fixed, randu, randn
+            seed (int): random seed, default: 100330201
+            verbose (int): whether verbose the simulation process, default: 0
+
+        Returns:
+            dict: dictionary of clients training data, test data, training data with missing values, global test data
         """
+
         if self.debug_mode:
             loguru.logger.remove()
             loguru.logger.add(sys.stdout, level="DEBUG")
@@ -260,21 +254,26 @@ class Simulator:
     ):
         """
         Simulate missing data scenario
-        :param data: data: numpy ndarray
-        :param data_config: data configuration dictionary
-        :param num_clients: number of clients
-        :param dp_strategy: data partition strategy - iid-even, iid-dir@<alpha>, niid-dir@<alpha>, niid-path@<k>
-        :param ms_scenario: predefined missing data scenario - mcar, mar-heter, mar-homo,mnar-heter,mnar-homo
-        :param dp_split_col_option: iid/niid column strategy partition base on - 'target', 'feature'
-        :param ms_cols: missing columns - 'all', 'all-num', 'random'
-        :param obs_cols: fully obsevered columns for MAR - 'rest', 'random'
-        :param dp_min_samples: minimum sample sizes for clients
-        :param dp_max_samples: maximum sample sizes for clients
-        :param ms_mr_lower:  minimum missing ratio for each feature
-        :param ms_mr_upper: maxinum missing ratio for each feature
-        :param verbose: whether verbose the simulation process
-        :param seed: random seed
-        :return:
+
+        Args:
+            data (np.array): data to be used for simulation
+            data_config (dict): data configuration dictionary
+            num_clients (int): number of clients
+            dp_strategy (str): data partition strategy, default: 'iid-even' - `iid-even`, `iid-dir`, `niid-dir`, `niid-path`
+            ms_scenario (str): predefined missing data scenario, default: 'mcar'
+                                - `mcar`, `mar-heter`， `mar-homo`, `mnar-heter`, `mnar-homo`
+            dp_split_col_option (str): iid/niid column strategy partition base on - 'target', 'feature', default: 'target'
+            ms_cols (Union[str, List[int]]): missing columns, default: 'all' - 'all', 'all-num', 'random'
+            obs_cols (Union[str, List[int]]): fully observed columns for MAR, default: 'random' - 'random', 'rest'
+            dp_min_samples (Union[float, int]): minimum samples for clients, default: 50
+            dp_max_samples (Union[float, int]): maximum samples for clients, default: 8000
+            ms_mr_lower (float): minimum missing ratio for each feature, default: 0.3
+            ms_mr_upper (float): maximum missing ratio for each feature, default: 0.7
+            seed (int): random seed, default: 100330201
+            verbose (int): whether verbose the simulation process, default: 0
+
+        Returns:
+            dict: dictionary of clients training data, test data, training data with missing values, global test data
         """
 
         ##################################################################################################

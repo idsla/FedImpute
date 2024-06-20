@@ -24,6 +24,10 @@ from tqdm.auto import trange
 
 class Evaluator:
 
+    """
+    Evaluator class for the federated imputation environment
+    """
+
     def __init__(self):
         self.results = None
 

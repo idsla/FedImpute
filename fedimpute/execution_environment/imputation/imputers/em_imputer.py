@@ -10,6 +10,25 @@ import numpy as np
 
 class EMImputer(BaseMLImputer, ICEImputerMixin):
 
+    """
+    EM imputer class for imputing missing values in data using Expectation Maximization algorithm.
+
+    Attributes:
+        clip: bool - whether to clip the imputed values
+        use_y: bool - whether to use target variable in imputation
+        min_values: np.array - minimum values for clipping
+        max_values: np.array - maximum values for clipping
+        data_utils_info: dict - information about data
+        seed: int - seed for randomization
+        name: str = 'em' - name of the imputer
+        model_type: str = 'simple' - type of the imputer - simple or nn - neural network based or not
+        mu: np.array - mean of the data
+        sigma: np.array - covariance matrix of the data
+        miss: np.array - missing values indices
+        obs: np.array - observed values indices
+        model_persistable: bool - whether model is persistable or not
+    """
+
     def __init__(
             self,
             clip: bool = True,
@@ -39,12 +58,13 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
     ) -> None:
         """
         Initialize imputer - statistics imputation models etc.
-        :param X: data with intial imputed values
-        :param missing_mask: missing mask of data
-        :param data_utils:  utils dictionary - contains information about data
-        :param params: params for initialization
-        :param seed: int - seed for randomization
-        :return: None
+
+        Args:
+            X: np.array - data with intial imputed values
+            missing_mask: np.array - missing mask of data
+            data_utils: dict - utils dictionary - contains information about data
+            params: dict - params for initialization
+            seed: int - seed for randomization
         """
 
         self.min_values, self.max_values = self.get_clip_thresholds(data_utils)
@@ -77,6 +97,19 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
 
     def fit(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> dict:
 
+        """
+        Fit the imputer on the data.
+
+        Args:
+            X: np.array - data with missing values
+            y: np.array - target variable
+            missing_mask: np.array - missing mask of data
+            params: dict - instructions for fitting the imputer
+
+        Returns:
+            dict: dictionary containing information about the fitting results
+        """
+
         # TODO: SAVE MODEL INTERVAL FOR LOCAL STRATEGY
         local_epochs = params['local_epoch']
         convergence_threshold = params['convergence_thres']
@@ -104,6 +137,19 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
 
     def impute(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> np.ndarray:
 
+        """
+        Impute the missing values in the data.
+
+        Args:
+            X: np.array - data with missing values
+            y: np.array - target variable
+            missing_mask: np.array - missing mask of data
+            params: dict - instructions for imputing the data
+
+        Returns:
+            np.array: imputed data
+        """
+
         # it has been already imputed in a fit step
         try:
             _, _, X_new = self._em(X, self.miss, self.obs, self.mu, self.sigma)
@@ -119,6 +165,22 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
 
     @staticmethod
     def _em(X, miss, obs, mu, sigma):
+
+        """
+        Perform the EM step for imputing missing values.
+
+        Args:
+            X: np.array - data at current iteration
+            miss: np.array - missing values indices
+            obs: np.array - observed values indices
+            mu: np.array - mean of the data
+            sigma: np.array - covariance matrix of the data
+
+        Returns:
+            np.array: updated mean of the data
+            np.array: updated covariance matrix of the data
+            np.array: updated data
+        """
 
         nrows, ncols = X.shape
 

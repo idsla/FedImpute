@@ -13,6 +13,26 @@ import loguru
 
 class Client:
 
+    """
+    Client class presenting a client in the federated imputation execution environment, it contains
+    the training and testing data, missing data, imputed data, imputation model class, and federated strategy class.
+
+    Attributes:
+        client_id (int): client id
+        X_train (np.ndarray): training data
+        y_train (np.ndarray): training labels
+        X_test (np.ndarray): testing data
+        y_test (np.ndarray): testing labels
+        X_train_ms (np.ndarray): missing data
+        X_train_mask (np.ndarray): missing data mask
+        X_train_imp (np.ndarray): imputed data
+        data_utils (dict): data statistics
+        imputer (BaseImputer): imputation model
+        fed_strategy (BaseFedStrategy): federated strategy
+        seed (int): seed
+        client_config (dict): client configuration
+    """
+
     def __init__(
             self,
             client_id: int,
@@ -24,7 +44,8 @@ class Client:
             imp_model_params,
             fed_strategy: str,
             fed_strategy_params: dict,
-            client_config: dict, seed=0,
+            client_config: dict,
+            seed=0,
     ) -> None:
 
         # client id
@@ -57,6 +78,10 @@ class Client:
     def initial_impute(self, imp_values: np.ndarray, col_type: str = 'num') -> None:
         """
         Initial imputation
+
+        Args:
+            imp_values (np.ndarray): imputation values
+            col_type (str): column type, 'num' or 'cat'
         """
         num_cols = self.data_utils['num_cols']
         if col_type == 'num':
@@ -72,6 +97,13 @@ class Client:
     def fit_local_imp_model(self, params: dict) -> Tuple[dict, dict]:
         """
         Fit a local imputation model
+
+        Args:
+            params (dict): instructions for fitting the imputation model
+
+        Returns:
+            Tuple[dict, dict]: model parameters and fitting results dictionary
+
         """
         if not params['fit_model']:
             return self.imputer.get_imp_model_params(params), {
@@ -100,6 +132,10 @@ class Client:
     def update_local_imp_model(self, updated_local_model: Union[dict, None], params: dict) -> None:
         """
         Fit a local imputation model
+
+        Args:
+            updated_local_model (Union[dict, None]): updated model parameters
+            params (dict): instructions for updating the imputation model
         """
         # if 'update_model' not in params or ('update_model' in params and params['update_model'] == True):
         #     print('update model')
@@ -108,7 +144,13 @@ class Client:
 
     def local_imputation(self, params: dict) -> Union[None, np.ndarray]:
         """
-        Imputation
+        Perform local imputation
+
+        Args:
+            params (dict): instructions for imputation - e.g `temp_imp` for temporary imputation
+
+        Returns:
+            Union[None, np.ndarray]: imputed data or None
         """
         if 'temp_imp' in params and params['temp_imp']:
             X_train_imp = self.imputer.impute(self.X_train_imp, self.y_train, self.X_train_mask, params)
@@ -148,7 +190,6 @@ class Client:
     def calculate_data_utils(self, data_config: dict) -> dict:
         """
         Calculate data statistic
-        # TODO: add VGM for numerical columns for modeling mixture of clusters
         """
         data_utils = {
             'task_type': data_config['task_type'],

@@ -8,19 +8,30 @@ nav:
       - 'Federated Missing Data Scenario Simulation': 'user-guide/scenario_simulation.md'
       - 'Federated Imputation': 'user-guide/fed_imp.md'
       - 'Evaluation': 'user-guide/evaluation.md'
-  - 'Tutorials':
-      - 'Basic Usage': 'tutorial/basic_usage.md'
   - 'API Reference':
       - 'Scenario simulation': 'api/simulation.md'
-      - 'Federated imputation': 'api/fed_impute.md'
+      - 'FedImpute Execution Environment': 'api/fed_impute.md'
+      - 'Imputation Models': 'api/imputation_models.md'
   # Contributing
   # Release Log
+plugins:
+  - search
+  - autorefs
+  - mkapi
+  #- mkdocstrings
 markdown_extensions:
     - extra
     - mdx_math
     - extra
     - tables
     - fenced_code
+    - admonition
+    - codehilite
+    #- mkautodoc
 extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML
+extra_css:
+  - css/mkdocstrings.css
+  - css/custom.css
+  - css/mkapi.css
 theme: readthedocs

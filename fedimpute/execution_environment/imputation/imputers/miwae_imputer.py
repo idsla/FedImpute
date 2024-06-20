@@ -18,6 +18,27 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MIWAEImputer(BaseNNImputer, JMImputerMixin):
 
+    """
+    MiWAE imputer class for imputing missing values in data using Multiple Imputation with Auxiliary Deep Generative Models.
+
+    Attributes:
+        name (str): name of the imputer
+        clip (bool): whether to clip the imputed values
+        latent_size (int): size of the latent space
+        n_hidden (int): number of hidden units
+        n_hidden_layers (int): number of hidden layers
+        out_dist (str): output distribution
+        K (int): number of samples
+        L (int): number of MCMC samples
+        activation (str): activation function
+        initializer (str): initializer for weights
+        batch_size (int): batch size for training
+        learning_rate (int): learning rate for optimizer
+        weight_decay (int): weight decay for optimizer
+        scheduler (str): scheduler for optimizer
+        optimizer (str): optimizer for training
+    """
+
     def __init__(
             self,
             name: str = 'miwae',
@@ -75,23 +96,11 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
         self.seed = None
 
     def get_imp_model_params(self, params: dict) -> OrderedDict:
-        """
-        Return model parameters
-        :param params: dict contains parameters for get_imp_model_params
-        :return: OrderedDict - model parameters dictionary
-        """
-        """
-        Return model parameters
-        """
+
         return deepcopy(self.model.state_dict())
 
     def set_imp_model_params(self, updated_model_dict: OrderedDict, params: dict) -> None:
-        """
-        Set model parameters
-        :param updated_model_dict: global model parameters dictionary
-        :param params: parameters for set parameters function
-        :return: None
-        """
+
         params_dict = self.model.state_dict()
         params_dict.update(deepcopy(updated_model_dict))
         self.model.load_state_dict(params_dict)
@@ -99,15 +108,7 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
     def initialize(
             self, X: np.array, missing_mask: np.array, data_utils: dict, params: dict, seed: int
     ) -> None:
-        """
-        Initialize imputer - statistics imputation models etc.
-        :param X: data with intial imputed values
-        :param missing_mask: missing mask of data
-        :param data_utils:  utils dictionary - contains information about data
-        :param params: params for initialization
-        :param seed: int - seed for randomization
-        :return: None
-        """
+
         self.seed = seed
         if self.name == 'miwae':
             self.model = MIWAE(
@@ -135,9 +136,6 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
             self, params: dict, X: np.ndarray, y: np.ndarray, missing_mask: np.ndarray
     ) -> Tuple[torch.nn.Module, torch.utils.data.DataLoader]:
 
-        # if self.train_dataloader is not None:
-        #     return self.model, self.train_dataloader
-        # else:
         n = X.shape[0]
         X_imp = X.copy()
         X_mask = missing_mask.copy()
@@ -160,17 +158,7 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
         return [optimizer], [lr_scheduler]
 
     def fit(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> dict:
-        """
-        Fit imputer to train local imputation models
-        :param X: features - float numpy array
-        :param y: target
-        :param missing_mask: missing mask
-        :param params: parameters for local training
-        :return: fit results of local training
-        """
-        """
-        Local training of imputation model for local epochs
-        """
+
         self.model.to(DEVICE)
 
         # initialization weights
@@ -258,15 +246,7 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
         }
 
     def impute(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> np.ndarray:
-        """
-        Impute missing values using an imputation model
-        :param X: numpy array of features
-        :param y: numpy array of target
-        :param missing_mask: missing mask
-        :param params: parameters for imputation
-        :return: imputed data - numpy array - same dimension as X
-        """
-        # make complete
+
         X_train_imp = X
         X_train_imp[missing_mask] = 0
         x = torch.from_numpy(X_train_imp.copy()).float().to(DEVICE)

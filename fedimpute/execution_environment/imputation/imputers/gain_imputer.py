@@ -17,6 +17,25 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class GAINImputer(BaseNNImputer, JMImputerMixin):
 
+    """
+    GAIN imputer class for imputing missing values in data using Generative Adversarial Imputation Networks.
+
+    Attributes:
+        h_dim (int): dimension of hidden layers
+        n_layers (int): number of layers
+        activation (str): activation function
+        initializer (str): initializer for weights
+        loss_alpha (float): alpha parameter for loss
+        hint_rate (float): hint rate for loss
+        clip (bool): whether to clip the imputed values
+        batch_size (int): batch size for training
+        learning_rate (int): learning rate for optimizer
+        weight_decay (int): weight decay for optimizer
+        scheduler (str): scheduler for optimizer
+        optimizer (str): optimizer for training
+        scheduler_params (dict): scheduler parameters
+    """
+
     def __init__(
             self,
             h_dim: int = 20,
@@ -69,15 +88,6 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
     def initialize(
             self, X: np.array, missing_mask: np.array, data_utils: dict, params: dict, seed: int
     ) -> None:
-        """
-        Initialize imputer - statistics imputation models etc.
-        :param X: data with intial imputed values
-        :param missing_mask: missing mask of data
-        :param data_utils:  utils dictionary - contains information about data
-        :param params: params for initialization
-        :param seed: int - seed for randomization
-        :return: None
-        """
 
         self.model = GainModel(
             dim=data_utils['n_features'],
@@ -115,15 +125,6 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
     def configure_model(
             self, params: dict, X: np.ndarray, y: np.ndarray, missing_mask: np.ndarray
     ) -> Tuple[torch.nn.Module, torch.utils.data.DataLoader]:
-        """
-        Fetch model for training
-        :param params: parameters for training
-        :param X: imputed data
-        :param y: target
-        :param missing_mask: missing mask
-        :return: model, train_dataloader
-        """
-        # set up train and test data for a training imputation model
 
         if self.train_dataloader is not None:
             return self.model, self.train_dataloader
@@ -144,12 +145,6 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
     def configure_optimizer(
             self, params: dict, model: torch.nn.Module
     ) -> tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler]]:
-        """
-        Configure optimizer for training
-        :param model: training model
-        :param params: params for optmizer
-        :return: List of optimizers and List of lr_schedulers
-        """
 
         g_solver = load_optimizer(
             self.optimizer, model.generator_layer.parameters(), self.learning_rate, self.weight_decay
