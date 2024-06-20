@@ -1,12 +1,19 @@
-
 <p align="center"><img src="docs/icon.jpg" width="400" height="240"></p>
+<h2 align='center'> FedImpute: a benchmarking and evaluation tool for federated imputation across various missing data scenarios. </h2>
 
-# FedImpute: A Benchmarking and Evaluation Tool for Federated Imputation
-
+<div align="center">
+    
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Docs site](https://img.shields.io/badge/docs-GitHub_Pages-blue)](https://idsla.github.io/FedImpute/badge-generator/)
+[![Docs site](https://img.shields.io/badge/docs-GitHub_Pages-blue)](https://idsla.github.io/FedImpute/)
 
-FedImpute is a benchmarking and evaluation tool to assess the effectiveness of federated imputation across various missing data scenarios. 
+</div>
+
+FedImpute is a benchmarking tool for the evaluation of federated imputation algorithms over various missing data scenarios under horizontally partitioned data.
+
+- **Documentation:** [Documentation](https://idsla.github.io/FedImpute/)
+- **Paper:** [FedImpute]()
+- **Source Code:** [Source Code](https://github.com/idsla/FedImpute/)
+- **Benchmarking Analysis:** [FedImputeBench](https://github.com/sitaomin1994/FedImputeBench)
 
 ## Installation
 Install python >= 3.8.0
