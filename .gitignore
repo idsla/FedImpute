@@ -1,5 +1,5 @@
-.venv
+data
+results
+outputs
 .idea
 __pycache__
-fedimp/
-site

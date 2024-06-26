@@ -1,0 +1,68 @@
+{
+  "mongodb_backend": {
+    "db": "federated_imputation",
+    "host": "localhost",
+    "collections": [
+      "raw_experiment",
+      "missing_evaluation_experiment"
+    ]
+  },
+  "data_dir": "data",
+  "experiment_config_dir": "experiment_configs",
+  "experiment_result_dir": "results",
+  "processed_result_dir": "processed_results",
+  "raw_result_dir": "raw_results",
+  "algo_params": {
+    "local": {},
+    "fedavg-s": {},
+    "fedwavg": {
+      "alpha": 0.9
+    },
+    "fedmechw": {
+      "client_thres": 1.0,
+      "alpha": 0.8,
+      "beta": 0.15
+    },
+    "fedmechclw": {
+      "client_thres": 0.2,
+      "thres1": 0.2,
+      "alpha": 0.5
+    },
+    "fedwavgcl": {
+      "alpha": 0.9
+    },
+    "fedmechclwcl": {
+      "client_thres": 0.2,
+      "thres1": 0.2,
+      "thres2": 0.2
+    },
+    "fedmechcl": {
+      "client_thres": 0.9,
+      "thres1": 0.2,
+      "thres2": 0.1,
+      "alpha": 0.2,
+      "beta": 0.6
+    },
+    "fedmechcl2": {
+      "client_thres": 0.9,
+      "thres1": 0.2,
+      "thres2": 0.1
+    },
+    "scale_factor": 4
+  },
+  "algo_params_grids": {
+    "fedwavg": {
+      "alpha": 0.9
+    },
+    "fedmechw": {
+      "client_thres": [1.0],
+      "alpha": [0.5],
+      "beta": [0.45]
+    },
+    "fedmechclw": {
+      "client_thres": [0.2],
+      "thres1": [0.2, 0.1, 0.05],
+      "alpha": [0.7]
+    }
+  }
+}

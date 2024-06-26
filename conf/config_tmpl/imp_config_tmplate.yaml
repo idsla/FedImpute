@@ -1,0 +1,104 @@
+# @package config_tmpl
+
+# num_clients
+num_clients: 10
+
+# dataset
+data:
+  dataset_name: breast
+  normalize: true
+
+# dataset partition
+data_partition:
+  strategy: full
+  params: {}
+
+handle_imbalance: null
+
+# missing data simulation
+missing_simulate:
+  mf_strategy: all
+  mm_strategy: s3
+
+# imputation method
+imputation:
+  initial_strategy_num: mean
+  initial_strategy_cat: mode
+  estimator_num: ridge_cv
+  estimator_cat: logistic_cv
+  imp_evaluation_model: logistic
+  imp_evaluation_params:
+    tune_params: gridsearch
+  clip: true
+
+# aggregation strategy
+agg_strategy_imp:
+  strategy: local
+  params:
+    ms_field: missing_cell_pct
+    beta: 0.7
+
+# server
+client_type: ice
+server_type: fedavg_pytorch
+server:
+  impute_mode: instant
+  imp_round: 20
+  imp_local_epochs: 0
+  pred_round: 0
+  pred_local_epochs: 0
+  model_fit_mode: one_shot
+  froze_ms_coefs_round: 100
+
+# prediction model
+pred_model:
+  model_params:
+    model: 2nn
+    num_hiddens: 32
+    model_init_config: null
+    model_other_params: null
+  train_params:
+    batch_size: 128
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    pred_round: 200
+    pred_local_epochs: 3
+
+
+# fed_imp
+experiment:
+  n_rounds: 5
+  seed: 102931466 # 102931466
+  mtp: true
+  random_seed: 50 # 50
+  num_process: 5
+  test_size: 0.1
+
+track: false
+tune_params: false
+prediction: false
+save_state: true
+
+# params
+algo_params:
+  central: {}
+  central2: {}
+  central_vae: {}
+  central_gain: {}
+  local: {}
+  local_vae: {}
+  local_gain: {}
+  fedavg: {}
+  fedavg_vae: {} 
+  fedavg_gain: {}
+  fedmechw:
+    client_thres: 1.0
+    alpha: 1.0
+    beta: 0.0,
+    scale_factor: 4
+  cafe:
+    client_thres: 1.0
+    alpha: 0.95
+    gamma: 0.02
+    scale_factor: 4
+  scale_factor: 6

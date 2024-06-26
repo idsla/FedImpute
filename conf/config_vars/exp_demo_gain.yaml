@@ -1,0 +1,91 @@
+# @package config_vars
+exp_demo_gain:
+  # dataset_name
+  - name: dataset_name
+    value: [codon]
+    keys:
+      - data
+      - dataset_name
+    save_mode: dir1
+
+  # data partition
+  - name: data_partition
+    value: [sample-evenly]
+    save_mode: dir3
+    keys:
+      - data_partition
+      - strategy
+
+  # missing scenario
+  - name: mm_strategy
+    value:
+      - complex1
+      - complex2
+      - ideal
+    save_mode: dir4
+    keys:
+      - missing_simulate
+      - mm_strategy_new
+
+  # missing scenario
+  - name: client_type
+    value: [gain]
+    save_mode: none
+    keys:
+      - server_type
+  
+  - name: server_type
+    value: [gain]
+    save_mode: none
+    keys:
+      - server_type
+
+  # aggregation strategy
+  - name: agg_strategy
+    value: [local_gain, central_gain, fedavg_gain]
+    save_mode:
+    keys:
+      - agg_strategy_imp
+      - strategy
+
+  - name: seed
+    value: [102931466]
+    save_mode:
+    keys:
+      - experiment
+      - seed
+
+  - name: seed2
+    value: [ 50 ]
+    save_mode:
+    keys:
+      - experiment
+      - random_seed
+
+  - name: params
+    value: [false]
+    save_mode:
+    keys:
+      - tune_params
+
+  # n_rounds
+  - name: n_rounds
+    value: [5]
+    save_mode: none
+    keys:
+      - experiment
+      - n_rounds
+
+  - name: np
+    value: [5]
+    save_mode: none
+    keys:
+      - experiment
+      - num_process
+
+  - name: test_size
+    value: [0.1]
+    save_mode: none
+    keys:
+      - experiment
+      - test_size

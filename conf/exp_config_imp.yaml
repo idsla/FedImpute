@@ -1,0 +1,10 @@
+experiment_name: fed_imp
+debug: false
+experiment_marker:
+  - num_clients
+  - server@imp_round
+defaults:
+  - config_tmpl: imp_config_tmplate
+  - config_vars:
+      - exp_demo
+  - _self_
