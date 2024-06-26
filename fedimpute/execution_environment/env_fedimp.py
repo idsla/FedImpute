@@ -133,7 +133,7 @@ class FedImputeEnv:
 
     def setup_from_simulator(self, simulator: Simulator, verbose: int = 0):
 
-        self.setup(
+        self.setup_from_data(
             simulator.clients_train_data, simulator.clients_test_data, simulator.clients_train_data_ms,
             simulator.clients_seeds, simulator.global_test, simulator.data_config, verbose
         )
