@@ -2,4 +2,5 @@
 .idea
 __pycache__
 fedimp/
-site
+site/
+dist/
