@@ -55,7 +55,7 @@ simulation_results = simulator.simulate_scenario(
 ```python
 from fedimpute.execution_environment import FedImputeEnv
 env = FedImputeEnv()
-env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
+env.configuration(imputer = 'fed_ice', fed_strategy='fedavg', fit_mode = 'fed')
 env.setup_from_simulator(simulator = simulator, verbose=1)
 
 env.run_fed_imputation()

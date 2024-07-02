@@ -38,6 +38,7 @@ mkdocstrings = {extras = ["python"], version = "^0.25.1"}
 python-markdown-math = "^0.8"
 mkautodoc = "^0.2.0"
 mkapi = "^2.1.0"
+ipykernel = "^6.29.5"
 
 [build-system]
 requires = ["poetry-core"]
