@@ -124,6 +124,12 @@ Finally, use the <code>run_fed_imputation</code> method to execute the federated
 <span class="n">env</span><span class="o">.</span><span class="n">setup_from_simulator</span><span class="p">(</span><span class="n">simulator</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">()</span>
 </code></pre></div>
+<p>Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior first
+<div class="highlight"><pre><span></span><code><span class="c1"># bash (linux)</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">CUBLAS_WORKSPACE_CONFIG</span><span class="o">=</span>:4096:8
+<span class="c1"># powershell (windows)</span>
+<span class="nv">$Env</span>:CUBLAS_WORKSPACE_CONFIG<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;:4096:8&quot;</span>
+</code></pre></div></p>
 <h2 id="environment-configuration">Environment Configuration</h2>
 <p>The <code>env.configuration()</code> method is used to configure the environment. It takes the following arguments:</p>
 <p><strong>Options</strong>:</p>
