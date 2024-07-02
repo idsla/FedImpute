@@ -38,6 +38,7 @@ import numpy as np
 data = np.random.rand(10000, 10)
 data_config = {
     'task_type': 'regression',
+    'clf_type': None,
     'num_cols': 9,
 }
 ```
