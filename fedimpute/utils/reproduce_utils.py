@@ -5,6 +5,7 @@ import os
 import loguru
 
 def set_seed(seed):
+    seed = int(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)

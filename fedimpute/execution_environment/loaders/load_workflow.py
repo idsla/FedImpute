@@ -15,7 +15,7 @@ def load_workflow(
     """
     Load the workflow based on the workflow name
     """
-    if workflow_name == 'simple':
+    if workflow_name == 'mean':
         return WorkflowSimple()
     elif workflow_name == 'em':
         return WorkflowEM(**workflow_params)

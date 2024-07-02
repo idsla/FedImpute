@@ -16,7 +16,14 @@ FedImpute is a benchmarking tool for the evaluation of federated imputation algo
 - **Benchmarking Analysis:** [FedImputeBench](https://github.com/idsla/FedImpute/tree/fedimpute_bench)
 
 ## Installation
-Install python >= 3.8.0
+Firstly, install python >= 3.10, we have two ways to install
+
+Install from pip:
+```bash
+pip install fedimpute
+```
+
+Install from package repo:
 ```bash
 python -m venv ./venv
 
@@ -25,9 +32,8 @@ source ./venv/Scripts/activate
 
 # linux/unix
 source ./venv/bin/activate
-```
-Install the required packages
-```bash
+
+# Install the required packages
 pip install -r requirements.txt
 ```
 ## Basic Usage
@@ -53,6 +59,14 @@ simulation_results = simulator.simulate_scenario(
 ```
 
 ### Step 3. Execute Federated Imputation Algorithms
+Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior
+```bash
+# bash (linux)
+export CUBLAS_WORKSPACE_CONFIG=:4096:8
+# powershell (windows)
+$Env:CUBLAS_WORKSPACE_CONFIG = ":4096:8"
+```
+
 ```python
 from fedimpute.execution_environment import FedImputeEnv
 env = FedImputeEnv()
