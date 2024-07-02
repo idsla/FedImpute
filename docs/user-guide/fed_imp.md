@@ -21,6 +21,14 @@ env.setup_from_simulator(simulator = simulator, verbose=1)
 env.run_fed_imputation()
 ```
 
+Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior first
+```bash
+# bash (linux)
+export CUBLAS_WORKSPACE_CONFIG=:4096:8
+# powershell (windows)
+$Env:CUBLAS_WORKSPACE_CONFIG = ":4096:8"
+```
+
 ## Environment Configuration
 
 The `env.configuration()` method is used to configure the environment. It takes the following arguments:
