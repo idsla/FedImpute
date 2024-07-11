@@ -25,6 +25,9 @@ pip install fedimpute
 
 Install from package repo:
 ```bash
+git clone https://github.com/idsla/FedImpute
+cd FedImpute
+
 python -m venv ./venv
 
 # window gitbash
