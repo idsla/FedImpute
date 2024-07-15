@@ -76,7 +76,7 @@ env = FedImputeEnv()
 env.configuration(imputer = 'fed_ice', fed_strategy='fedavg', fit_mode = 'fed')
 env.setup_from_simulator(simulator = simulator, verbose=1)
 
-env.run_fed_imputation()
+env.run_fed_imputation(run_type='sequential')
 ```
 ### Step 4. Evaluate imputation outcomes
 ```python

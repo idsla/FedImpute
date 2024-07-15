@@ -10,6 +10,10 @@ pip install fedimpute
 
 Install from package repo:
 ```bash
+git clone https://github.com/idsla/FedImpute
+cd FedImpute
+
+# create virtual env
 python -m venv ./venv
 
 # window gitbash
@@ -64,10 +68,11 @@ $Env:CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 ```python
 from fedimpute.execution_environment import FedImputeEnv
 env = FedImputeEnv()
+env.reset_env()
 env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
 env.setup_from_simulator(simulator = simulator, verbose=1)
 
-env.run_fed_imputation()
+env.run_fed_imputation(run_type = 'sequential')
 ```
 
 

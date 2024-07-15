@@ -18,7 +18,7 @@ from fedimpute.execution_environment import FedImputeEnv
 env = FedImputeEnv()
 env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
 env.setup_from_simulator(simulator = simulator, verbose=1)
-env.run_fed_imputation()
+env.run_fed_imputation(run_type='sequential')
 ```
 
 Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior first
@@ -107,10 +107,10 @@ env.setup_from_data(
 
 ## Execute Federated Imputation
 
-After setting up the environment, we can execute the federated imputation algorithms using `run_fed_imputation()` method.
+After setting up the environment, we can execute the federated imputation algorithms using `run_fed_imputation()` method. Currently, we support two types of simulation execution (1) Run FL in sequential mode (`run_type="sequential"`), in this model, there is no parallel, whole processes of imputation for clients  run sequantially by using for loop (2) Run federated imputation in parallel mode (`run_type="parallel"`), it will simulate different processes for clients and server and then using workflow to manage communication between clients and server to approach the real world FL environment.
 
 ```python
-env.run_fed_imputation()
+env.run_fed_imputation(run_type='squential')
 ```
 
 ## Miscellaneous
