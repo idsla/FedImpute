@@ -161,4 +161,24 @@ class FedImputeEnv:
         pass
 
     def reset_env(self):
-        pass
+        # clients, server and workflow
+        self.clients = None
+        self.server = None
+        self.workflow = None
+
+        # imputer and fed strategy
+        self.imputer_name = None
+        self.fed_strategy_name = None
+        self.workflow_name = None
+        self.imputer_params = {}
+        self.fed_strategy_params = {}
+        self.workflow_params = {}
+        self.data_config = {}
+
+        # other components
+        self.simulator = None
+        self.evaluator = None
+        self.tracker = None
+        self.result_analyzer = None
+        self.benchmark = None
+        self.env_dir_path = None

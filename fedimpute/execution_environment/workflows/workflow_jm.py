@@ -2,6 +2,7 @@ import logging
 import loguru
 import numpy as np
 from tqdm import tqdm
+import multiprocessing as mp
 
 import fedimpute.execution_environment.utils.nn_utils as nn_utils
 
@@ -15,18 +16,19 @@ from tqdm.auto import trange
 
 from ..imputation.initial_imputation.initial_imputation import initial_imputation
 from ..utils.tracker import Tracker
+from .parallel import client_process_func, server_process_func
 
 
 class WorkflowJM(BaseWorkflow):
 
     def __init__(
             self,
-            initial_zero_impute:bool = True,
-            global_epoch:int = 150,
-            local_epoch:int = 5,
+            initial_zero_impute: bool = True,
+            global_epoch: int = 150,
+            local_epoch: int = 5,
             use_early_stopping: bool = True,
-            log_interval:int = 10,
-            imp_interval:int = 1000,
+            log_interval: int = 10,
+            imp_interval: int = 1000,
             save_model_interval: int = 200,
             model_converge: dict = {
                 "tolerance": 0.001,
@@ -72,10 +74,6 @@ class WorkflowJM(BaseWorkflow):
         ############################################################################################################
         # Federated Imputation Workflow
         use_early_stopping = self.use_early_stopping
-        # if server.fed_strategy.name == 'local':
-        #     early_stopping_mode = 'local'
-        # else:
-        #     early_stopping_mode = 'global'
         early_stopping_mode = 'local'
 
         model_converge_tol = self.model_converge['tolerance']
@@ -168,7 +166,6 @@ class WorkflowJM(BaseWorkflow):
         loguru.logger.info("start fine tuning ...")
         ################################################################################################################
         # local training of an imputation model
-        print(early_stopping_mode, use_early_stopping)
         early_stoppings, all_clients_converged_sign = self.setup_early_stopping(
             'local', model_converge_tol, model_converge_tolerance_patience,
             model_converge_increase_patience, model_converge_window_size, model_converge_steps,
@@ -232,6 +229,205 @@ class WorkflowJM(BaseWorkflow):
     def fed_imp_parallel(
             self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker
     ) -> Tracker:
+
+        ################################################################################################################
+        # Initial Imputation and Evaluation
+        ################################################################################################################
+        if server.fed_strategy.name == 'central':
+            clients.append(formulate_centralized_client(clients))
+
+        # clients = initial_imputation(server.fed_strategy.strategy_params['initial_impute'], clients)
+        if self.initial_zero_impute:
+            clients = initial_imputation('zero', clients)
+        else:
+            clients = initial_imputation(server.fed_strategy.initial_impute, clients)
+        if server.fed_strategy.name != 'local':
+            update_clip_threshold(clients)
+
+        clients_data = [(client.X_train_imp, client.X_train, client.X_train_mask) for client in clients]
+        self.eval_and_track_parallel(
+            evaluator, tracker, clients_data, phase='initial', central_client=server.fed_strategy.name == 'central'
+        )
+
+        ################################################################################################################
+        # Federated Imputation Workflow
+        ################################################################################################################
+        use_early_stopping = self.use_early_stopping
+        early_stopping_mode = 'local'
+
+        model_converge_tol = self.model_converge['tolerance']
+        model_converge_tolerance_patience = self.model_converge['tolerance_patience']
+        model_converge_increase_patience = self.model_converge['increase_patience']
+        model_converge_window_size = self.model_converge['window_size']
+        model_converge_steps = self.model_converge['check_steps']
+        model_converge_back_steps = self.model_converge['back_steps']
+
+        early_stoppings, all_clients_converged_sign = self.setup_early_stopping(
+            early_stopping_mode, model_converge_tol, model_converge_tolerance_patience,
+            model_converge_increase_patience, model_converge_window_size, model_converge_steps,
+            model_converge_back_steps, clients
+        )
+
+        ################################################################################################################
+        # setup clients and server
+        ################################################################################################################
+        client_pipes = [mp.Pipe() for _ in clients]
+        server_pipe, main_pipe = mp.Pipe()
+        client_processes = [mp.Process(
+            target=client_process_func, args=(client, pipe[1])) for client, pipe in zip(clients, client_pipes)
+        ]
+
+        server_process = mp.Process(
+            target=server_process_func, args=(server, [pipe[0] for pipe in client_pipes], server_pipe)
+        )
+
+        for p in client_processes + [server_process]:
+            p.start()
+
+        ################################################################################################################
+        # Federated Training
+        ################################################################################################################
+        global_model_epochs = self.global_epoch
+        log_interval = self.log_interval
+        imp_interval = self.imp_interval
+        save_model_interval = self.save_model_interval
+        fit_params_list = [{'local_epoch': self.local_epoch} for _ in clients]
+
+        for epoch in trange(global_model_epochs, desc='Global Epoch', colour='blue'):
+
+            # local fitting
+            fit_instruction = server.fed_strategy.fit_instruction([{} for _ in range(len(clients))])
+            for client_idx in range(len(clients)):
+                fit_params = fit_params_list[client_idx]
+                fit_params.update(fit_instruction[client_idx])
+                if early_stopping_mode == 'local' and all_clients_converged_sign[client_idx]:
+                    fit_params.update({'fit_model': False})
+                pipe = client_pipes[client_idx]
+                pipe[0].send(("fit_local", fit_params))
+
+            # receive the results and send to server
+            ret = [pipe[0].recv() for pipe in client_pipes]
+            local_models = [item[0] for item in ret]
+            fit_res_list = [item[1] for item in ret]
+            if epoch % log_interval == 0:  # Loss logging
+                self.logging_loss(fit_res_list)
+
+            # server aggregation
+            main_pipe.send("aggregate")
+            for pipe, params, fit_res in zip(client_pipes, local_models, fit_res_list):
+                pipe[1].send((params, fit_res))
+            global_models, agg_res = main_pipe.recv()
+
+            # update local model
+            for client_id, (pipe, global_model) in enumerate(zip(client_pipes, global_models)):
+                if early_stopping_mode == 'local' and (all_clients_converged_sign[client_id]):
+                    continue
+                pipe[0].send(("update_only", {'global_model_params': global_model, 'params': {}}))
+
+            # Early Stopping and Logging and Evaluation
+            if use_early_stopping:
+                self.early_stopping_step(
+                    fit_res_list, early_stoppings, all_clients_converged_sign, early_stopping_mode
+                )
+                if all(all_clients_converged_sign):
+                    loguru.logger.info("All clients have converged. Stopping training at {}.".format(epoch))
+                    break
+
+            if epoch % save_model_interval == 0:
+                for pipe in client_pipes:
+                    pipe[0].send(("save_model", f'{epoch}'))
+
+            if (epoch == 0 and self.initial_zero_impute == False) or (epoch > 0 and epoch % imp_interval == 0):
+                for pipe in client_pipes:
+                    pipe[0].send(("impute_only", {'params': {}}))
+
+                clients_data = [pipe[0].recv() for pipe in client_pipes]
+                self.eval_and_track_parallel(
+                    evaluator, tracker, clients_data, phase='round', epoch=epoch,
+                    central_client=server.fed_strategy.name == 'central'
+                )
+
+        ################################################################################################################
+        # Federated Fine Tuning
+        ################################################################################################################
+        loguru.logger.info("start fine tuning ...")
+        early_stoppings, all_clients_converged_sign = self.setup_early_stopping(
+            'local', model_converge_tol, model_converge_tolerance_patience,
+            model_converge_increase_patience, model_converge_window_size, model_converge_steps,
+            model_converge_back_steps, clients
+        )
+
+        fine_tune_epochs = server.fed_strategy.fine_tune_epochs
+        fit_params_list = [{'local_epoch': 1} for _ in clients]
+        for epoch in trange(fine_tune_epochs, desc='Fine Tuning Epoch', colour='blue'):
+
+            # local training
+            fit_instruction = server.fed_strategy.fit_instruction([{} for _ in range(len(clients))])
+            for client_idx in range(len(clients)):
+                fit_params = fit_params_list[client_idx]
+                fit_params.update(fit_instruction[client_idx])
+                fit_params.update({'freeze_encoder': False})
+                if all_clients_converged_sign[client_idx]:
+                    fit_params.update({'fit_model': False})
+                pipe = client_pipes[client_idx]
+                pipe[0].send(("fit_local", fit_params))
+
+            # receive the results
+            clients_fit_res = [pipe[0].recv() for pipe in client_pipes]
+
+            # Early Stopping and Logging and Evaluation
+            if epoch % log_interval == 0:
+                self.logging_loss(clients_fit_res)
+
+            if epoch % save_model_interval == 0:
+                for pipe in client_pipes:
+                    pipe[0].send(("save_model", f'{epoch + global_model_epochs}'))
+
+            if epoch > 0 and epoch % imp_interval == 0:
+                for pipe in client_pipes:
+                    pipe[0].send(("impute_only", {'params': {}}))
+
+                clients_data = [pipe[0].recv() for pipe in client_pipes]
+                self.eval_and_track_parallel(
+                    evaluator, tracker, clients_data, phase='round', epoch=epoch,
+                    central_client=server.fed_strategy.name == 'central'
+                )
+
+            if use_early_stopping:
+                self.early_stopping_step(clients_fit_res, early_stoppings, all_clients_converged_sign, 'local')
+                if all(all_clients_converged_sign):
+                    loguru.logger.info("All clients have converged. Stopping training at {}.".format(epoch))
+                    break
+
+        ############################################################################################################
+        # Terminate processes and update clients and server and collect environment
+        for pipe in client_pipes:
+            pipe[0].send(("impute_only", {'params': {}}))
+            pipe[0].send(("save_model", 'final'))
+
+        clients_data = [pipe[0].recv() for pipe in client_pipes]
+        self.eval_and_track_parallel(
+            evaluator, tracker, clients_data, phase='final', central_client=server.fed_strategy.name == 'central'
+        )
+
+        for pipe, client in zip(client_pipes, clients):
+            pipe[0].send(("terminate", None))
+            new_client = pipe[0].recv()
+            client.X_train_imp = new_client.X_train_imp
+            client.X_train = new_client.X_train
+            client.X_train_mask = new_client.X_train_mask
+            client.imputer = new_client.imputer
+            client.fed_strategy = new_client.fed_strategy
+
+        main_pipe.send("terminate")
+        new_server = main_pipe.recv()
+        server.fed_strategy = new_server.fed_strategy
+
+        # Join processes
+        for p in client_processes + [server_process]:
+            p.join()
+            p.close()
+
         return tracker
 
     @staticmethod
