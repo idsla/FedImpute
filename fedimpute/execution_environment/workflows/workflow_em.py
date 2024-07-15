@@ -319,6 +319,7 @@ class WorkflowEM(BaseWorkflow):
                 # send params and fit_res to server
                 for pipe, params, fit_res in zip(client_pipes, local_models, fit_res_list):
                     pipe[1].send((params, fit_res))
+
                 # Server aggregation
                 global_models, agg_res = main_pipe.recv()
 
@@ -338,10 +339,13 @@ class WorkflowEM(BaseWorkflow):
                 # Save model
                 if iteration % save_model_interval == 0:
                     for pipe in client_pipes:
-                        pipe[0].send(("save_model", None))
+                        pipe[0].send(("save_model", f'{iteration}'))
 
             ############################################################################################################
             # Terminate processes and update clients and server and collect environment
+            for pipe in client_pipes:
+                pipe[0].send(("save_model", 'final'))
+
             for pipe, client in zip(client_pipes, clients):
                 pipe[0].send(("terminate", None))
                 new_client = pipe[0].recv()

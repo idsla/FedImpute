@@ -24,8 +24,17 @@ def client_process_func(client: Client, client_pipe: mp.Pipe):
             client.update_local_imp_model(data['global_model_params'], params=data['params'])
             client.local_imputation(params=data['params'])
             client_pipe.send((client.X_train_imp, client.X_train, client.X_train_mask))
+        elif command == "update_only":
+            client.update_local_imp_model(data['global_model_params'], params=data['params'])
+        elif command == "impute_only":
+            client.local_imputation(params=data['params'])
+            client_pipe.send((client.X_train_imp, client.X_train, client.X_train_mask))
         elif command == "save_model":
-            client.save_imp_model(version='final')
+            version_name = data
+            if version_name is not None:
+                client.save_imp_model(version=version_name)
+            else:
+                client.save_imp_model(version='final')
         elif command == "terminate":
             client_pipe.send(client)
             break
