@@ -103,7 +103,11 @@
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>fedimpute
 </code></pre></div></p>
 <p>Install from package repo:
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>./venv
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/idsla/FedImpute
+<span class="nb">cd</span><span class="w"> </span>FedImpute
+
+<span class="c1"># create virtual env</span>
+python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>./venv
 
 <span class="c1"># window gitbash</span>
 <span class="nb">source</span><span class="w"> </span>./venv/Scripts/activate
@@ -149,10 +153,11 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 </code></pre></div></p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.execution_environment</span> <span class="kn">import</span> <span class="n">FedImputeEnv</span>
 <span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">reset_env</span><span class="p">()</span>
 <span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedavg&#39;</span><span class="p">,</span> <span class="n">fit_mode</span> <span class="o">=</span> <span class="s1">&#39;fed&#39;</span><span class="p">)</span>
 <span class="n">env</span><span class="o">.</span><span class="n">setup_from_simulator</span><span class="p">(</span><span class="n">simulator</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">(</span><span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
 </code></pre></div>
 <h3 id="step-4-evaluate-imputation-outcomes">Step 4. Evaluate imputation outcomes</h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>

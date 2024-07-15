@@ -122,7 +122,7 @@ Finally, use the <code>run_fed_imputation</code> method to execute the federated
 <span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">()</span>
 <span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedavg&#39;</span><span class="p">,</span> <span class="n">fit_mode</span> <span class="o">=</span> <span class="s1">&#39;fed&#39;</span><span class="p">)</span>
 <span class="n">env</span><span class="o">.</span><span class="n">setup_from_simulator</span><span class="p">(</span><span class="n">simulator</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">(</span><span class="n">run_type</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
 </code></pre></div>
 <p>Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior first
 <div class="highlight"><pre><span></span><code><span class="c1"># bash (linux)</span>
@@ -275,8 +275,8 @@ in the scenario where user have their own data that not simulated from simulator
 <span class="p">)</span>
 </code></pre></div>
 <h2 id="execute-federated-imputation">Execute Federated Imputation</h2>
-<p>After setting up the environment, we can execute the federated imputation algorithms using <code>run_fed_imputation()</code> method.</p>
-<div class="highlight"><pre><span></span><code><span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">()</span>
+<p>After setting up the environment, we can execute the federated imputation algorithms using <code>run_fed_imputation()</code> method. Currently, we support two types of simulation execution (1) Run FL in sequential mode (<code>run_type="sequential"</code>), in this model, there is no parallel, whole processes of imputation for clients  run sequantially by using for loop (2) Run federated imputation in parallel mode (<code>run_type="parallel"</code>), it will simulate different processes for clients and server and then using workflow to manage communication between clients and server to approach the real world FL environment.</p>
+<div class="highlight"><pre><span></span><code><span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">(</span><span class="n">run_type</span><span class="o">=</span><span class="s1">&#39;squential&#39;</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="miscellaneous">Miscellaneous</h2>
 <ul>
