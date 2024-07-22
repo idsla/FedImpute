@@ -3,6 +3,8 @@ from typing import Iterable, Union, Any
 import loguru
 import torch
 from torch import nn
+from torch.optim import Optimizer
+
 
 
 def load_optimizer(
@@ -18,8 +20,21 @@ def load_optimizer(
         return torch.optim.ASGD(parameters, lr=learning_rate, weight_decay=weight_decay)
     elif optimizer_name == 'lbfgs':
         return torch.optim.LBFGS(parameters, lr=learning_rate)
+    elif optimizer_name == 'scaffold':
+        return SCAFFOLDOptimizer(parameters, lr=learning_rate)
     else:
         raise ValueError(f"Optimizer {optimizer_name} not supported")
+
+
+class SCAFFOLDOptimizer(Optimizer):
+    def __init__(self, params, lr):
+        defaults = dict(lr=lr)
+        super(SCAFFOLDOptimizer, self).__init__(params, defaults)
+
+    def step(self, server_cs, client_cs):
+        for group in self.param_groups:
+            for p, sc, cc in zip(group['params'], server_cs, client_cs):
+                p.data.add_(other=(p.grad.data + sc - cc), alpha=-group['lr'])
 
 
 def load_lr_scheduler(

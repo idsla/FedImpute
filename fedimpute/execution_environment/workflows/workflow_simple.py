@@ -15,7 +15,7 @@ class WorkflowSimple(BaseWorkflow):
     def __init__(
             self,
     ):
-        super().__init__()
+        super(WorkflowSimple, self).__init__()
         self.tracker = None
 
     def fed_imp_sequential(

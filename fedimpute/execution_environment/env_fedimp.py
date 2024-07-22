@@ -52,16 +52,16 @@ class FedImputeEnv:
         # check if imputer and fed strategy are supported and set the imputer and fed strategy names
         if imputer in ['fed_ice', 'fed_mean', 'fed_em']:
             imputer_name = imputer.split('_')[1]
-            fed_strategy_name = 'fedavg'
+            fed_strategy_name = 'simple_avg'
             workflow_name = imputer_name
         elif imputer in ['fed_missforest']:
-            imputer_name = imputer.split('_')[1]
+            imputer_name = 'missforest'
             fed_strategy_name = 'fedtree'
             workflow_name = 'ice'
         elif imputer in ['miwae', 'gain']:
             imputer_name = imputer
             workflow_name = 'jm'
-            if fed_strategy in ['fedavg', 'fedprox', 'fedavg_ft']:
+            if fed_strategy in ['fedavg', 'fedavg_ft', 'fedprox', 'scaffold']:
                 fed_strategy_name = fed_strategy
             else:
                 raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
@@ -114,7 +114,9 @@ class FedImputeEnv:
         if verbose > 0:
             print(f"Setting up server...")
         self.server = setup_server(
-            fed_strategy=self.fed_strategy_name, fed_strategy_params=self.fed_strategy_params, global_test=global_test,
+            fed_strategy=self.fed_strategy_name, fed_strategy_params=self.fed_strategy_params,
+            imputer_name=self.imputer_name, imputer_params=self.imputer_params,
+            global_test=global_test,
             server_config={}
         )
 

@@ -39,7 +39,7 @@ class WorkflowJM(BaseWorkflow):
                 "back_steps": 1
             },
     ):
-        super().__init__()
+        super(WorkflowJM, self).__init__()
         self.tracker = None
         self.initial_zero_impute = initial_zero_impute
         self.global_epoch = global_epoch
@@ -173,9 +173,7 @@ class WorkflowJM(BaseWorkflow):
         )
 
         fine_tune_epochs = server.fed_strategy.fine_tune_epochs
-        fit_params_list = [{
-            'local_epoch': 1
-        } for _ in clients]
+        fit_params_list = [{'local_epoch': 1} for _ in clients]
         for epoch in trange(fine_tune_epochs, desc='Fine Tuning Epoch', colour='blue'):
 
             clients_fit_res = []

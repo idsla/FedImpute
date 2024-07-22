@@ -1,29 +1,52 @@
+import gc
 import numpy as np
-
-from ...fed_strategy.fed_strategy_client import StrategyBaseClient
 import torch
 from typing import Tuple
-import gc
+from .utils import trainable_params
 
 from ...imputation.base import BaseNNImputer
+from .strategy_base import StrategyBaseClient
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-class FedAvgStrategyClient(StrategyBaseClient):
+class ScaffoldStrategyClient(StrategyBaseClient):
 
     def __init__(self):
-        super(FedAvgStrategyClient, self).__init__('fedavg')
 
-    def pre_training_setup(self, params: dict):
-        return {}
-
-    def post_training_setup(self, params: dict):
-        return {}
+        super(ScaffoldStrategyClient, self).__init__(name='scaffold')
+        self.name = 'scaffold'
+        self.local_model = None
+        self.global_model = None
+        self.global_c = None
+        self.client_c = None
 
     def set_parameters(self, global_model: torch.nn.Module, local_model: torch.nn.Module, params: dict):
         for new_param, old_param in zip(global_model.parameters(), local_model.parameters()):
             old_param.data = new_param.data.clone()
+
+    def pre_training_setup(self, params: dict):
+        local_model, global_model, global_c = params['local_model'], params['global_model'], params['global_c']
+        for new_param, old_param in zip(global_model.parameters(), local_model.parameters()):
+            old_param.data = new_param.data.clone()
+
+        self.global_c = global_c
+        self.global_model = global_model
+        self.local_model = local_model
+
+        # first time setup of client c
+        if self.client_c is None:
+            self.client_c = [torch.zeros_like(param) for param in trainable_params(local_model)]
+
+    def post_training_setup(self, params: dict):
+        local_epochs = params['local_epoch']
+        num_batches = params['num_batches']
+        learning_rate = params['learning_rate']
+        self.update_yc(local_epochs, num_batches, learning_rate)
+        delta_y, delta_c = self.delta_yc(local_epochs, num_batches, learning_rate)
+        return {
+            'delta_y': delta_y, 'delta_c': delta_c
+        }
 
     def train_local_nn_model(
             self, imputer: BaseNNImputer, training_params: dict, X_train_imp: np.ndarray,
@@ -35,6 +58,7 @@ class FedAvgStrategyClient(StrategyBaseClient):
         try:
             local_epochs = training_params['local_epoch']
             global_model = training_params['global_model']
+            global_c = training_params['global_c']
             learning_rate = training_params['lr']
         except KeyError as e:
             raise ValueError(f"Parameter {str(e)} not found in params")
@@ -50,11 +74,14 @@ class FedAvgStrategyClient(StrategyBaseClient):
 
         ################################################################################################################
         # pre-training setup - set global_c, global_model, local_model
-        self.pre_training_setup({})
+        pre_training_params = {
+            'local_model': local_model, 'global_model': global_model, 'global_c': global_c
+        }
+        self.pre_training_setup(pre_training_params)
 
         ################################################################################################################
         # training loop
-        local_model.train()
+        self.local_model.train()
         total_loss, total_iters = 0, 0
         # for ep in trange(local_epochs, desc='Local Epoch', colour='blue'):
         for ep in range(local_epochs):
@@ -66,7 +93,12 @@ class FedAvgStrategyClient(StrategyBaseClient):
                 # for optimizer_idx, optimizer in enumerate(optimizers):
                 #########################################################################
                 # training step
-                loss, res = local_model.train_step(batch, batch_idx, optimizers, optimizer_idx=0)
+                loss, res = self.local_model.train_step(batch, batch_idx, optimizers, optimizer_idx=0)
+
+                #########################################################################
+                # scaffold updates
+                for p, sc, cc in zip(trainable_params(self.local_model), self.global_c, self.client_c):
+                    p.data.add_(sc - cc, alpha=-learning_rate)
 
                 #########################################################################
                 # update loss
@@ -92,12 +124,32 @@ class FedAvgStrategyClient(StrategyBaseClient):
 
         final_loss = total_loss / total_iters
         gc.collect()
-        local_model.to('cpu')
+        self.local_model.to('cpu')
 
         #########################################################################################
         # post-training setup
-        self.post_training_setup({})
+        post_training_params = {
+            'local_epoch': local_epochs, 'num_batches': len(train_dataloader), 'learning_rate': learning_rate
+        }
+        post_training_ret = self.post_training_setup(post_training_params)
+        delta_y, delta_c = post_training_ret['delta_y'], post_training_ret['delta_c']
 
         return local_model, {
             'loss': final_loss, 'sample_size': len(train_dataloader.dataset),
+            'delta_y': delta_y, 'delta_c': delta_c
         }
+
+    def update_yc(self, local_epochs, num_batches, learning_rate):
+        for ci, c, x, yi in zip(
+                self.client_c, self.global_c, self.global_model.parameters(), self.local_model.parameters()
+        ):
+            ci.data = ci - c + 1 / num_batches / local_epochs / learning_rate * (x - yi)
+
+    def delta_yc(self, local_epochs, num_batches, learning_rate):
+        delta_y = []
+        delta_c = []
+        for c, x, yi in zip(self.global_c, self.global_model.parameters(), self.local_model.parameters()):
+            delta_y.append(yi - x)
+            delta_c.append(- c + 1 / num_batches / local_epochs / learning_rate * (x - yi))
+
+        return delta_y, delta_c

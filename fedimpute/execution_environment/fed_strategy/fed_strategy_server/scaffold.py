@@ -1,15 +1,19 @@
 from typing import List, Tuple
 import torch
 from ...fed_strategy.fed_strategy_server import StrategyBaseServer
+import copy
 
 
-class FedproxStrategyServer(StrategyBaseServer):
+class ScaffoldStrategyServer(StrategyBaseServer):
 
-    def __init__(self, fine_tune_epochs: int = 0):
+    def __init__(self, server_learning_rate: float = 0.001, fine_tune_epochs: int = 0):
 
-        super(FedproxStrategyServer, self).__init__('fedprox', 'fedavg', fine_tune_epochs)
+        super(ScaffoldStrategyServer, self).__init__('scaffold', 'fedavg', fine_tune_epochs)
         self.initial_impute = 'fedavg'
         self.fine_tune_epochs = 0
+        self.server_learning_rate = server_learning_rate
+        self.global_model = None
+        self.global_c = None
 
     def initialization(self, global_model, params: dict):
         """
@@ -34,18 +38,23 @@ class FedproxStrategyServer(StrategyBaseServer):
         :param kwargs: other params dict
         :return: List of aggregated model parameters, dict of aggregated results
         """
-        # clear the server model
-        for server_params in self.global_model.parameters():
-            server_params.data = torch.zeros_like(server_params.data)
 
-        # federated averaging
-        weights = torch.tensor([fit_res[cid]['sample_size'] for cid in range(len(local_models))])
+        global_model = copy.deepcopy(self.global_model)
+        global_c = copy.deepcopy(self.global_c)
+        num_clients = len(local_models)
+        weights = torch.tensor([fit_res[cid]['sample_size'] for cid in range(num_clients)])
         weights = weights / weights.sum()
-        for cid in range(len(local_models)):
-            for server_param, client_param in zip(self.global_model.parameters(), local_models[cid].parameters()):
+        for cid in range(num_clients):
+            dy, dc = fit_res[cid]['delta_y'], fit_res[cid]['delta_c']
+            for server_param, client_param in zip(global_model.parameters(), dy):
+                server_param.data += client_param.data.clone() * weights[cid] * self.server_learning_rate
+            for server_param, client_param in zip(global_c, dc):
                 server_param.data += client_param.data.clone() * weights[cid]
 
-        return [self.global_model for _ in range(len(local_models))], {}
+        self.global_model = global_model
+        self.global_c = global_c
+
+        return [global_model for _ in range(num_clients)], {}
 
     def fit_instruction(self, params_list: List[dict]) -> List[dict]:
 
