@@ -21,8 +21,8 @@ class ScaffoldStrategyClient(StrategyBaseClient):
         self.global_c = None
         self.client_c = None
 
-    def set_parameters(self, global_model: torch.nn.Module, local_model: torch.nn.Module, params: dict):
-        for new_param, old_param in zip(global_model.parameters(), local_model.parameters()):
+    def set_parameters(self, updated_model_params: torch.nn.Module, local_model: torch.nn.Module, params: dict):
+        for new_param, old_param in zip(updated_model_params.parameters(), local_model.parameters()):
             old_param.data = new_param.data.clone()
 
     def pre_training_setup(self, params: dict):

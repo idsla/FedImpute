@@ -12,13 +12,23 @@ class StrategyBaseClient(ABC):
         self.name = name
 
     @abstractmethod
-    def set_parameters(self, global_model: torch.nn.Module, local_model: torch.nn.Module, params: dict):
+    def set_parameters(self, updated_model_params: dict, local_model: torch.nn.Module, params: dict):
         """
         Set parameters global model to local model
-        :param global_model: global model
+        :param updated_model_params: received updated model parameters
         :param local_model: local model
         :param params: config params
         :return: None
+        """
+        pass
+
+    @abstractmethod
+    def get_parameters(self, local_model: torch.nn.Module, params: dict) -> dict:
+        """
+        Get parameters from local model
+        :param local_model: local model
+        :param params: config params
+        :return: parameters dict
         """
         pass
 
@@ -44,7 +54,7 @@ class StrategyBaseClient(ABC):
     def train_local_nn_model(
             self, imputer: BaseNNImputer, training_params: dict, X_train_imp: np.ndarray,
             y_train: np.ndarray, X_train_mask: np.ndarray
-    ) -> Tuple[torch.nn.Module, dict]:
+    ) -> Tuple[dict, dict]:
         """
         Train local nn model
         :param imputer: imputer

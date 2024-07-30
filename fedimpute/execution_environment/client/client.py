@@ -10,7 +10,7 @@ from ..imputation.base import BaseNNImputer
 from ..fed_strategy.fed_strategy_client import StrategyBaseClient
 from ..loaders.load_imputer import load_imputer
 from ..loaders.load_strategy import load_fed_strategy_client
-from ..utils.fed_nn_trainer import fit_fed_nn_model
+# from ..utils.fed_nn_trainer import fit_fed_nn_model
 
 
 class Client:
@@ -108,7 +108,7 @@ class Client:
 
         """
         if not params['fit_model']:
-            return self.imputer.get_imp_model_params(params), {
+            return self.fed_strategy.get_parameters(self.imputer.model, params), {
                 'sample_size': self.X_train_imp.shape[0], 'converged': True
             }
         else:
@@ -132,7 +132,7 @@ class Client:
 
             return model_parameters, fit_res
 
-    def update_local_imp_model(self, updated_local_model: Union[dict, None, torch.nn.Module], params: dict) -> None:
+    def update_local_imp_model(self, updated_local_model: Union[dict, None], params: dict) -> None:
         """
         Fit a local imputation model
 

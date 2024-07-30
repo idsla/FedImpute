@@ -43,7 +43,7 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
             self,
             name: str = 'miwae',
             # model params
-            latent_size: int = 8,
+            latent_size: int = 5,
             n_hidden: int = 16,
             n_hidden_layers: int = 2,
             out_dist='studentt',
@@ -57,7 +57,7 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
             learning_rate: int = 0.001,
             weight_decay: int = 0.0001,
             scheduler: str = "step",
-            optimizer: str = 'sgd',
+            optimizer: str = 'adam',
     ):
 
         super().__init__()

@@ -48,15 +48,21 @@ def server_process_func(server: Server, client_pipes: List[mp.Pipe], server_pipe
     :param server_pipe: server pipe for communication
     :return: None
     """
+    print('server process')
     while True:
+        print('received command')
         command = server_pipe.recv()
+        print('received command', command)
         if command == "aggregate":
             params_list, fit_rest_list = [], []
+            print('aggregate server')
             for pipe in client_pipes:
                 params, fit_res = pipe.recv()
                 params_list.append(params)
                 fit_rest_list.append(fit_res)
+            print('aggregate server received all')
             global_models, agg_res = server.fed_strategy.aggregate_parameters(params_list, fit_rest_list, {})
+            print('send aggregate result')
             server_pipe.send((global_models, agg_res))
         elif command == "terminate":
             server_pipe.send(server)
