@@ -56,25 +56,29 @@ class FedAvgStrategyClient(StrategyBaseClient):
 
         ################################################################################################################
         # training loop
-        local_model.train()
         total_loss, total_iters = 0, 0
         # for ep in trange(local_epochs, desc='Local Epoch', colour='blue'):
         for ep in range(local_epochs):
-
             #################################################################################
             # training one epoch
-            losses_epoch, ep_iters = [0 for _ in range(len(optimizers))], 0
+            losses_epoch, ep_iters = 0, 0
+
             for batch_idx, batch in enumerate(train_dataloader):
-                # for optimizer_idx, optimizer in enumerate(optimizers):
-                #########################################################################
-                # training step
-                loss, res = local_model.train_step(batch, batch_idx, optimizers, optimizer_idx=0)
-
-                #########################################################################
-                # update loss
+                loss_opt = 0
                 for optimizer_idx, optimizer in enumerate(optimizers):
-                    losses_epoch[optimizer_idx] += loss
+                    #########################################################################
+                    # training step
+                    local_model.train()
+                    optimizer.zero_grad()
+                    loss, res = local_model.train_step(batch, batch_idx, optimizers, optimizer_idx=optimizer_idx)
+                    loss_opt += loss
 
+                    #########################################################################
+                    # update loss
+                    optimizer.step()
+
+                loss_opt /= len(optimizers)
+                losses_epoch += loss_opt
                 ep_iters += 1
 
             #################################################################################
@@ -82,8 +86,7 @@ class FedAvgStrategyClient(StrategyBaseClient):
             if DEVICE == "cuda":
                 torch.cuda.empty_cache()
 
-            losses_epoch = np.array(losses_epoch) / len(train_dataloader)
-            epoch_loss = losses_epoch.mean()
+            epoch_loss = losses_epoch / len(train_dataloader)
 
             # update lr scheduler
             # for scheduler in lr_schedulers:
@@ -99,7 +102,6 @@ class FedAvgStrategyClient(StrategyBaseClient):
         #########################################################################################
         # post-training setup
         self.post_training_setup({})
-
         uploaded_params = self.get_parameters(local_model, {})
 
         return uploaded_params, {

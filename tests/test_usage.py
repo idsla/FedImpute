@@ -22,4 +22,4 @@ if __name__ == '__main__':
     env.setup_from_simulator(simulator = simulator, verbose=1)
     print(env.imputer_name, env.fed_strategy_name)
 
-    env.run_fed_imputation(run_type='sequential')
+    env.run_fed_imputation(run_type='parallel')
