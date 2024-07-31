@@ -108,9 +108,14 @@ class Client:
 
         """
         if not params['fit_model']:
-            return self.fed_strategy.get_parameters(self.imputer.model, params), {
-                'sample_size': self.X_train_imp.shape[0], 'converged': True
-            }
+            if isinstance(self.fed_strategy, StrategyBaseClient):
+                return self.fed_strategy.get_parameters(self.imputer.model, params), {
+                    'sample_size': self.X_train_imp.shape[0], 'converged': True
+                }
+            else:
+                return self.imputer.get_imp_model_params(params), {
+                    'sample_size': self.X_train_imp.shape[0], 'converged': True
+                }
         else:
             ############################################################################################################
             # NN based Imputation Models

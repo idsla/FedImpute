@@ -19,11 +19,11 @@ class WorkflowICE(BaseWorkflow):
 
     def __init__(
             self,
-            imp_iterations:int = 20,
-            evaluation_interval:int = 1,
+            imp_iterations: int = 20,
+            evaluation_interval: int = 1,
             early_stopping: bool = True,
-            tolerance:float = 0.001,
-            tolerance_patience:int = 3,
+            tolerance: float = 0.001,
+            tolerance_patience: int = 3,
             increase_patience: int = 3,
             window_size: int = 3,
             log_interval: int = 1,
@@ -254,8 +254,7 @@ class WorkflowICE(BaseWorkflow):
                     # client local train imputation model
                     fit_params = {'feature_idx': feature_idx, 'fit_model': True}
                     pipe[0].send(("fit_local", fit_params))
-                    ret = [pipe[0].recv() for pipe in client_pipes]
-                    model_parameter, fit_res = [item[0] for item in ret], [item[1] for item in ret]
+                    model_parameter, fit_res = pipe[0].recv()
                     pipe[0].send(("update_and_impute", {
                         'global_model_params': model_parameter, 'params': {'feature_idx': feature_idx}
                     }))
@@ -277,7 +276,7 @@ class WorkflowICE(BaseWorkflow):
 
                 # Final Evaluation and Tracking and saving imputation model
                 imp_qualities = self.eval_and_track_parallel(
-                    evaluator, tracker, clients_data, phase='round',
+                    evaluator, tracker, clients_data, phase='round', epoch=epoch,
                     central_client=server.fed_strategy.name == 'central'
                 )
 
@@ -306,7 +305,6 @@ class WorkflowICE(BaseWorkflow):
             ]
 
             fit_params_list = [{} for _ in range(len(clients))]
-
             for epoch in trange(iterations, desc='ICE Iterations', colour='blue'):
 
                 ########################################################################################################
@@ -332,10 +330,15 @@ class WorkflowICE(BaseWorkflow):
                     for client_idx, (global_model, client) in enumerate(zip(global_models, clients)):
                         if not all_clients_converged[client.client_id]:
                             pipe = client_pipes[client_idx]
-                            pipe[0].send(("update_and_impute",
-                                    {'global_model_params': global_model, 'params': {'feature_idx': feature_idx}}
+                            pipe[0].send((
+                                "update_and_impute",
+                                {'global_model_params': global_model, 'params': {'feature_idx': feature_idx}}
                             ))
-                            clients_data = [pipe[0].recv() for pipe in client_pipes]
+                        else:
+                            pipe = client_pipes[client_idx]
+                            pipe[0].send(("send_data", {'params': {'feature_idx': feature_idx}}))
+
+                    clients_data = [pipe[0].recv() for pipe in client_pipes]
 
                 ########################################################################################################
                 # Evaluation and early stopping
@@ -344,7 +347,7 @@ class WorkflowICE(BaseWorkflow):
                         pipe[0].send(("save_model", f'{epoch}'))
 
                 imp_qualities = self.eval_and_track_parallel(
-                    evaluator, tracker, clients_data, phase='round',
+                    evaluator, tracker, clients_data, phase='round', epoch=epoch,
                     central_client=server.fed_strategy.name == 'central'
                 )
 

@@ -30,6 +30,7 @@ def trainable_params(
             if param.requires_grad:
                 parameters.append(func(param))
                 keys.append(name)
+
     # model class - nn.Module
     elif isinstance(src, torch.nn.Module):
         for name, param in src.state_dict(keep_vars=True).items():

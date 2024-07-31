@@ -45,14 +45,7 @@ class FedAvgStrategyServer(StrategyBaseServer):
             agg_res = {}
 
             return agg_model_parameters, agg_res
-    #
-    # def fit_instruction(self, params_list: List[dict]) -> List[dict]:
-    #
-    #     return [{'fit_model': True} for _ in range(len(params_list))]
-    #
-    # def update_instruction(self, params: dict) -> dict:
-    #
-    #     return {}
+
     def initialization(self, global_model, params: dict):
         """
         Initialize the server

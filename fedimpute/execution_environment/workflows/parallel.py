@@ -14,6 +14,7 @@ def client_process_func(client: Client, client_pipe: mp.Pipe):
     """
     while True:
         command, data = client_pipe.recv()
+        #print(client.client_id, command)
         if command == "initial_impute":
             client.initial_impute(data)
         elif command == "fit_local":
@@ -23,6 +24,8 @@ def client_process_func(client: Client, client_pipe: mp.Pipe):
         elif command == "update_and_impute":
             client.update_local_imp_model(data['global_model_params'], params=data['params'])
             client.local_imputation(params=data['params'])
+            client_pipe.send((client.X_train_imp, client.X_train, client.X_train_mask))
+        elif command == 'send_data':
             client_pipe.send((client.X_train_imp, client.X_train, client.X_train_mask))
         elif command == "update_only":
             client.update_local_imp_model(data['global_model_params'], params=data['params'])
@@ -48,21 +51,16 @@ def server_process_func(server: Server, client_pipes: List[mp.Pipe], server_pipe
     :param server_pipe: server pipe for communication
     :return: None
     """
-    print('server process')
     while True:
-        print('received command')
         command = server_pipe.recv()
-        print('received command', command)
+        #print(command)
         if command == "aggregate":
             params_list, fit_rest_list = [], []
-            print('aggregate server')
             for pipe in client_pipes:
                 params, fit_res = pipe.recv()
                 params_list.append(params)
                 fit_rest_list.append(fit_res)
-            print('aggregate server received all')
             global_models, agg_res = server.fed_strategy.aggregate_parameters(params_list, fit_rest_list, {})
-            print('send aggregate result')
             server_pipe.send((global_models, agg_res))
         elif command == "terminate":
             server_pipe.send(server)

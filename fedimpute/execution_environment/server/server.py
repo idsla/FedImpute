@@ -6,6 +6,7 @@ from fedimpute.execution_environment.loaders.load_imputer import load_imputer
 from fedimpute.execution_environment.utils.tracker import Tracker
 from fedimpute.execution_environment.loaders.load_strategy import load_fed_strategy_server
 import numpy as np
+from fedimpute.execution_environment.fed_strategy.fed_strategy_server.strategy_base import StrategyBaseServer
 
 
 class Server:
@@ -38,7 +39,8 @@ class Server:
 
         # initialize server side strategy
         self.fed_strategy = load_fed_strategy_server(fed_strategy_name, fed_strategy_params)
-        self.fed_strategy.initialization(self.global_imputer.model, {})
+        if isinstance(self.fed_strategy, StrategyBaseServer):
+            self.fed_strategy.initialization(self.global_imputer.model, {})
 
     def global_evaluation(self, eval_res: dict) -> dict:
         # global evaluation of imputation models

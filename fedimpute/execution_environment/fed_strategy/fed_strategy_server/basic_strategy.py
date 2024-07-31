@@ -7,8 +7,8 @@ import numpy as np
 class CentralStrategyServer:
 
     def __init__(self):
-        super(CentralStrategyServer, self).__init__('central', 'central')
-        self.intial_impute = 'central'
+        self.initial_impute = 'central'
+        self.name = 'central'
         self.fine_tune_epochs = 0
 
     def aggregate_parameters(
@@ -48,7 +48,7 @@ class CentralStrategyServer:
 class LocalStrategyServer:
 
     def __init__(self):
-        super(LocalStrategyServer, self).__init__('local', 'local')
+        self.name = 'local'
         self.initial_impute = 'local'
         self.fine_tune_epochs = 0
 

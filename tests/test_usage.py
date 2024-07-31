@@ -14,12 +14,12 @@ if __name__ == '__main__':
     from fedimpute.execution_environment import FedImputeEnv
 
     simulator = Simulator(debug_mode=False)
-    simulation_results = simulator.simulate_scenario(data, data_config, num_clients = 10, verbose=1)
+    simulation_results = simulator.simulate_scenario(data, data_config, num_clients=10, verbose=1)
 
     env = FedImputeEnv()
     env.reset_env()
-    env.configuration(imputer = 'miwae', fed_strategy='fedavg', fit_mode = 'fed')
-    env.setup_from_simulator(simulator = simulator, verbose=1)
+    env.configuration(imputer='fed_em', fed_strategy='fedavg', fit_mode='central')
+    env.setup_from_simulator(simulator=simulator, verbose=1)
     print(env.imputer_name, env.fed_strategy_name)
 
     env.run_fed_imputation(run_type='parallel')
