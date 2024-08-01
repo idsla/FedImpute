@@ -61,7 +61,7 @@ class FedImputeEnv:
         elif imputer in ['miwae', 'gain']:
             imputer_name = imputer
             workflow_name = 'jm'
-            if fed_strategy in ['fedavg', 'fedavg_ft', 'fedprox', 'scaffold']:
+            if fed_strategy in ['fedavg', 'fedavg_ft', 'fedprox', 'scaffold', 'fedadam', 'fedadagrad', 'fedyogi']:
                 fed_strategy_name = fed_strategy
             else:
                 raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")

@@ -18,6 +18,9 @@ from ..fed_strategy.fed_strategy_server import (
     FedAvgFtStrategyServer,
     FedproxStrategyServer,
     ScaffoldStrategyServer,
+    FedAdamStrategyServer,
+    FedAdagradStrategyServer,
+    FedYogiStrategyServer,
     # Traditional Strategy Server
     LocalStrategyServer,
     CentralStrategyServer,
@@ -43,13 +46,15 @@ def load_fed_strategy_client(strategy_name: str, strategy_params: dict) -> Union
         return FedTreeStrategyClient()
     # NN based strategies
     elif strategy_name == 'fedavg':
-        return FedAvgStrategyClient()
-    elif strategy_name == 'fedavg_ft':
-        return FedAvgStrategyClient()
+        return FedAvgStrategyClient(global_initialize=False)
+    elif strategy_name == 'fedadam' or strategy_name == 'fedadagrad' or strategy_name == 'fedyogi':
+        return FedAvgStrategyClient(global_initialize=True)
     elif strategy_name == 'fedprox':
         return FedproxStrategyClient(**strategy_params)
     elif strategy_name == 'scaffold':
         return ScaffoldStrategyClient()
+    elif strategy_name == 'fedavg_ft':
+        return FedAvgStrategyClient()
     else:
         raise ValueError(f"Invalid strategy name: {strategy_name}")
 
@@ -74,6 +79,12 @@ def load_fed_strategy_server(strategy_name: str, strategy_params: dict) -> Union
         return FedproxStrategyServer(**strategy_params)
     elif strategy_name == 'scaffold':
         return ScaffoldStrategyServer(**strategy_params)
+    elif strategy_name == 'fedadam':
+        return FedAdamStrategyServer(**strategy_params)
+    elif strategy_name == 'fedadagrad':
+        return FedAdagradStrategyServer(**strategy_params)
+    elif strategy_name == 'fedyogi':
+        return FedYogiStrategyServer(**strategy_params)
     elif strategy_name == 'fedavg_ft':
         return FedAvgFtStrategyServer(**strategy_params)
     else:

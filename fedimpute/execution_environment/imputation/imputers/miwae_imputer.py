@@ -57,7 +57,7 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
             learning_rate: int = 0.001,
             weight_decay: int = 0.0001,
             scheduler: str = "step",
-            optimizer: str = 'adam',
+            optimizer: str = 'sgd',
     ):
 
         super().__init__()

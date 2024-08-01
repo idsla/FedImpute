@@ -6,18 +6,21 @@ from typing import Tuple
 import gc
 
 from ...imputation.base import BaseNNImputer
-from ..utils import get_parameters
+from ..utils import get_parameters, convert_params_format
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class FedAvgStrategyClient(StrategyBaseClient):
 
-    def __init__(self):
+    def __init__(self, global_initialize=True):
         super().__init__('fedavg')
         self.loss = None
+        self.initial_aligned = False
+        self.global_initialize = global_initialize
 
     def pre_training_setup(self, params: dict):
+        # initialize local model with global model
         return {}
 
     def post_training_setup(self, params: dict):
@@ -39,6 +42,7 @@ class FedAvgStrategyClient(StrategyBaseClient):
         # training params
         try:
             local_epochs = training_params['local_epoch']
+            global_model_dict = training_params['global_model_dict']
         except KeyError as e:
             raise ValueError(f"Parameter {str(e)} not found in params")
 
@@ -52,7 +56,10 @@ class FedAvgStrategyClient(StrategyBaseClient):
 
         ################################################################################################################
         # pre-training setup - set global_c, global_model, local_model
-        self.pre_training_setup({})
+        if self.global_initialize and self.initial_aligned == False:
+            global_dict = convert_params_format(global_model_dict, output_type='state_dict')
+            local_model.load_state_dict(global_dict)
+            self.initial_aligned = True
 
         ################################################################################################################
         # training loop
