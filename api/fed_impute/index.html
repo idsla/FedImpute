@@ -270,7 +270,7 @@ column type, 'num' or 'cat'
 </p>
 <p class="mkapi-object">
   <span class="mkapi-object-kind">method</span>
-  <span class="mkapi-object-name"><span class="mkapi-prefix">Client</span><span class="mkapi-dot">.</span><span class="mkapi-name">fit_local_imp_model</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="typing.Tuple">Tuple</span>[dict, dict]</span></span></p>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">Client</span><span class="mkapi-dot">.</span><span class="mkapi-name">fit_local_imp_model</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="typing.Tuple">Tuple</span>[<span class="mkapi-tooltip" title="typing.Union">Union</span>[dict, <span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.nn">nn</span>.<span class="mkapi-tooltip" title="torch.nn.Module">Module</span>], dict]</span></span></p>
 <p>Fit a local imputation model</p>
 <p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
 <ul>
@@ -284,7 +284,7 @@ instructions for fitting the imputation model
 <p class="mkapi-section"><span class="mkapi-section-name">Returns</span></p>
 <ul>
 <li>
-<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Tuple">Tuple</span>[dict, dict]</span> &mdash;
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Tuple">Tuple</span>[<span class="mkapi-tooltip" title="typing.Union">Union</span>[dict, <span class="mkapi-tooltip" title="torch">torch</span>.<span class="mkapi-tooltip" title="torch.nn">nn</span>.<span class="mkapi-tooltip" title="torch.nn.Module">Module</span>], dict]</span> &mdash;
 model parameters and fitting results dictionary
   </p>
 </li>
@@ -325,7 +325,7 @@ imputed data or None
 </p>
 <p class="mkapi-object">
   <span class="mkapi-object-kind">class</span>
-  <span class="mkapi-object-name"><span class="mkapi-name">Server</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">fed_strategy_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">fed_strategy_params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">global_test</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">server_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Dict">Dict</span>[str, <span class="mkapi-tooltip" title="typing.Union">Union</span>[str, int, float]]</span><span class="mkapi-paren">)</span></span></p>
+  <span class="mkapi-object-name"><span class="mkapi-name">Server</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">fed_strategy_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">fed_strategy_params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imputer_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imputer_params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">global_test</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">server_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Dict">Dict</span>[str, <span class="mkapi-tooltip" title="typing.Union">Union</span>[str, int, float]]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">21</span><span class="mkapi-paren">)</span></span></p>
 <p>Server class to be used in the federated imputation environment</p>
 <p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
 <ul>
@@ -358,6 +358,10 @@ np.ndarray - global test data
 <ul>
 <li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.server.server.Server.global_evaluation">global_evaluation</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.server.server.Server.calculate_data_utils">calculate_data_utils</span></span>
   </p>
 </li>
 </ul>
