@@ -65,3 +65,7 @@ class StrategyBaseClient(ABC):
         :return: local model and training results dict
         """
         pass
+
+    @abstractmethod
+    def get_fit_res(self, local_model: torch.nn.Module, params: dict) -> dict:
+        pass

@@ -28,11 +28,11 @@ def setup_clients(
 def setup_server(
         fed_strategy: str, fed_strategy_params: dict,
         imputer_name: str, imputer_params: dict,
-        global_test: np.ndarray, server_config: dict
+        global_test: np.ndarray, data_config: dict, server_config: dict
 ) -> Server:
 
     server = Server(
-        fed_strategy, fed_strategy_params, imputer_name, imputer_params, global_test, server_config
+        fed_strategy, fed_strategy_params, imputer_name, imputer_params, global_test, data_config, server_config
     )
     return server
 

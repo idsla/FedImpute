@@ -6,6 +6,7 @@ from typing import Tuple
 import gc
 
 from ...imputation.base import BaseNNImputer
+from ..utils import get_parameters
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -14,6 +15,7 @@ class FedAvgStrategyClient(StrategyBaseClient):
 
     def __init__(self):
         super().__init__('fedavg')
+        self.loss = None
 
     def pre_training_setup(self, params: dict):
         return {}
@@ -22,13 +24,11 @@ class FedAvgStrategyClient(StrategyBaseClient):
         return {}
 
     def set_parameters(self, updated_model_params: dict, local_model: torch.nn.Module, params: dict):
-        # for new_param, old_param in zip(global_model.parameters(), local_model.parameters()):
-        #     old_param.data = new_param.data.clone()
         state_dict = {k: torch.from_numpy(v.copy()) for k, v in updated_model_params.items()}
         local_model.load_state_dict(state_dict)
 
     def get_parameters(self, local_model: torch.nn.Module, params: dict) -> dict:
-        return {key: val.cpu().numpy() for key, val in local_model.state_dict().items()}
+        return get_parameters(local_model, trainable_only=True, return_type='numpy_dict')
 
     def train_local_nn_model(
             self, imputer: BaseNNImputer, training_params: dict, X_train_imp: np.ndarray,
@@ -47,7 +47,7 @@ class FedAvgStrategyClient(StrategyBaseClient):
         local_model, train_dataloader = imputer.configure_model(training_params, X_train_imp, y_train, X_train_mask)
 
         # optimizer and scheduler
-        optimizers, lr_schedulers = imputer.configure_optimizer(training_params, local_model)
+        optimizers, lr_schedulers, optim_params = imputer.configure_optimizer(training_params, local_model)
         local_model.to(DEVICE)
 
         ################################################################################################################
@@ -103,7 +103,11 @@ class FedAvgStrategyClient(StrategyBaseClient):
         # post-training setup
         self.post_training_setup({})
         uploaded_params = self.get_parameters(local_model, {})
+        self.loss = final_loss
 
         return uploaded_params, {
             'loss': final_loss, 'sample_size': len(train_dataloader.dataset),
         }
+
+    def get_fit_res(self, local_model: torch.nn.Module, params: dict) -> dict:
+        return {'loss': self.loss}

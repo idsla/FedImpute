@@ -116,7 +116,7 @@ class FedImputeEnv:
         self.server = setup_server(
             fed_strategy=self.fed_strategy_name, fed_strategy_params=self.fed_strategy_params,
             imputer_name=self.imputer_name, imputer_params=self.imputer_params,
-            global_test=global_test,
+            global_test=global_test, data_config=data_config,
             server_config={}
         )
 

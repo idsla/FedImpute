@@ -2,11 +2,12 @@ from typing import List, Tuple
 import torch
 from ...fed_strategy.fed_strategy_server import StrategyBaseServer
 import copy
+from ..utils import get_parameters
 
 
 class ScaffoldStrategyServer(StrategyBaseServer):
 
-    def __init__(self, server_learning_rate: float = 0.001, fine_tune_epochs: int = 0):
+    def __init__(self, server_learning_rate: float = 1.0, fine_tune_epochs: int = 0):
 
         super(ScaffoldStrategyServer, self).__init__('scaffold', 'fedavg', fine_tune_epochs)
         self.initial_impute = 'fedavg'
@@ -14,6 +15,10 @@ class ScaffoldStrategyServer(StrategyBaseServer):
         self.server_learning_rate = server_learning_rate
         self.global_model = None
         self.global_c = None
+
+    @staticmethod
+    def get_parameters(local_model: torch.nn.Module, params: dict) -> dict:
+        return get_parameters(local_model, trainable_only=True, return_type='numpy_dict')
 
     def initialization(self, global_model, params: dict):
         """
@@ -23,14 +28,17 @@ class ScaffoldStrategyServer(StrategyBaseServer):
         :return: None
         """
         self.global_model = global_model
-        self.global_c = [torch.zeros_like(param) for param in global_model.parameters()]
+        self.global_c = [
+            torch.zeros_like(param) for param in
+            get_parameters(global_model, trainable_only=True, return_type='parameters')
+        ]
 
     def aggregate_parameters(
-            self, local_models: List[torch.nn.Module], fit_res: List[dict], params: dict, *args, **kwargs
-    ) -> Tuple[List[torch.nn.Module], dict]:
+        self, local_model_parameters: List[dict], fit_res: List[dict], params: dict, *args, **kwargs
+    ) -> Tuple[List[dict], dict]:
         """
         Aggregate local models
-        :param local_models: List of local model objects
+        :param local_model_parameters: List of local model numpy dict
         :param fit_res: List of fit results of local training
             - sample_size: int - number of samples used for training
         :param params: dictionary for information
@@ -41,12 +49,12 @@ class ScaffoldStrategyServer(StrategyBaseServer):
 
         global_model = copy.deepcopy(self.global_model)
         global_c = copy.deepcopy(self.global_c)
-        num_clients = len(local_models)
+        num_clients = len(local_model_parameters)
         weights = torch.tensor([fit_res[cid]['sample_size'] for cid in range(num_clients)])
         weights = weights / weights.sum()
         for cid in range(num_clients):
             dy, dc = fit_res[cid]['delta_y'], fit_res[cid]['delta_c']
-            for server_param, client_param in zip(global_model.parameters(), dy):
+            for server_param, client_param in zip(get_parameters(global_model, trainable_only=True, return_type='parameters', copy = False), dy):
                 server_param.data += client_param.data.clone() * weights[cid] * self.server_learning_rate
             for server_param, client_param in zip(global_c, dc):
                 server_param.data += client_param.data.clone() * weights[cid]
@@ -54,11 +62,18 @@ class ScaffoldStrategyServer(StrategyBaseServer):
         self.global_model = global_model
         self.global_c = global_c
 
-        return [global_model for _ in range(num_clients)], {}
+        return [self.get_parameters(self.global_model, {}) for _ in range(num_clients)], {}
 
     def fit_instruction(self, params_list: List[dict]) -> List[dict]:
 
-        return [{'fit_model': True} for _ in range(len(params_list))]
+        return [
+            {
+                'fit_model': True,
+                'global_c': self.global_c,
+                'global_model_dict': get_parameters(
+                    self.global_model, trainable_only=True, return_type='numpy_dict')
+            } for _ in range(len(params_list))
+        ]
 
     def update_instruction(self, params: dict) -> dict:
 

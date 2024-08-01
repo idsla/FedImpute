@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     env = FedImputeEnv()
     env.reset_env()
-    env.configuration(imputer='fed_em', fed_strategy='fedavg', fit_mode='central')
+    env.configuration(imputer='miwae', fed_strategy='scaffold', fit_mode='fed')
     env.setup_from_simulator(simulator=simulator, verbose=1)
     print(env.imputer_name, env.fed_strategy_name)
 

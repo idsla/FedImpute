@@ -109,9 +109,9 @@ class Client:
         """
         if not params['fit_model']:
             if isinstance(self.fed_strategy, StrategyBaseClient):
-                return self.fed_strategy.get_parameters(self.imputer.model, params), {
-                    'sample_size': self.X_train_imp.shape[0], 'converged': True
-                }
+                fit_res = self.fed_strategy.get_fit_res(self.imputer.model, params)
+                fit_res.update({'sample_size': self.X_train_imp.shape[0], 'converged': True})
+                return self.fed_strategy.get_parameters(self.imputer.model, params), fit_res
             else:
                 return self.imputer.get_imp_model_params(params), {
                     'sample_size': self.X_train_imp.shape[0], 'converged': True

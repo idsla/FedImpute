@@ -1,7 +1,7 @@
 import gc
 from collections import OrderedDict
 from copy import deepcopy
-from typing import Tuple, List, Union
+from typing import Tuple, List, Union, Dict, Any
 
 import numpy as np
 import torch
@@ -144,7 +144,7 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
 
     def configure_optimizer(
             self, params: dict, model: torch.nn.Module
-    ) -> tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler]]:
+    ) -> tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler], Dict[str, Any]]:
 
         g_solver = load_optimizer(
             self.optimizer, model.generator_layer.parameters(), self.learning_rate, self.weight_decay
@@ -158,7 +158,8 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
         g_lr_scheduler = load_lr_scheduler(self.scheduler, g_solver, self.scheduler_params)
 
         return (
-            [d_solver, g_solver], [d_lr_scheduler, g_lr_scheduler]
+            [d_solver, g_solver], [d_lr_scheduler, g_lr_scheduler],
+            {'learning_rate': self.learning_rate, 'weight_decay': self.weight_decay}
         )
 
     def impute(

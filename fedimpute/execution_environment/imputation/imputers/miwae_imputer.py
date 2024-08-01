@@ -1,6 +1,6 @@
 import gc
 from copy import deepcopy
-from typing import Dict, Union, List, Tuple, OrderedDict
+from typing import Dict, Union, List, Tuple, OrderedDict, Any
 
 import numpy as np
 from torch.utils.data import DataLoader
@@ -150,12 +150,12 @@ class MIWAEImputer(BaseNNImputer, JMImputerMixin):
 
     def configure_optimizer(
             self, params: dict, model: torch.nn.Module
-    ) -> tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler]]:
+    ) -> tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler], Dict[str, Any]]:
 
         optimizer = load_optimizer(self.optimizer, model.parameters(), self.learning_rate, self.weight_decay)
         lr_scheduler = load_lr_scheduler(self.scheduler, optimizer, self.scheduler_params)
 
-        return [optimizer], [lr_scheduler]
+        return [optimizer], [lr_scheduler], {'learning_rate': self.learning_rate, 'weight_decay': self.weight_decay}
 
     def fit(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> dict:
 
