@@ -2,7 +2,7 @@ import os
 import pickle
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
-from typing import Tuple, List
+from typing import Tuple, List, Dict, Any
 
 import numpy as np
 import torch
@@ -182,7 +182,7 @@ class BaseNNImputer(metaclass=ABCMeta):
     @abstractmethod
     def configure_optimizer(
             self, params: dict, model: torch.nn.Module
-    ) -> tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler]]:
+    ) -> tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler], Dict[str, Any]]:
         """
         Configure optimizer for training
 
@@ -191,8 +191,8 @@ class BaseNNImputer(metaclass=ABCMeta):
             params (dict): params for optmizer
 
         Returns:
-            tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler]]:
-                List of optimizers and List of lr_schedulers
+            tuple[List[torch.optim.Optimizer], List[torch.optim.lr_scheduler.LRScheduler], Dict[str, Any]]:
+                List of optimizers and List of lr_schedulers, optimizer_params
         """
         pass
 

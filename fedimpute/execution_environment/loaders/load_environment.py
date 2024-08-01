@@ -5,10 +5,6 @@ from ..server import Server
 from typing import List, Tuple
 from typing import Union, List
 
-from ..workflows.workflow_ice import WorkflowICE
-from ..workflows.workflow_icegrad import WorkflowICEGrad
-from ..workflows.workflow_jm import WorkflowJM
-
 
 def setup_clients(
         clients_data: List[Tuple[np.ndarray, np.ndarray, np.ndarray]], clients_seeds: List[int], data_config: dict,
@@ -30,12 +26,14 @@ def setup_clients(
 
 
 def setup_server(
-        fed_strategy: str, fed_strategy_params: dict, global_test: np.ndarray, server_config: dict
+        fed_strategy: str, fed_strategy_params: dict,
+        imputer_name: str, imputer_params: dict,
+        global_test: np.ndarray, data_config: dict, server_config: dict
 ) -> Server:
-    server = Server(
-        fed_strategy, fed_strategy_params, global_test, server_config
-    )
 
+    server = Server(
+        fed_strategy, fed_strategy_params, imputer_name, imputer_params, global_test, data_config, server_config
+    )
     return server
 
 

@@ -24,7 +24,7 @@ class WorkflowJM(BaseWorkflow):
     def __init__(
             self,
             initial_zero_impute: bool = True,
-            global_epoch: int = 150,
+            global_epoch: int = 300,
             local_epoch: int = 5,
             use_early_stopping: bool = True,
             log_interval: int = 10,
@@ -39,7 +39,7 @@ class WorkflowJM(BaseWorkflow):
                 "back_steps": 1
             },
     ):
-        super().__init__()
+        super(WorkflowJM, self).__init__()
         self.tracker = None
         self.initial_zero_impute = initial_zero_impute
         self.global_epoch = global_epoch
@@ -173,9 +173,7 @@ class WorkflowJM(BaseWorkflow):
         )
 
         fine_tune_epochs = server.fed_strategy.fine_tune_epochs
-        fit_params_list = [{
-            'local_epoch': 1
-        } for _ in clients]
+        fit_params_list = [{'local_epoch': 1} for _ in clients]
         for epoch in trange(fine_tune_epochs, desc='Fine Tuning Epoch', colour='blue'):
 
             clients_fit_res = []
@@ -485,9 +483,9 @@ class WorkflowJM(BaseWorkflow):
     def logging_loss(clients_fit_res: List):
         losses = np.array([client_fit_res['loss'] for client_fit_res in clients_fit_res if 'loss' in client_fit_res])
         if len(losses) == 0:
-            loguru.logger.debug("\nLoss: {:.2f} ({:2f})".format(0, 0))
+            loguru.logger.info("\nLoss: {:.2f} ({:2f})".format(0, 0))
         else:
-            loguru.logger.debug("\nLoss: {:.4f} ({:4f})".format(losses.mean(), losses.std()))
+            loguru.logger.info("\nLoss: {:.4f} ({:4f})".format(losses.mean(), losses.std()))
 
     @staticmethod
     def pseudo_imp_eval(clients, evaluator: Evaluator):

@@ -14,6 +14,7 @@ def client_process_func(client: Client, client_pipe: mp.Pipe):
     """
     while True:
         command, data = client_pipe.recv()
+        #print(client.client_id, command)
         if command == "initial_impute":
             client.initial_impute(data)
         elif command == "fit_local":
@@ -23,6 +24,8 @@ def client_process_func(client: Client, client_pipe: mp.Pipe):
         elif command == "update_and_impute":
             client.update_local_imp_model(data['global_model_params'], params=data['params'])
             client.local_imputation(params=data['params'])
+            client_pipe.send((client.X_train_imp, client.X_train, client.X_train_mask))
+        elif command == 'send_data':
             client_pipe.send((client.X_train_imp, client.X_train, client.X_train_mask))
         elif command == "update_only":
             client.update_local_imp_model(data['global_model_params'], params=data['params'])
@@ -50,6 +53,7 @@ def server_process_func(server: Server, client_pipes: List[mp.Pipe], server_pipe
     """
     while True:
         command = server_pipe.recv()
+        #print(command)
         if command == "aggregate":
             params_list, fit_rest_list = [], []
             for pipe in client_pipes:

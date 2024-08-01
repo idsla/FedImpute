@@ -28,7 +28,7 @@ class WorkflowEM(BaseWorkflow):
             evaluation_interval: int = 1,
             save_model_interval: int = 10
     ):
-        super().__init__()
+        super(WorkflowEM, self).__init__()
         self.max_iterations = max_iterations
         self.convergence_thres = convergence_thres
         self.local_epoch = local_epoch
@@ -326,8 +326,9 @@ class WorkflowEM(BaseWorkflow):
                 # Client update and local imputation
                 for client_id, (pipe, global_model) in enumerate(zip(client_pipes, global_models)):
                     if clients_converged_signs[client_id]:
-                        continue
-                    pipe[0].send(("update_and_impute", {'global_model_params': global_model, 'params': {}}))
+                        pipe[0].send(('send_data', {}))
+                    else:
+                        pipe[0].send(("update_and_impute", {'global_model_params': global_model, 'params': {}}))
 
                 # Receive client imputation results and Evaluate
                 clients_data = [pipe[0].recv() for pipe in client_pipes]

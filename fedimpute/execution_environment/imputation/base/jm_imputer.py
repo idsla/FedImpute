@@ -1,4 +1,6 @@
 import numpy as np
+
+
 class JMImputerMixin:
 
     def __init__(self):

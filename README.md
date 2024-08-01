@@ -102,12 +102,15 @@ Federated Imputation Algorithms:
 
 Federated Strategies:
 
-|   Method    |      Type       | Fed_strategy(code) | Reference     |
-|:-----------:|:---------------:|:------------------:|:--------------|
-|   FedAvg    |    global FL    |      `fedavg`      | [FedAvg]()    |
-|   FedProx   |    global FL    |     `fedprox`      | [FedProx]()   |
-|  Scaffold   |    global FL    |     `scaffold`     | [Scaffold]()  |
-|  FedAvg-FT  | personalized FL |    `fedavg_ft`     | [FedAvg-FT]() |
+|   Method   |      Type       | Fed_strategy(code) | Reference      |
+|:----------:|:---------------:|:------------------:|:---------------|
+|   FedAvg   |    global FL    |      `fedavg`      | [FedAvg](https://arxiv.org/pdf/1602.05629)     |
+|  FedProx   |    global FL    |     `fedprox`      | [FedProx](https://arxiv.org/pdf/1812.06127)    |
+|  Scaffold  |    global FL    |     `scaffold`     | [Scaffold](https://arxiv.org/pdf/1910.06378)   |
+|  FedAdam   |    global FL    |     `fedadam`      | [FedAdam](https://arxiv.org/pdf/2003.00295)    |
+| FedAdagrad |    global FL    |    `fedadagrad`    | [FedAdaGrad](https://arxiv.org/pdf/2003.00295) |
+|  FedYogi   |    global FL    |     `fedyogi`      | [FedYogi](https://arxiv.org/pdf/2003.00295)    |
+| FedAvg-FT  | personalized FL |    `fedavg_ft`     | [FedAvg-FT]()  |
 
 
 
