@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fedimpute"
-version = "0.0.4"
+version = "0.0.5"
 description = "fedimpute is a benchmarking tool for federated imputation"
 authors = ["Sitao Min (idlsa Rutgers University) <sitaomin1994@gmail.com>"]
 license = "GPL GNU v3.0"
