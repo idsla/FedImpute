@@ -58,6 +58,10 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#overview-and-basic-usage">Overview and Basic Usage</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#supported-data-partition-strategies">Supported Data Partition Strategies</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#supported-missing-data-mechanism">Supported Missing Data Mechanism</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#classical-simulation-function-simulate_scenario">Classical Simulation Function - simulate_scenario</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#data-partitioning-parameters">Data Partitioning Parameters</a>
@@ -144,6 +148,26 @@ Initialize the <code>Simulator</code> class and call the <code>simulate_scenario
   <span class="n">dp_split_col_option</span> <span class="o">=</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
 <span class="p">)</span>
 </code></pre></div>
+<h2 id="supported-data-partition-strategies">Supported Data Partition Strategies</h2>
+<ul>
+<li><strong>Natural Partition</strong>: this can be done by reading list of datasets, see <code>data_prep</code> section in documentation, the input will be list of datasets (federated data) and no further partition will be applied.</li>
+<li><strong>Artifical Partition</strong><ul>
+<li><code>column</code>: partition based on discrete values of the column in the dataset</li>
+<li><code>iid-even</code>: iid partition with even sample sizes</li>
+<li><code>iid-dir</code>： iid parititon with sample sizes following dirichlet distribution</li>
+<li><code>niid-dir</code>: non-iid partition based on some columns with dirichlet ditribution</li>
+<li><code>niid-path</code>: non-iid partition based on some columns with pathological distribution (shard partition)</li>
+</ul>
+</li>
+</ul>
+<h2 id="supported-missing-data-mechanism">Supported Missing Data Mechanism</h2>
+<ul>
+<li><code>mcar</code>: MCAR missing mechanism</li>
+<li><code>mar-homo</code>: Homogeneous MAR missing mechansim</li>
+<li><code>mar-heter</code>: Heterogeneous MAR missing mechanism</li>
+<li><code>mnar-homo</code>: Homogeneours MNAR missing mechanism</li>
+<li><code>mnar-heter</code>: Heterogenous MNAR missing mechanism</li>
+</ul>
 <h2 id="classical-simulation-function-simulate_scenario">Classical Simulation Function - <code>simulate_scenario</code></h2>
 <p>The <code>simulate_scenario</code> method has the following major parameters for data partitioning and missing data simulation.</p>
 <h3 id="data-partitioning-parameters">Data Partitioning Parameters</h3>
@@ -151,6 +175,7 @@ Initialize the <code>Simulator</code> class and call the <code>simulate_scenario
 <ul>
 <li><strong>num_clients</strong> (int) - Number of clients to partition the dataset.</li>
 <li><strong>dp_strategy</strong> (str) - Data partitioning strategy. The available strategies are:<ul>
+<li><code>natural_column</code>: Partition the data samples based on values of a categorical column in the dataset, to use this strategy, user need to specify the <strong>dp_split_cols</strong> to be the index of the column to partition based on. If column is continous, it values will be first binned into 20 bins. That column will be dropped out after partitioning the data.</li>
 <li><code>iid-even</code>: Partition the data samples i.i.d across the clients with equal sample sizes.</li>
 <li><code>iid-dir</code>: Partition the data samples i.i.d across the clients with sample sizes follows 
 Dirichlet distribtion with parameter <strong><alpha></strong> controlled by <strong>dp_size_niid_alpha</strong> parameter.</li>
@@ -257,6 +282,7 @@ which can be used to simulate the missing data scenario with predefined strategi
 <p>The <code>simulate_scenario_lite</code> method has the following major parameters for data partitioning and missing data simulation.</p>
 <h3 id="data-partitioning-options-dp_strategy">Data Partitioning Options - <code>dp_strategy</code></h3>
 <ul>
+<li><strong>column@<col_id></strong>: Partition data based on value of a categorical column</li>
 <li><strong>iid-even</strong>: Partition the data samples i.i.d across the clients with equal sample sizes.</li>
 <li><strong>iid-dir@&lt;alpha&gt;</strong>: Partition the data samples i.i.d across the clients with sample sizes follows dirichlet distribution with parameter <code>alpha</code>,e.g. <code>iid-dir@0.5</code>.</li>
 <li><strong>niid-dir@&lt;alpha&gt;</strong>: Partition the data samples non-i.i.d across the clients with dirichlet distribution with parameter <code>alpha</code>,e.g. <code>niid-dir@0.5</code></li>

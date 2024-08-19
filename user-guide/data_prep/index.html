@@ -117,7 +117,7 @@
                 <h1 id="dataset-and-preprocessing">Dataset and Preprocessing</h1>
 <p>The first step for using FedImpute is to prepare the data. </p>
 <h2 id="input-data-format-and-preprocessing">Input Data Format and Preprocessing</h2>
-<p>The data should be tabular data in the form of a <strong>numpy array</strong> (<code>&lt;np.ndarray&gt;</code>), where each row represents an observation and each column represents a feature. 
+<p>The data should be tabular data in the form of a <strong>numpy array</strong> (<code>&lt;np.ndarray&gt;</code>) or <strong>List of numpy arrays</strong> for those <strong><em>naturally partitioned federated data</em></strong>, where each row represents an observation and each column represents a feature. 
 It will be the input to the simulation process, where it will be partitioned into subset as local dataset for each party and the missing data will be introduced.</p>
 <h3 id="required-preprocessing-steps">Required Preprocessing Steps</h3>
 <p>There are some basic <strong>preprocessing steps</strong> that you need to follow before using FedImpute, 
@@ -174,6 +174,7 @@ The example of the <code>data_config</code> dictionary is as follows:</p>
     <span class="s1">&#39;task_type&#39;</span><span class="p">:</span> <span class="s1">&#39;classification&#39;</span><span class="p">,</span>
     <span class="s1">&#39;clf_type&#39;</span><span class="p">:</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span>
     <span class="s1">&#39;num_cols&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s1">&#39;natural_partition&#39;</span><span class="p">:</span> <span class="kc">False</span>
 <span class="p">}</span>
 </code></pre></div>
 <p>The <code>data_config</code> dictionary should contain the following keys:</p>
