@@ -1,7 +1,7 @@
 from ..imputation.imputers import (
     LinearICEImputer,
     SimpleImputer, EMImputer,
-    ICEGradImputer, GAINImputer, MIWAEImputer, MissForestImputer,
+    ICEGradImputer, GAINImputer, MIWAEImputer, MissForestImputer, NotMIWAEImputer, GNRImputer
 )
 
 
@@ -28,7 +28,9 @@ def load_imputer(name, imputer_params):
         return GAINImputer(**imputer_params)
     elif name == 'miwae':
         return MIWAEImputer(name='miwae', **imputer_params)
-    # elif name == 'notmiwae':
-    #     return MIWAEImputer(name='notmiwae', **imputer_params)
+    elif name == 'notmiwae':
+        return NotMIWAEImputer(**imputer_params)
+    elif name == 'gnr':
+        return GNRImputer(**imputer_params)
     else:
         raise NotImplementedError

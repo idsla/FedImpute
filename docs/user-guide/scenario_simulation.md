@@ -36,6 +36,24 @@ simulation_results = simulator.simulate_scenario_lite(
 )
 ```
 
+## Supported Data Partition Strategies
+
+- **Natural Partition**: this can be done by reading list of datasets, see `data_prep` section in documentation, the input will be list of datasets (federated data) and no further partition will be applied.
+- **Artifical Partition**
+    - `column`: partition based on discrete values of the column in the dataset
+    - `iid-even`: iid partition with even sample sizes
+    - `iid-dir`： iid parititon with sample sizes following dirichlet distribution
+    - `niid-dir`: non-iid partition based on some columns with dirichlet ditribution
+    - `niid-path`: non-iid partition based on some columns with pathological distribution (shard partition)
+
+## Supported Missing Data Mechanism
+
+- `mcar`: MCAR missing mechanism
+- `mar-homo`: Homogeneous MAR missing mechansim
+- `mar-heter`: Heterogeneous MAR missing mechanism
+- `mnar-homo`: Homogeneours MNAR missing mechanism
+- `mnar-heter`: Heterogenous MNAR missing mechanism
+
 ## Classical Simulation Function - `simulate_scenario`
 
 The `simulate_scenario` method has the following major parameters for data partitioning and missing data simulation.
@@ -46,6 +64,7 @@ The core parameters for data partitioning are number of clients and data partiti
 
 - **num_clients** (int) - Number of clients to partition the dataset.
 - **dp_strategy** (str) - Data partitioning strategy. The available strategies are:
+    - `natural_column`: Partition the data samples based on values of a categorical column in the dataset, to use this strategy, user need to specify the **dp_split_cols** to be the index of the column to partition based on. If column is continous, it values will be first binned into 20 bins. That column will be dropped out after partitioning the data.
     - `iid-even`: Partition the data samples i.i.d across the clients with equal sample sizes.
     - `iid-dir`: Partition the data samples i.i.d across the clients with sample sizes follows 
     Dirichlet distribtion with parameter **<alpha>** controlled by **dp_size_niid_alpha** parameter.
@@ -139,6 +158,7 @@ The `simulate_scenario_lite` method has the following major parameters for data 
 
 ### Data Partitioning Options - `dp_strategy`
 
+- **column@<col_id>**: Partition data based on value of a categorical column
 - **iid-even**: Partition the data samples i.i.d across the clients with equal sample sizes.
 - **iid-dir@<alpha\>**: Partition the data samples i.i.d across the clients with sample sizes follows dirichlet distribution with parameter `alpha`,e.g. `iid-dir@0.5`.
 - **niid-dir@<alpha\>**: Partition the data samples non-i.i.d across the clients with dirichlet distribution with parameter `alpha`,e.g. `niid-dir@0.5`

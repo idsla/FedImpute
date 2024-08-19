@@ -62,6 +62,8 @@ Federated Imputation Algorithms:
 | Fed-MissForest |    Non-NN     |            -             | `fed_missforest` | `ice`     | [MissForest](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_missforest.py), [Fed Randomforest](https://pubmed.ncbi.nlm.nih.gov/35139148/) |
 |     MIWAE      |      NN       | `fedavg`, `fedprox`,...  |     `miwae`      | `jm`      | [MIWAE](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_miwae.py)                                                                          |
 |      GAIN      |      NN       | `fedavg`, `fedprox`, ... |      `gain`      | `jm`      | [GAIN](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_gain.py)                                                                            |
+|     Not-MIWAE      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`, ...     |     `notmiwae`      | `jm` | [Not-MIWAE](https://arxiv.org/abs/2006.12871)
+|     GNR      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`, ...    |     `gnr`      | `jm` | [GNR](https://dl.acm.org/doi/abs/10.1145/3583780.3614835?casa_token=o8dv16sHJcMAAAAA:aAIvug_7cp9oUJSB7ZfTvzUksPyuP6Jbcl3TlHsvXXGEwIe4AbQuHCTlxXZtjDKlymfO30n2o-E9iw)
 
 Federated Strategies:
 

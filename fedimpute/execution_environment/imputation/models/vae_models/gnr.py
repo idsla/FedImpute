@@ -52,15 +52,6 @@ class FusionDecoder(nn.Module):
         return mu, std, mask
 
 
-# class MaskNet(nn.Module):
-#     def __init__(self, input_dim, output_dim, out_activation_fn):
-#         super(MaskNet, self).__init__()
-#         self.mask_layer = nn.Linear(input_dim, output_dim)
-#         self.out_activation_fn = out_activation_fn
-#
-#     def forward(self, u):
-#         return self.out_activation_fn(self.mask_layer(u))
-
 class GNR(nn.Module):
 
     def __init__(
@@ -70,13 +61,12 @@ class GNR(nn.Module):
             n_hidden: int = 1,
             n_hidden_layers: int = 2,
             seed: int = 0,
-            out_dist=None,  # TODO: add this option later
             K: int = 20,
             loss_ceof=10,
+            mr_loss_coef: bool = True,
             L: int = 1000,
             activation='tanh',
             initializer='xavier',
-            mr_loss_coef: bool = True
     ) -> None:
         super().__init__()
         set_seed(seed)
@@ -93,12 +83,11 @@ class GNR(nn.Module):
 
         # encoder
         self.encoder = BaseEncoder(
-            self.num_features, 2 * self.latent_size, [self.n_hidden for _ in range(self.n_hidden_layers)],
+            self.num_features, self.latent_size, [self.n_hidden for _ in range(self.n_hidden_layers)],
             activation=activation
         ).to(DEVICE)
 
         # fusion decoder
-        self.out_dist = out_dist
         self.decoder = FusionDecoder(
             self.latent_size, self.num_features, [self.n_hidden for _ in range(self.n_hidden_layers)],
             activation=activation
@@ -121,14 +110,15 @@ class GNR(nn.Module):
 
     def compute_loss(self, inputs: Tuple[torch.Tensor, ...]) -> Tuple[torch.Tensor, Dict]:
         x, mask = inputs  # x - data, mask - missing mask
-        batch_size = x.shape[0]
         missing_ratio = (1 - mask).sum() / (mask.shape[0] * mask.shape[1]) + 1e-6
 
         # encoder
         q_mu, q_logvar = self.encoder(x)  # (batch_size, latent_size)
-        q_std = torch.sqrt(torch.exp(q_logvar))
 
-        q_zgivenx = td.Normal(loc=q_mu, scale=q_std)  # todo check consistency of std and logvar
+        q_std = torch.sqrt(torch.exp(q_logvar))
+        q_zgivenx = td.Independent(
+            td.Normal(loc=q_mu, scale=q_std), 1  # todo check consistency of std and logvar
+        )
         l_z = q_zgivenx.rsample([self.K])  # (K, batch_size, latent_size)
         l_z = torch.transpose(l_z, 0, 1)  # (batch_size, K, latent_size)
 
@@ -152,18 +142,18 @@ class GNR(nn.Module):
         )  # (batch_size, K)
 
         # q(z|x)
-        q_z_given_x2 = td.Normal(loc=torch.unsqueeze(q_mu, dim=1), scale=torch.unsqueeze(q_std, dim=1))
-        log_qz_given_x = torch.sum(
-            q_z_given_x2.log_prob(l_z),  # (batch_size, K, 1, latent_size)
-            dim=-1
-        )
+        # q_z_given_x2 = td.Independent(
+        #     td.Normal(loc=torch.unsqueeze(q_mu, dim=1), scale=torch.unsqueeze(q_std, dim=1)),
+        #     1
+        # )
+        log_qz_given_x = q_zgivenx.log_prob(l_z)  # (batch_size, K)
 
         # p(z)
-        log_pz = torch.sum(self.p_z.log_prob(l_z), dim=-1)  # (batch_size, K)
+        log_pz = self.p_z.log_prob(l_z)  # (batch_size, K)
 
         # final loss
         if self.mr_loss_coef:
-            l_w = log_px_given_z + self.loss_coef * log_pm_given_z / missing_ratio + log_pz - log_qz_given_x
+            l_w = log_px_given_z + log_pm_given_z * self.loss_coef / missing_ratio.item() + log_pz - log_qz_given_x
         else:
             l_w = log_px_given_z + self.loss_coef * log_pm_given_z + log_pz - log_qz_given_x
 
@@ -193,7 +183,7 @@ class GNR(nn.Module):
         q_mu, q_logvar = self.encoder(x)
         q_std = torch.sqrt(torch.exp(q_logvar))
 
-        q_zgivenx = td.Normal(loc=q_mu, scale=q_std)  # todo check consistency of std and logvar
+        q_zgivenx = td.Independent(td.Normal(loc=q_mu, scale=q_std),1)  # todo check consistency of std and logvar
         l_z = q_zgivenx.rsample([L])  # (L, batch_size, latent_size)
         l_z = torch.transpose(l_z, 0, 1)  # (batch_size, L, latent_size)
 
@@ -216,17 +206,19 @@ class GNR(nn.Module):
         )  # (batch_size, L)
 
         # q(z|x)
-        q_z_given_x2 = td.Normal(loc=torch.unsqueeze(q_mu, dim=1), scale=torch.unsqueeze(q_std, dim=1))
-        log_qz_given_x = torch.sum(
-            q_z_given_x2.log_prob(l_z), dim=-1  # (batch_size, L, 1, latent_size)
-        )
+        # q_z_given_x2 = td.Independent(
+        #     td.Normal(loc=torch.unsqueeze(q_mu, dim=1), scale=torch.unsqueeze(q_std, dim=1)), 1
+        # )
+        l_z_reshaped = l_z.view(-1, self.latent_size)  # (batch_size*L, latent size)
+        log_qz_given_x = q_zgivenx.log_prob(l_z_reshaped) # (batch_size, L)
+
 
         # p(z)
-        log_pz = torch.sum(self.p_z.log_prob(l_z), dim=-1)  # (batch_size, L)
+        log_pz = self.p_z.log_prob(l_z)  # (batch_size, L)
 
         # final loss
         if self.mr_loss_coef:
-            l_w = log_px_given_z + self.loss_coef * log_pm_given_z / missing_ratio + log_pz - log_qz_given_x
+            l_w = log_px_given_z + log_pm_given_z * self.loss_coef / missing_ratio + log_pz - log_qz_given_x
         else:
             l_w = log_px_given_z + self.loss_coef * log_pm_given_z + log_pz - log_qz_given_x
 
