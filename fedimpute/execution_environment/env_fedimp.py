@@ -58,7 +58,7 @@ class FedImputeEnv:
             imputer_name = 'missforest'
             fed_strategy_name = 'fedtree'
             workflow_name = 'ice'
-        elif imputer in ['miwae', 'gain']:
+        elif imputer in ['miwae', 'gain', 'notmiwae', 'gnr']:
             imputer_name = imputer
             workflow_name = 'jm'
             if fed_strategy in ['fedavg', 'fedavg_ft', 'fedprox', 'scaffold', 'fedadam', 'fedadagrad', 'fedyogi']:

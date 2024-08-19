@@ -87,6 +87,24 @@ evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstrea
 evaluator.show_results()
 ```
 
+## Supported Data Partition Strategies
+
+- **Natural Partition**: this can be done by reading list of datasets, see "Dataset and Preprocessing" section in documentation
+- **Artifical Partition**
+    - `column`: partition based on discrete values of the column in the dataset
+    - `iid-even`: iid partition with even sample sizes
+    - `iid-dir`： iid parititon with sample sizes following dirichlet distribution
+    - `niid-dir`: non-iid partition based on some columns with dirichlet ditribution
+    - `niid-path`: non-iid partition based on some columns with pathological distribution (shard partition)
+
+## Supported Missing Data Mechanism
+
+- `mcar`: MCAR missing mechanism
+- `mar-homo`: Homogeneous MAR missing mechansim
+- `mar-heter`: Heterogeneous MAR missing mechanism
+- `mnar-homo`: Homogeneours MNAR missing mechanism
+- `mnar-heter`: Heterogenous MNAR missing mechanism
+
 ## Supported Federated Imputation Algorithms
 
 Federated Imputation Algorithms:
@@ -97,8 +115,10 @@ Federated Imputation Algorithms:
 |     Fed-EM     |    Non-NN     |                    -                     |     `fed_em`     | [EM](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_EM.py), [FedEM](https://arxiv.org/abs/2108.10252)                                     |
 |    Fed-ICE     |    Non-NN     |                    -                     |    `fed_ice`     | [FedICE](https://pubmed.ncbi.nlm.nih.gov/33122624/)                                                                                                                                         |
 | Fed-MissForest |    Non-NN     |                    -                     | `fed_missforest` | [MissForest](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_missforest.py), [Fed Randomforest](https://pubmed.ncbi.nlm.nih.gov/35139148/) |
-|     MIWAE      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`     |     `miwae`      | [MIWAE](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_miwae.py)                                                                          |
-|      GAIN      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`     |      `gain`      | [GAIN](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_gain.py)                                                                            |
+|     MIWAE      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`, ...    |     `miwae`      | [MIWAE](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_miwae.py)                                                                          |
+|      GAIN      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`, ...     |      `gain`      | [GAIN](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_gain.py)                                                                            |
+|     Not-MIWAE      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`, ...     |     `notmiwae`      | [Not-MIWAE](https://arxiv.org/abs/2006.12871)
+|     GNR      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`, ...    |     `gnr`      | [GNR](https://dl.acm.org/doi/abs/10.1145/3583780.3614835?casa_token=o8dv16sHJcMAAAAA:aAIvug_7cp9oUJSB7ZfTvzUksPyuP6Jbcl3TlHsvXXGEwIe4AbQuHCTlxXZtjDKlymfO30n2o-E9iw)
 
 Federated Strategies:
 

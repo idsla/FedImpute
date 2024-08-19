@@ -1,4 +1,6 @@
 from .miwae_imputer import MIWAEImputer
+from .notmiwae_imputer import NotMIWAEImputer
+from .gnr_imputer import GNRImputer
 from .linear_ice_imputer import LinearICEImputer
 from .simple_imputer import SimpleImputer
 from .gain_imputer import GAINImputer

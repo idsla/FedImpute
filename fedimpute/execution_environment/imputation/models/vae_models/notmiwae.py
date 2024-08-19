@@ -15,7 +15,6 @@ torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
 
 
-# TODO: move this MM model to a separate file
 class MaskNet(nn.Module):
     """
     This implements the Mask net used in notmiwae's implementation for self-masking mechanism
@@ -171,6 +170,7 @@ class NOTMIWAE(nn.Module):
         set_seed(seed)
         self.encoder.apply(lambda x: weights_init(x, self.initializer))
         self.decoder.apply(lambda x: weights_init(x, self.initializer))
+        self.mask_net.apply(lambda x: weights_init(x, self.initializer))
 
     def compute_loss(self, inputs: tuple[torch.Tensor, ...]) -> Tuple[torch.Tensor, Dict]:
 
@@ -205,7 +205,7 @@ class NOTMIWAE(nn.Module):
         all_log_pxgivenz_flat = self.decoder.dist_xgivenz(out_decoder, flat=True).log_prob(data_flat)
         all_log_pxgivenz = all_log_pxgivenz_flat.reshape([self.K * batch_size, self.num_features])
 
-        # p(m|x)
+        # p(m|x) - not-miwae loss
         p_mgivenx = td.Bernoulli(logits=mask_recon)  # (K * batch_size*p, 1)
         all_logp_mgivenx = p_mgivenx.log_prob(tiled_mask.reshape([-1, 1])).reshape(
             [self.K * batch_size, self.num_features])
