@@ -15,7 +15,7 @@ class WorkflowSimple(BaseWorkflow):
     def __init__(
             self,
     ):
-        super(WorkflowSimple, self).__init__()
+        super().__init__('MEAN (Mean Imputation)')
         self.tracker = None
 
     def fed_imp_sequential(

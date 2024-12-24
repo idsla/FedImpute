@@ -39,7 +39,7 @@ class WorkflowJM(BaseWorkflow):
                 "back_steps": 1
             },
     ):
-        super(WorkflowJM, self).__init__()
+        super().__init__('JM (Joint Modeling)')
         self.tracker = None
         self.initial_zero_impute = initial_zero_impute
         self.global_epoch = global_epoch

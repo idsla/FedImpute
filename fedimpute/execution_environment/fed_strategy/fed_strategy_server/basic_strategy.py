@@ -79,7 +79,7 @@ class LocalStrategyServer:
 class SimpleAvgStrategyServer:
 
     def __init__(self):
-        self.name = 'fedavg'
+        self.name = 'simple_avg'
         self.initial_impute = 'fedavg'
         self.fine_tune_epochs = 0
 

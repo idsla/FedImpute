@@ -18,7 +18,7 @@ def add_missing(
         global_missing: bool = False,
         mf_strategy: str = 'all',
         mf_dist: str = 'identity',
-        mr_dist: str = 'uniform_int',
+        mr_dist: str = 'randu',
         mr_lower: float = 0.3,
         mr_upper: float = 0.7,
         mm_funcs_dist: str = 'identity',
@@ -92,7 +92,7 @@ def _add_missing_central(
         data: np.ndarray, cols: List[int],
         mf_strategy: str = 'all',
         mf_dist: str = 'identity',
-        mr_dist: str = 'uniform_int',
+        mr_dist: str = 'randu',
         mr_lower: float = 0.3,
         mr_upper: float = 0.7,
         mm_funcs_bank: str = 'lr',
@@ -165,7 +165,7 @@ def _add_missing_dist(
         clients_data: List[np.ndarray], cols: List[int], rngs: List[np.random.Generator],
         mf_strategy: str = 'all',
         mf_dist: str = 'identity',
-        mr_dist: str = 'randu-int',
+        mr_dist: str = 'randu',
         mr_lower: float = 0.3,
         mr_upper: float = 0.7,
         mm_funcs_dist: str = 'random',
@@ -274,7 +274,7 @@ def simulate_nan(
             X_train, missing_features, missing_ratio=missing_ratios, missing_func=mechanism_funcs,
             obs=mm_obs, strict=mm_strictness, rng=rng
         )
-    elif mm_mech == 'mar_sigmoid':
+    elif mm_mech == 'mar_logit':
         X_train_ms = mar_simulate.simulate_nan_mar_sigmoid(
             X_train, missing_features, missing_ratio=missing_ratios, missing_func=mechanism_funcs,
             obs=mm_obs, strict=mm_strictness, mm_feature_option=mm_feature_option, mm_beta_option=mm_beta_option,
@@ -285,10 +285,15 @@ def simulate_nan(
             X_train, missing_features, missing_ratio=missing_ratios, missing_func=mechanism_funcs, strict=mm_strictness,
             rng=rng
         )
-    elif mm_mech == 'mnar_sigmoid':
+    elif mm_mech == 'mnar_logit':
         X_train_ms = mnar_simulate.simulate_nan_mnar_sigmoid(
             X_train, missing_features, missing_ratio=missing_ratios, missing_func=mechanism_funcs,
             strict=mm_strictness, mm_feature_option=mm_feature_option, mm_beta_option=mm_beta_option, rng=rng
+        )
+    elif mm_mech == 'mnar_sm_logit':
+        X_train_ms = mnar_simulate.simulate_nan_mnar_sigmoid(
+            X_train, missing_features, missing_ratio=missing_ratios, missing_func=mechanism_funcs,
+            strict=mm_strictness, mm_feature_option='self', mm_beta_option=mm_beta_option, rng=rng
         )
     else:
         raise NotImplementedError

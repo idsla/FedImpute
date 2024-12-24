@@ -3,6 +3,7 @@ from typing import Tuple, Union, List
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
+from tabulate import tabulate
 
 
 def one_hot_encoding(
@@ -60,4 +61,18 @@ def ordering_features(
     data = data[numerical_cols + categorical_cols + [target_col]]
 
     return data
+
+
+def display_data(data: pd.DataFrame):
+    print(
+        tabulate(
+            data.head(), 
+            headers='keys', 
+            showindex=False, 
+            tablefmt="psql", 
+            numalign="center", 
+            stralign="center",
+            floatfmt=".4f"
+        )
+    )
 

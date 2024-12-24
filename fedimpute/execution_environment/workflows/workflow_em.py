@@ -28,7 +28,7 @@ class WorkflowEM(BaseWorkflow):
             evaluation_interval: int = 1,
             save_model_interval: int = 10
     ):
-        super(WorkflowEM, self).__init__()
+        super().__init__('EM (Expectation Maximization)')
         self.max_iterations = max_iterations
         self.convergence_thres = convergence_thres
         self.local_epoch = local_epoch

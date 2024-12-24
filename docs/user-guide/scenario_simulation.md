@@ -10,8 +10,7 @@ Details on how to preparing the dataset and the data configuration dictionary ar
 <img src="../../img/fmiss.png" width="600" height="380">
 
 The `fedimpute.simulator` module include the following core functionalities: (1) **Data Partition**: Partition the dataset horizontally into multiple clients.
-(2) **Missing Data Simulation**: Introduce missing values in the dataset of each client. It takes the data and data configuration as input and perform data partition and missing data simulation logic based 
-on the parameters specified by the user and output the following:
+(2) **Missing Data Simulation**: Introduce missing values in the dataset of each client. It takes the data and data configuration as input and perform data partition and missing data simulation logic based on the parameters specified by the user and output the following:
 
 - Clients' local training data
 - Clients' local training data missing mask (representing the missing data)

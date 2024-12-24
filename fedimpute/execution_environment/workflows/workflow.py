@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import loguru
+import timeit
 from ..server import Server
 from typing import Dict, Union, List, Tuple, Any
 from ..client import Client
@@ -12,8 +13,8 @@ class BaseWorkflow(ABC):
     Abstract class for the workflow to be used in the federated imputation environment
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, name: str):
+        self.name = name
 
     @abstractmethod
     def fed_imp_sequential(
@@ -68,11 +69,19 @@ class BaseWorkflow(ABC):
         Returns:
             Tracker - tracker with tracked results
         """
-
+        loguru.logger.info(f"Imputation Start ...")
         if run_type == 'sequential':
-            return self.fed_imp_sequential(clients, server, evaluator, tracker)
+            start_time = timeit.default_timer()
+            result = self.fed_imp_sequential(clients, server, evaluator, tracker)
+            end_time = timeit.default_timer()
+            loguru.logger.info(f"Running time: {end_time - start_time:.4f} seconds")
+            return result
         elif run_type == 'parallel':
-            return self.fed_imp_parallel(clients, server, evaluator, tracker)
+            start_time = timeit.default_timer()
+            result = self.fed_imp_parallel(clients, server, evaluator, tracker)
+            end_time = timeit.default_timer()
+            loguru.logger.info(f"Running time: {end_time - start_time:.4f} seconds")
+            return result
         else:
             raise ValueError('Invalid workflow run type')
 
@@ -99,7 +108,7 @@ class BaseWorkflow(ABC):
             )
 
             loguru.logger.info(
-                f"\nInitial: rmse - {evaluation_results['imp_rmse_avg']} ws - {evaluation_results['imp_ws_avg']}"
+                f"Initial: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
             )
 
             return None
@@ -125,7 +134,7 @@ class BaseWorkflow(ABC):
 
             if log_eval:
                 loguru.logger.info(
-                    f"Epoch {epoch}: rmse - {evaluation_results['imp_rmse_avg']} ws - {evaluation_results['imp_ws_avg']}"
+                    f"Epoch {epoch}: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
                 )
 
             return evaluator.get_imp_quality(evaluation_results)
@@ -149,7 +158,7 @@ class BaseWorkflow(ABC):
             )
 
             loguru.logger.info(
-                f"Final: rmse - {evaluation_results['imp_rmse_avg']} ws - {evaluation_results['imp_ws_avg']}"
+                f"Final: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
             )
 
             return evaluator.get_imp_quality(evaluation_results)
@@ -180,7 +189,7 @@ class BaseWorkflow(ABC):
             )
 
             loguru.logger.info(
-                f"\nInitial: rmse - {evaluation_results['imp_rmse_avg']} ws - {evaluation_results['imp_ws_avg']}"
+                f"\nInitial: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
             )
 
             return None
@@ -204,7 +213,7 @@ class BaseWorkflow(ABC):
 
             if log_eval:
                 loguru.logger.info(
-                    f"Epoch {epoch}: rmse - {evaluation_results['imp_rmse_avg']} ws - {evaluation_results['imp_ws_avg']}"
+                    f"Epoch {epoch}: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
                 )
 
             return evaluator.get_imp_quality(evaluation_results)
@@ -224,7 +233,7 @@ class BaseWorkflow(ABC):
             )
 
             loguru.logger.info(
-                f"Final: rmse - {evaluation_results['imp_rmse_avg']} ws - {evaluation_results['imp_ws_avg']}"
+                f"Final: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
             )
 
             return evaluator.get_imp_quality(evaluation_results)

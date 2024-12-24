@@ -29,7 +29,7 @@ class WorkflowICE(BaseWorkflow):
             log_interval: int = 1,
             save_model_interval: int = 5
     ):
-        super(WorkflowICE, self).__init__()
+        super().__init__('ICE (Imputation via Chain Equation)')
         self.imp_iterations = imp_iterations
         self.evaluation_interval = evaluation_interval
         self.early_stopping = early_stopping
