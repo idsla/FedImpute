@@ -2,7 +2,7 @@ from typing import List, Tuple
 from collections import OrderedDict
 import numpy as np
 
-from ...fed_strategy.fed_strategy_server.strategy_base import StrategyBaseServer
+from ...fed_strategy.fed_strategy_server.strategy_base import NNStrategyBaseServer
 from ..utils import get_parameters, convert_params_format
 
 def fedavg(
@@ -36,7 +36,7 @@ def fedavg(
         return averaged_model_state_dict
 
 
-class FedAvgStrategyServer(StrategyBaseServer):
+class FedAvgStrategyServer(NNStrategyBaseServer):
 
     def __init__(self, fine_tune_epochs: int = 0, weight_option: str = 'sample_size'):
         super().__init__('fedavg', 'fedavg', fine_tune_epochs)

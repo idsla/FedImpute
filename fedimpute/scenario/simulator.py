@@ -493,7 +493,7 @@ class Simulator:
             ms_mm_obs = False
             ms_mm_dist_clients = 'random'
 
-        return self.simulate_scenario(
+        return self.create_simulated_scenario(
             data, 
             data_config, 
             num_clients,

@@ -8,7 +8,7 @@ from fedimpute.execution_environment.loaders.load_imputer import load_imputer
 from fedimpute.execution_environment.utils.tracker import Tracker
 from fedimpute.execution_environment.loaders.load_strategy import load_fed_strategy_server
 import numpy as np
-from fedimpute.execution_environment.fed_strategy.fed_strategy_server.strategy_base import StrategyBaseServer
+from fedimpute.execution_environment.fed_strategy.fed_strategy_server.strategy_base import NNStrategyBaseServer
 
 
 class Server:
@@ -51,7 +51,7 @@ class Server:
         self.global_imputer = load_imputer(imputer_name, imputer_params)
         self.global_imputer.initialize(self.X_test, np.isnan(self.X_test), self.data_utils, {}, self.seed)
 
-        if isinstance(self.fed_strategy, StrategyBaseServer):
+        if isinstance(self.fed_strategy, NNStrategyBaseServer):
             self.fed_strategy.initialization(self.global_imputer.model, {})
 
     def global_evaluation(self, eval_res: dict) -> dict:

@@ -69,10 +69,10 @@ class Evaluator:
     ):
 
         if metrics is None:
-            metrics = ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed']
+            metrics = ['imp_quality', 'local_pred', 'fed_pred']
 
         for metric in metrics:
-            if metric not in ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed']:
+            if metric not in ['imp_quality', 'local_pred', 'fed_pred']:
                 raise ValueError(f"Invalid metric: {metric}")
 
         results = {}
@@ -86,114 +86,63 @@ class Evaluator:
         if 'imp_quality' in metrics:
             if verbose >= 1:
                 loguru.logger.info("Evaluating imputation quality...")
-            results['imp_quality'] = self.evaluate_imp_quality(
+            ret = self.evaluate_imp_quality(
                 X_train_imps=X_train_imps, X_train_origins=X_train_origins,
                 X_train_masks=X_train_masks, seed=seed
             )
             
+            results['imp_quality'] = ret['imp_quality']
+            
             if verbose >= 1:
                 loguru.logger.info("Imputation quality evaluation completed.")
 
-        if 'pred_downstream_local' in metrics:
+        if 'local_pred' in metrics:
             if verbose >= 1:
                 loguru.logger.info("Evaluating downstream prediction...")
-            results['pred_downstream_local'] = self.run_evaluation_pred(
+            ret = self.evaluate_local_pred(
                 X_train_imps=X_train_imps, X_train_origins=X_train_origins, y_trains=y_trains,
                 X_tests=X_tests, y_tests=y_tests, data_config=env.data_config, model = 'nn', seed = seed
             )
+            results['local_pred'] = ret['local_pred']
+            results['local_pred_fairness'] = ret['local_pred_fairness']
             if verbose >= 1:
                 loguru.logger.info("Downstream prediction evaluation completed.")
 
-        if 'pred_downstream_fed' in metrics:
+        if 'fed_pred' in metrics:
             if verbose >= 1:
                 loguru.logger.info("Evaluating federated downstream prediction...")
-            results['pred_downstream_fed'] = self.run_evaluation_fed_pred(
+            ret = self.evaluate_fed_pred(
                 X_train_imps=X_train_imps, X_train_origins=X_train_origins, y_trains=y_trains,
                 X_tests=X_tests, y_tests=y_tests, X_test_global=env.server.X_test,
                 y_test_global=env.server.y_test, data_config=env.data_config, seed=seed
             )
+            results['fed_pred'] = ret['fed_pred']
             if verbose >= 1:
                 loguru.logger.info("Federated downstream prediction evaluation completed.")
 
         if verbose >= 1:
             loguru.logger.info("Evaluation completed.")
+        
         self.results = results
 
         return results
 
-    def show_results_overview(self):
+    def show_results_all(self, format: str = 'dataframe'):
 
         # check empty
         if self.results is None or len(self.results) == 0:
             print("Evaluation results is empty. Run evaluation first.")
         else:
-            # setup formatting widths
-            # metrics_w = []
-            # if 'imp_quality' in self.results:
-            #     metrics = list(self.results['imp_quality']['imp_quality'].keys())
-            #     metrics_w.append([len(m) for m in metrics])
-            # if 'pred_downstream_local' in self.results:
-            #     metrics = list(self.results['pred_downstream_local']['pred_performance'].keys())
-            #     metrics_w.append([len(m) for m in metrics])
-            # if 'pred_downstream_fed' in self.results:
-            #     metrics = list(self.results['pred_downstream_fed']['global'].keys())
-            #     metrics_w.append([len(m) for m in metrics])
-
-            # metrics_w_array = np.zeros([len(metrics_w), len(max(metrics_w, key=lambda x: len(x)))])
-            # for i, j in enumerate(metrics_w):
-            #     metrics_w_array[i][0:len(j)] = j
-
-            # widths = np.max(metrics_w_array, axis=0).astype(int).tolist()
-            
-            total_width = 55
-            
-            print("=" * total_width)
-            print("Evaluation Results")
-            print("=" * total_width)
-            
-            # Prepare data for tabulate
-            headers = ["", "Average", "Std"]
-            table_data = []
-
-            # Add Imputation Quality metrics
-            if 'imp_quality' in self.results:
-                for metric, values in self.results['imp_quality']['imp_quality'].items():
-                    mean = np.mean(values)
-                    std = np.std(values)
-                    if len(table_data) == 0:
-                        table_data.append(["Imputation Quality", "", ""])
-                    table_data.append([f"    {metric}", f"{mean:.3f}", f"{std:.3f}"])
-
-            # Add horizontal separator
-            if table_data:
-                table_data.append(["-" * 29, "-" * 10, "-" * 10])
-
-            # Add Downstream Prediction (Local) metrics
-            if 'pred_downstream_local' in self.results:
-                for metric, values in self.results['pred_downstream_local']['pred_performance'].items():
-                    mean = np.mean(values)
-                    std = np.std(values)
-                    if not any("Downstream Prediction (Local)" in row for row in table_data):
-                        table_data.append(["Downstream Prediction (Local)", "", ""])
-                    table_data.append([f"    {metric}", f"{mean:.3f}", f"{std:.3f}"])
-
-            # Add horizontal separator
-            if 'pred_downstream_local' in self.results:
-                table_data.append(["-" * 29, "-" * 10, "-" * 10])
-
-            # Add Downstream Prediction (Fed) metrics
-            if 'pred_downstream_fed' in self.results:
-                for metric, values in self.results['pred_downstream_fed']['global'].items():
-                    mean = np.mean(values)
-                    std = np.std(values)
-                    if not any("Downstream Prediction (Fed)" in row for row in table_data):
-                        table_data.append(["Downstream Prediction (Fed)", "", ""])
-                    table_data.append([f"    {metric}", f"{mean:.3f}", "-"])
-
-            # Print table using tabulate
-            print(tabulate(table_data, headers=headers, tablefmt="simple"))
-            print("=" * total_width)
-            
+            if format == 'dataframe':
+                df = self.export_results(format = 'dataframe')
+                # format the dataframe
+                df = df.map(lambda x: f"{x:.3f}")
+                return df
+            elif format == 'text-table':
+                print(self.export_results(format = 'text-table'))
+            else:
+                raise ValueError(f"Invalid format: {format}")
+                
     def evaluate_imp_quality(
         self, 
         X_train_imps: List[np.ndarray], 
@@ -214,18 +163,28 @@ class Evaluator:
         for key, value in imp_qualities.items():
             imp_qualities[key] = list(value)
 
-        results = {
-            'imp_quality': imp_qualities,
-        }
+        results = imp_qualities
         
         if self.results is None:
             self.results = {}
         
         self.results['imp_quality'] = results
 
-        return results
+        return {
+            'imp_quality': results,
+        }
     
     def show_imp_results(self):
+        """
+        Example:
+        {
+            'imp_quality': {
+                'rmse': [0.1, 0.1, 0.1],
+                'nrmse': [0.2, 0.2, 0.2],
+                'sliced-ws': [0.3, 0.3, 0.3]
+            }
+        }
+        """
         
         if self.results is None or len(self.results) == 0:
             print("Evaluation results is empty. Run evaluation first.")
@@ -235,9 +194,9 @@ class Evaluator:
         print("=" * total_width)
         print("Imputation Quality")
         print("=" * total_width)
-        metrics = list(self.results['imp_quality']['imp_quality'].keys())
-        num_clients = len(list(self.results['imp_quality']['imp_quality'].values())[0])
-        ret = self.results['imp_quality']['imp_quality']
+        metrics = list(self.results['imp_quality'].keys())
+        num_clients = len(list(self.results['imp_quality'].values())[0])
+        ret = self.results['imp_quality']
         headers = [""] + metrics
         rows = []
         
@@ -308,33 +267,35 @@ class Evaluator:
             return ax
         
         if overall:
-            X_train_imp = np.concatenate(X_train_imps, axis=0)
-            X_train_origin = np.concatenate(X_train_origins, axis=0)
-            X_train_imps.append(X_train_imp)
-            X_train_origins.append(X_train_origin)
+            X_imp = np.concatenate(X_imps, axis=0)
+            X_origin = np.concatenate(X_origins, axis=0)
+            X_imps.append(X_imp)
+            X_origins.append(X_origin)
             
-            titles = [f"Client {i+1}" for i in range(len(X_train_imps))]
+            titles = [f"Client {i+1}" for i in range(len(X_imps))]
             titles[-1] = 'Overall'
         else:
-            titles = [f"Client {i+1}" for i in range(len(X_train_imps))]
+            titles = [f"Client {i+1}" for i in range(len(X_imps))]
+        
+        n_clients = len(X_imps)
         
         if sampling_size is not None:
             np.random.seed(seed)
-            for i in range(len(X_train_imps)):
-                indices = np.random.choice(len(X_train_imps[i]), sampling_size, replace=False)
-                X_train_imps[i] = X_train_imps[i][indices]
-                X_train_origins[i] = X_train_origins[i][indices]
+            for i in range(n_clients):
+                indices = np.random.choice(len(X_imps[i]), sampling_size, replace=False)
+                X_imps[i] = X_imps[i][indices]
+                X_origins[i] = X_origins[i][indices]
         
         n_cols = 5
-        if len(X_train_imps) < 5:
-            n_cols = len(X_train_imps)
-        n_rows = len(X_train_imps) // n_cols + (len(X_train_imps) % n_cols > 0)
+        if n_clients < 5:
+            n_cols = n_clients
+        n_rows = n_clients // n_cols + (n_clients % n_cols > 0)
         fig, axs = plt.subplots(n_rows, n_cols, figsize=(4 * n_cols, 4 * n_rows))
         axs = axs.flatten()
         
-        for i in range(len(X_train_imps)):
+        for i in range(n_clients):
             print(f'Evaluating TSNE for {titles[i]} ...')
-            tsne_results, colors, N1, N2 = eval_tsne(X_train_origins[i], X_train_imps[i])
+            tsne_results, colors, N1, N2 = eval_tsne(X_origins[i], X_imps[i])
             plot_tsne(tsne_results, colors, N1, N2, ax=axs[i])
             axs[i].set_title(titles[i], fontsize=fontsize, fontweight='bold')
             axs[i].set_xlabel('')
@@ -342,7 +303,7 @@ class Evaluator:
             axs[i].set_xticks([])
             axs[i].set_yticks([])
         
-        for i in range(len(X_train_imps), len(axs)):
+        for i in range(n_clients, len(axs)):
             axs[i].set_visible(False)
         
         legend_elements = [
@@ -401,17 +362,26 @@ class Evaluator:
         if self.results is None:
             self.results = {}
         
-        self.results['pred_downstream_local'] = {
-            'pred_performance': pred_performance,
-            'pred_performance_fairness': pred_performance_fairness,
-        }
+        self.results['local_pred'] = pred_performance
+        self.results['local_pred_fairness'] = pred_performance_fairness
 
         return {
-            'pred_performance': pred_performance,
-            'pred_performance_fairness': pred_performance_fairness,
+            'local_pred': pred_performance,
+            'local_pred_fairness': pred_performance_fairness,
         }
         
     def show_local_pred_results(self):
+        """
+        Example:
+        {
+            'pred_downstream_local': {
+                'accuracy': [0.8, 0.8, 0.8],
+                'f1': [0.7, 0.7, 0.7],
+                'auc': [0.6, 0.6, 0.6],
+                'prc': [0.5, 0.5, 0.5]
+            }
+        }
+        """
         
         if self.results is None or len(self.results) == 0:
             print("Evaluation results is empty. Run evaluation first.")
@@ -421,9 +391,9 @@ class Evaluator:
         print("=" * total_width)
         print("Downstream Prediction (Local)")
         print("=" * total_width)
-        metrics = list(self.results['pred_downstream_local']['pred_performance'].keys())
-        num_clients = len(list(self.results['pred_downstream_local']['pred_performance'].values())[0])
-        ret = self.results['pred_downstream_local']['pred_performance']
+        metrics = list(self.results['local_pred'].keys())
+        num_clients = len(list(self.results['local_pred'].values())[0])
+        ret = self.results['local_pred']
         headers = [""] + metrics
         rows = []
         
@@ -512,11 +482,28 @@ class Evaluator:
         if self.results is None:
             self.results = {}
         
-        self.results['pred_downstream_fed'] = pred_performance
+        self.results['fed_pred'] = pred_performance
 
-        return pred_performance
+        return {
+            'fed_pred': pred_performance,
+        }
 
     def show_fed_pred_results(self):
+        
+        """
+        Example:
+        {
+            'fed_pred': {
+                'global': {'accuracy': 0.8, 'f1': 0.8, 'auc': 0.8, 'prc': 0.8},
+                'personalized': {
+                    'accuracy': [0.7, 0.7, 0.7],
+                    'f1': [0.6, 0.6, 0.6],
+                    'auc': [0.5, 0.5, 0.5],
+                    'prc': [0.4, 0.4, 0.4]
+                }
+            }
+        }
+        """
         
         if self.results is None or len(self.results) == 0:
             print("Evaluation results is empty. Run evaluation first.")
@@ -526,10 +513,10 @@ class Evaluator:
         print("=" * total_width)
         print("Downstream Prediction (Fed)")
         print("=" * total_width)
-        metrics = list(self.results['pred_downstream_fed']['global'].keys())
-        num_clients = len(list(self.results['pred_downstream_fed']['personalized'].values())[0])
-        ret = self.results['pred_downstream_fed']['personalized']
-        ret_global = self.results['pred_downstream_fed']['global']
+        metrics = list(self.results['fed_pred']['global'].keys())
+        num_clients = len(list(self.results['fed_pred']['personalized'].values())[0])
+        ret = self.results['fed_pred']['personalized']
+        ret_global = self.results['fed_pred']['global']
             
         headers = ["Personalized"] + metrics
         rows = []
@@ -891,3 +878,140 @@ class Evaluator:
             'local': local_ret,
             'personalized': ret_personalized
         }
+        
+    def export_results(self, format: str = 'dataframe', persist: bool = False, save_path: str = None):
+        """
+        Export the results to a dataframe or a dictionary.
+        
+        Parameters:
+            format (str): The format of the output. Can be 'dataframe', 'dict-dataframe', 'dict', or 'text-table'.
+            persist (bool): If True, the results will be saved to a file. [TODO]
+            save_path (str): The path to save the results. [TODO]
+        
+        Returns:
+            ret (pd.DataFrame or dict or str): The results in the specified format.
+        """
+        if self.results is None:
+            raise ValueError("No results to export, please run the evaluation first.")
+        
+        ################################################################################################################
+        # Export to one Pandas Dataframe
+        if format == 'dataframe':
+            df = pd.DataFrame()
+            if 'imp_quality' in self.results:
+                for metric_name, metric_values in self.results['imp_quality'].items():
+                    col_name = ('imp_quality', metric_name)
+                    df[col_name] = metric_values
+            
+            if 'local_pred' in self.results:
+                for metric_name, metric_values in self.results['local_pred'].items():
+                    col_name = ('local_pred', f'local_{metric_name}')
+                    df[col_name] = metric_values
+                    
+            if 'fed_pred' in self.results:
+                for metric_name, metric_values in self.results['fed_pred']['personalized'].items():
+                    col_name = ('fed_pred_personalized', f'personalized_{metric_name}')
+                    df[col_name] = metric_values
+                
+                num_clients = len(list(self.results['fed_pred']['personalized'].values())[0])
+                for metric_name, metric_values in self.results['fed_pred']['global'].items():
+                    col_name = ('fed_pred_global', f'global_{metric_name}')
+                    df[col_name] = [metric_values[0]]*num_clients
+            
+            # covert tuple columns to multiindex columns
+            df.columns = pd.MultiIndex.from_tuples(df.columns)
+                 
+            return df
+        
+        ################################################################################################################
+        # Export to dictionary of dataframes
+        elif format == 'dict-dataframe':
+            ret = {}
+            if 'imp_quality' in self.results:
+                df = pd.DataFrame()
+                for metric_name, metric_values in self.results['imp_quality'].items():
+                    col_name = metric_name
+                    df[col_name] = metric_values
+                ret['imp_quality'] = df
+                
+            if 'local_pred' in self.results:
+                df = pd.DataFrame()
+                for metric_name, metric_values in self.results['local_pred'].items():
+                    col_name = f'local_{metric_name}'
+                    df[col_name] = metric_values
+                ret['local_pred'] = df
+                
+            if 'fed_pred' in self.results:
+                df = pd.DataFrame()
+                for metric_name, metric_values in self.results['fed_pred']['personalized'].items():
+                    col_name = f'personalized_{metric_name}'
+                    df[col_name] = metric_values
+                ret['fed_pred_personalized'] = df
+                
+                df = pd.DataFrame()
+                num_clients = len(list(self.results['fed_pred']['personalized'].values())[0])
+                for metric_name, metric_values in self.results['fed_pred']['global'].items():
+                    col_name = f'global_{metric_name}'
+                    df[col_name] = [metric_values[0]]*num_clients    
+                ret['fed_pred_global'] = df
+            
+            return ret
+        
+        ################################################################################################################
+        # Export to one dictionary
+        elif format == 'dict':
+            return self.results
+
+        ################################################################################################################
+        # Text Table by Tabulate
+        elif format == 'text-table':
+            ret_str = ""
+            ret_str += "=" * total_width + "\n"
+            ret_str += "Evaluation Results" + "\n"
+            ret_str += "=" * total_width + "\n"
+            
+            # Prepare data for tabulate
+            headers = ["", "Average", "Std"]
+            table_data = []
+
+            # Add Imputation Quality metrics
+            if 'imp_quality' in self.results:
+                for metric, values in self.results['imp_quality']['imp_quality'].items():
+                    mean = np.mean(values)
+                    std = np.std(values)
+                    if len(table_data) == 0:
+                        table_data.append(["Imputation Quality", "", ""])
+                    table_data.append([f"    {metric}", f"{mean:.3f}", f"{std:.3f}"])
+
+            # Add horizontal separator
+            if table_data:
+                table_data.append(["-" * 29, "-" * 10, "-" * 10])
+
+            # Add Downstream Prediction (Local) metrics
+            if 'local_pred' in self.results:
+                for metric, values in self.results['local_pred']['local_pred'].items():
+                    mean = np.mean(values)
+                    std = np.std(values)
+                    if not any("Downstream Prediction (Local)" in row for row in table_data):
+                        table_data.append(["Downstream Prediction (Local)", "", ""])
+                    table_data.append([f"    {metric}", f"{mean:.3f}", f"{std:.3f}"])
+
+            # Add horizontal separator
+            if 'local_pred' in self.results:
+                table_data.append(["-" * 29, "-" * 10, "-" * 10])
+
+            # Add Downstream Prediction (Fed) metrics
+            if 'fed_pred' in self.results:
+                for metric, values in self.results['fed_pred']['global'].items():
+                    mean = np.mean(values)
+                    std = np.std(values)
+                    if not any("Downstream Prediction (Fed)" in row for row in table_data):
+                        table_data.append(["Downstream Prediction (Fed)", "", ""])
+                    table_data.append([f"    {metric}", f"{mean:.3f}", "-"])
+
+            # Print table using tabulate
+            ret_str += tabulate(table_data, headers=headers, tablefmt="simple") + "\n"
+            ret_str += "=" * total_width + "\n"
+            return ret_str
+        else:
+            raise ValueError(f"Invalid format: {format}")

@@ -1,10 +1,10 @@
 from typing import List, Tuple
 import torch
-from ...fed_strategy.fed_strategy_server import StrategyBaseServer
+from ...fed_strategy.fed_strategy_server import NNStrategyBaseServer
 import numpy as np
 
 
-class FedproxStrategyServer(StrategyBaseServer):
+class FedproxStrategyServer(NNStrategyBaseServer):
 
     def __init__(self, fine_tune_epochs: int = 0):
 

@@ -1,20 +1,15 @@
-from abc import ABC, abstractmethod
-from typing import List, OrderedDict, Tuple
-import torch
+from typing import List, Tuple
+from collections import OrderedDict
+import numpy as np
 
+from ...fed_strategy.fed_strategy_server.strategy_base import NNStrategyBaseServer
 
-class NNStrategyBaseServer(ABC):
+class LocalNNStrategyServer(NNStrategyBaseServer):
 
-    def __init__(self, name: str, initial_impute: str, fine_tune_epochs: int = 0):
-        self.name = name
-        self.initial_impute = initial_impute
-        self.fine_tune_epochs = fine_tune_epochs
+    def __init__(self, fine_tune_epochs: int = 0):
+        super().__init__('local_nn', 'local', fine_tune_epochs)
+        self.initial_impute = 'local'
 
-    @abstractmethod
-    def initialization(self, global_model: torch.nn.Module, params: dict):
-        pass
-
-    @abstractmethod
     def aggregate_parameters(
             self, local_model_parameters: List[dict], fit_res: List[dict], params: dict, *args, **kwargs
     ) -> Tuple[List[dict], dict]:
@@ -28,12 +23,23 @@ class NNStrategyBaseServer(ABC):
         :param kwargs: other params dict
         :return: List of aggregated model parameters, dict of aggregated results
         """
+        agg_res = {}
+
+        return local_model_parameters, agg_res
+
+    def initialization(self, global_model, params: dict):
+        """
+        Initialize the server
+        :param global_model: global model
+        :param params: parameters of initialization
+        :return: None
+        """
         pass
 
-    @abstractmethod
     def fit_instruction(self, params_list: List[dict]) -> List[dict]:
-        pass
 
-    @abstractmethod
+        return [{'fit_model': True} for _ in range(len(params_list))]
+
     def update_instruction(self, params: dict) -> dict:
-        return {'update_model': True}
+
+        return {}

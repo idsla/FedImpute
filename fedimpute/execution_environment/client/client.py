@@ -6,8 +6,8 @@ from scipy import stats
 import torch
 import loguru
 
-from ..imputation.base import BaseNNImputer
-from ..fed_strategy.fed_strategy_client import StrategyBaseClient
+from ..imputation.base import BaseNNImputer, BaseMLImputer
+from ..fed_strategy.fed_strategy_client import NNStrategyBaseClient
 from ..loaders.load_imputer import load_imputer
 from ..loaders.load_strategy import load_fed_strategy_client
 # from ..utils.fed_nn_trainer import fit_fed_nn_model
@@ -108,7 +108,7 @@ class Client:
 
         """
         if not params['fit_model']:
-            if isinstance(self.fed_strategy, StrategyBaseClient):
+            if isinstance(self.fed_strategy, NNStrategyBaseClient):
                 fit_res = self.fed_strategy.get_fit_res(self.imputer.model, params)
                 fit_res.update({'sample_size': self.X_train_imp.shape[0], 'converged': True})
                 return self.fed_strategy.get_parameters(self.imputer.model, params), fit_res
@@ -119,7 +119,7 @@ class Client:
         else:
             ############################################################################################################
             # NN based Imputation Models
-            if isinstance(self.fed_strategy, StrategyBaseClient):
+            if isinstance(self.fed_strategy, NNStrategyBaseClient):
 
                 imp_model, fit_res = self.fed_strategy.train_local_nn_model(
                     self.imputer, params, self.X_train_imp, self.y_train, self.X_train_mask
@@ -148,7 +148,7 @@ class Client:
         # if 'update_model' not in params or ('update_model' in params and params['update_model'] == True):
         #     print('update model')
         if updated_local_model is not None:
-            if isinstance(self.fed_strategy, StrategyBaseClient):
+            if isinstance(self.fed_strategy, NNStrategyBaseClient):
                 self.fed_strategy.set_parameters(updated_local_model, self.imputer.model, params)
             else:
                 self.imputer.set_imp_model_params(updated_local_model, params)

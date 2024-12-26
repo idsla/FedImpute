@@ -122,6 +122,28 @@ class SimpleAvgStrategyServer:
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+
+class FedMICEStrategyServer(SimpleAvgStrategyServer):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fedmice'
+        self.initial_impute = 'fedavg'
+        
+class FedEMStrategyServer(SimpleAvgStrategyServer):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fedem'
+        self.initial_impute = 'fedavg'
+        
+class FedMeanStrategyServer(SimpleAvgStrategyServer):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fedmean'
+        self.initial_impute = 'fedavg'
 
 
 class FedTreeStrategyServer:

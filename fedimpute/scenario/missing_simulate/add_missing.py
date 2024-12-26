@@ -1,7 +1,7 @@
 import numpy as np
-import fedimpute.simulator.missing_simulate.mcar_simulate as mcar_simulate
-import fedimpute.simulator.missing_simulate.mar_simulate as mar_simulate
-import fedimpute.simulator.missing_simulate.mnar_simulate as mnar_simulate
+import fedimpute.scenario.missing_simulate.mcar_simulate as mcar_simulate
+import fedimpute.scenario.missing_simulate.mar_simulate as mar_simulate
+import fedimpute.scenario.missing_simulate.mnar_simulate as mnar_simulate
 from typing import List, Union
 from .add_missing_utils import (
     generate_missing_cols, generate_missing_ratios, generate_missing_mech_funcs

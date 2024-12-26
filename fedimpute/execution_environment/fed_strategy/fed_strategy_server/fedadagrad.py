@@ -4,9 +4,9 @@ import torch
 
 from .fedavg import fedavg
 from ..utils import get_parameters
-from .strategy_base import StrategyBaseServer
+from .strategy_base import NNStrategyBaseServer
 
-class FedAdagradStrategyServer(StrategyBaseServer):
+class FedAdagradStrategyServer(NNStrategyBaseServer):
 
     def __init__(
             self, eta=0.1, eta_l=0.1, beta_1=0.9, beta_2=0.99, tau=1e-9, weight_option='sample_size'

@@ -59,7 +59,7 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
         self.data_utils_info = None
         self.seed = None
         self.model_type = 'sklearn'
-        self.name = 'linear_ice'
+        self.name = 'mice'
         self.model_persistable = False
 
     def initialize(

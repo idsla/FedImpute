@@ -1,11 +1,11 @@
 from typing import List, Tuple
 import torch
-from ...fed_strategy.fed_strategy_server import StrategyBaseServer
+from ...fed_strategy.fed_strategy_server import NNStrategyBaseServer
 import copy
 from ..utils import get_parameters
 
 
-class ScaffoldStrategyServer(StrategyBaseServer):
+class ScaffoldStrategyServer(NNStrategyBaseServer):
 
     def __init__(self, server_learning_rate: float = 1.0, fine_tune_epochs: int = 0):
 

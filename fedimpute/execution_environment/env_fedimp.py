@@ -66,14 +66,27 @@ class FedImputeEnv:
     ):
 
         # check if imputer and fed strategy are supported and set the imputer and fed strategy names
-        if imputer in ['ice', 'mean', 'em']:
+        if imputer in ['mean']:
             imputer_name = imputer
-            if fed_strategy in ['local', 'central', 'simple_avg']:
+            if fed_strategy in ['local', 'central', 'fedmean']:
                 fed_strategy_name = fed_strategy
             else:
                 raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
-            #fed_strategy_name = 'simple_avg'
-            workflow_name = imputer_name
+            workflow_name = 'mean'
+        elif imputer in ['em']:
+            imputer_name = imputer
+            if fed_strategy in ['local', 'central', 'fedem']:
+                fed_strategy_name = fed_strategy
+            else:
+                raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
+            workflow_name = 'em'
+        elif imputer in ['mice']:
+            imputer_name = imputer
+            if fed_strategy in ['local', 'central', 'fedmice']:
+                fed_strategy_name = fed_strategy
+            else:
+                raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
+            workflow_name = 'ice'
         
         elif imputer in ['missforest']:
             imputer_name = 'missforest'
@@ -90,6 +103,10 @@ class FedImputeEnv:
                 'fedavg', 'fedavg_ft', 'fedprox', 'scaffold', 'fedadam', 'fedadagrad', 'fedyogi'
             ]:
                 fed_strategy_name = fed_strategy
+            elif fed_strategy in ['local']:
+                fed_strategy_name = 'local_nn'
+            elif fed_strategy in ['central']:
+                fed_strategy_name = 'central_nn'
             else:
                 raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
         
@@ -127,7 +144,7 @@ class FedImputeEnv:
     ):
 
         rng = np.random.default_rng(self.seed)
-        clients_seeds = setup_clients_seed(rng, len(clients_train_data))
+        clients_seeds = setup_clients_seed(len(clients_train_data), rng)
         
         self.data_config = data_config
         if 'num_cols' not in data_config:
@@ -174,7 +191,7 @@ class FedImputeEnv:
         verbose: int = 0
     ):
         rng = np.random.default_rng(self.seed)
-        clients_seeds = setup_clients_seed(rng, len(simulator.clients_train_data))
+        clients_seeds = setup_clients_seed(len(simulator.clients_train_data), rng)
         
         self.setup_from_data(
             simulator.clients_train_data, 
