@@ -519,20 +519,23 @@ class Simulator:
         self, 
         datas: List[pd.DataFrame],
         data_config: Dict,
+        seed: int = 100330201,
+        verbose: int = 0,
     ):
         
         # clients seed
         global_seed = seed
         global_rng = np.random.default_rng(seed)
+        num_clients = len(datas)
         client_seeds = setup_clients_seed(num_clients, rng=global_rng)
         
         # convert data to numpy array
         data_list = []
         for data in datas:
             if isinstance(data, pd.DataFrame):
-                data = dataframe_to_numpy(data, data_config)
+                data = dataframe_to_numpy(data, data_config).astype(np.float32)
             elif isinstance(data, np.ndarray):
-                data = data
+                data = data.astype(np.float32)
             else:
                 raise ValueError(f"Invalid data type: {type(data)}")
             
@@ -540,7 +543,7 @@ class Simulator:
         
         # load data partition - natural partition
         clients_train_data_list, _, clients_test_data_list, global_test_data, stats = (
-            load_data_partition(data_list, data_config)
+            load_data_partition(data_list, data_config, num_clients, client_seeds, local_backup_size=0)
         )
         
         # missing data statistics

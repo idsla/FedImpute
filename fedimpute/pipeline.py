@@ -287,6 +287,58 @@ class FedImputePipeline:
             
         return pd.DataFrame(rows)
     
+    def show_pipeline_results(
+        self, 
+        format: str = 'plain-text',
+        metric_aspect: str = None,
+        metric_name: str = None,
+        show_round_variation: bool = False,
+        display: bool = True
+    ):
+        
+        data = self._convert_results_to_tidy_dataframe(self.results).copy()
+        
+        assert (
+            (metric_aspect in data['metric_type'].unique()) == True
+        ), f"Metric aspect {metric_aspect} not found, supported aspects: {data['metric_type'].unique()}."
+        
+        # global data filtering and aggregation
+        data = data[
+            (data['metric_type'] == metric_aspect) & (data['metric_name'] == metric_name)
+        ].drop(columns=['metric_type', 'metric_name'])
+        
+        data = data.groupby(
+            ['imputer', 'fed_strategy', 'client_id']
+        ).agg({'value': [
+            ('value_mean', lambda x: x.mean()), ('value_std', lambda x: x.std() if len(x) > 1 else 0)
+        ]}).reset_index()
+        
+        if format == 'plain-text':
+            pass            
+        elif format == 'dataframe':
+        
+            # Create the formatted string of mean(std) values
+            data['value_formatted'] = data.apply(
+                lambda x: f"{x['value']['value_mean']:.3f} ({x['value']['value_std']:.2f})", 
+                axis=1
+            )
+            
+            data['client_id'] = data['client_id'].apply(lambda x: f'Client {x}')
+            
+            # Pivot the table
+            result = data.pivot(
+                index='client_id',
+                columns=['imputer', 'fed_strategy'],
+                values='value_formatted'
+            )
+            
+            result.columns.names = (None, None)
+            result.index.name = None
+            
+            return result.style.set_table_styles([dict(selector='th', props=[('text-align', 'center')])])
+        else:
+            raise ValueError(f"Unsupported format: {format}")
+    
     def plot_pipeline_results(
         self, 
         metric_aspect: str,

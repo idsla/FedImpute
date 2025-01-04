@@ -214,11 +214,11 @@ class FedImputeEnv:
         self.seed = None
         gc.collect()
 
-    def run_fed_imputation(self, run_type: str = 'sequential'):
+    def run_fed_imputation(self, run_type: str = 'sequential', verbose: int = 0):
 
         ###########################################################################################################
         # Run Federated Imputation
-        self.workflow.run_fed_imp(self.clients, self.server, self.evaluator, self.tracker, run_type)
+        self.workflow.run_fed_imp(self.clients, self.server, self.evaluator, self.tracker, run_type, verbose)
 
     def show_env_info(self):
         

@@ -217,14 +217,17 @@ def generate_local_test_data(
             )
 
         # split train and retain
-        if not regression:
-            train_data, backup_data = train_test_split(
-                data, test_size=local_backup_size, random_state=seeds[idx], stratify=data[:, -1]
-            )
+        if local_backup_size > 0:
+            if not regression:
+                train_data, backup_data = train_test_split(
+                    data, test_size=local_backup_size, random_state=seeds[idx], stratify=data[:, -1]
+                )
+            else:
+                train_data, backup_data = train_test_split(
+                    data, test_size=local_backup_size, random_state=seeds[idx]
+                )
         else:
-            train_data, backup_data = train_test_split(
-                data, test_size=local_backup_size, random_state=seeds[idx]
-            )
+            train_data, backup_data = train_data, None
 
         train_datas.append(train_data)
         backup_datas.append(backup_data)

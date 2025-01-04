@@ -14,7 +14,7 @@ def load_data_partition(
         data_config: dict,
         num_clients: int,
         seeds: List[int],
-        partition_strategy: str,
+        partition_strategy: str = 'iid-even',
         split_cols_option: int = 0,
         niid_alpha: float = 0.2,
         size_niid_alpha: float = 0.2,
