@@ -57,6 +57,7 @@ class Client:
         self.X_train, self.y_train = train_data[:, :-1], train_data[:, -1]  # training data
         self.X_test, self.y_test = test_data[:, :-1], test_data[:, -1]  # testing data
         self.X_train_ms = X_train_ms  # missing data
+        
         # imputed training data
         self.X_train_mask = np.isnan(self.X_train_ms)  # missing data mask
         self.X_train_imp = self.X_train_ms.copy()  # imputed data
@@ -319,13 +320,13 @@ class Client:
                 np.isnan(self.X_test).sum().sum() / (self.X_test.shape[0] * self.X_test.shape[1])
             ))
 
-        ms_ratio_cols = np.isnan(self.X_train_ms).sum(axis=0) / (self.X_train_ms.shape[0] * 0.9)
+        ms_ratio_cols = np.isnan(self.X_train_ms).sum(axis=0) / (self.X_train_ms.shape[0])
         loguru.logger.debug(
             "| MR Cols: {} |".format(np.array2string(ms_ratio_cols, precision=2, suppress_small=True))
         )
         
         if self.test_missing:
-            ms_ratio_cols = np.isnan(self.X_test).sum(axis=0) / (self.X_test.shape[0] * 0.9)
+            ms_ratio_cols = np.isnan(self.X_test).sum(axis=0) / (self.X_test.shape[0])
             loguru.logger.debug(
                 "| MR Cols (Test): {} |".format(np.array2string(ms_ratio_cols, precision=2, suppress_small=True))
             )

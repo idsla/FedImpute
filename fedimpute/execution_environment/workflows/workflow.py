@@ -110,7 +110,15 @@ class BaseWorkflow(ABC):
 
     @staticmethod
     def eval_and_track(
-            evaluator, tracker, clients, phase='round', epoch=0, log_eval=True, central_client=True
+        evaluator, 
+        tracker, 
+        clients, 
+        phase='round', 
+        epoch=0, 
+        log_eval=True, 
+        central_client=True, 
+        other_infos=None,
+        eval = True
     ) -> Union[Any]:
 
         ############################################################################################################
@@ -122,29 +130,40 @@ class BaseWorkflow(ABC):
                 tracker.record_initial(
                     data=[client.X_train for client in clients],
                     mask=[client.X_train_mask for client in clients],
-                    imp_quality=[],
+                    imp_quality=None,
                 )
-                
-                loguru.logger.info("Initial Imputation.")
+                if log_eval:
+                    loguru.logger.info("Initial Imputation.")
                 
                 return None
                 
             else:
-                evaluation_results = evaluator.evaluate_imputation(
-                    X_train_imps=[client.X_train_imp for client in clients],
-                    X_train_origins=[client.X_train for client in clients],
-                    X_train_masks=[client.X_train_mask for client in clients],
-                    central_client=central_client
-                )
-
+                if eval:
+                    evaluation_results = evaluator.evaluate_imputation(
+                        X_train_imps=[client.X_train_imp for client in clients],
+                        X_train_origins=[client.X_train for client in clients],
+                        X_train_masks=[client.X_train_mask for client in clients],
+                        central_client=central_client
+                    )
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Initial: rmse - {evaluation_results['imp_rmse_avg']:.4f} "
+                            f"ws - {evaluation_results['imp_ws_avg']:.4f}"
+                        )
+                    
+                else:
+                    evaluation_results = None
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Initial Imputation."
+                        )
+                
                 tracker.record_initial(
                     data=[client.X_train for client in clients],
                     mask=[client.X_train_mask for client in clients],
                     imp_quality=evaluation_results,
-                )
-
-                loguru.logger.info(
-                    f"Initial: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
                 )
 
                 return None
@@ -157,37 +176,55 @@ class BaseWorkflow(ABC):
                 
                 tracker.record_round(
                     round_num=epoch + 1,
-                    imp_quality=[],
+                    imp_quality=None,
                     data=[client.X_train_imp for client in clients],
                     model_params=[],  # todo make it
-                    other_info=[{} for _ in clients]
+                    other_info=[other_infos[client_id] for client_id in range(len(clients))]
                 )
                 
-                loguru.logger.info(f"Epoch {epoch} ...")
+                avg_other_info = {}
+                for key in other_infos[0].keys():
+                    avg_other_info[key] = sum(info[key] for info in other_infos) / len(other_infos)
+                
+                if log_eval:
+                    info_str = f"Epoch {epoch} "
+                    for key in avg_other_info.keys():
+                        info_str += f"{key}: {avg_other_info[key]:.4f} "
+                
+                    loguru.logger.info(info_str)
                 
                 return None
             
             else:
-
-                evaluation_results = evaluator.evaluate_imputation(
-                    X_train_imps=[client.X_train_imp for client in clients],
-                    X_train_origins=[client.X_train for client in clients],
-                    X_train_masks=[client.X_train_mask for client in clients],
-                    central_client=central_client
-                )
+                if eval:
+                    evaluation_results = evaluator.evaluate_imputation(
+                        X_train_imps=[client.X_train_imp for client in clients],
+                        X_train_origins=[client.X_train for client in clients],
+                        X_train_masks=[client.X_train_mask for client in clients],
+                        central_client=central_client,
+                    )
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Epoch {epoch}: rmse - {evaluation_results['imp_rmse_avg']:.4f} "
+                            f"ws - {evaluation_results['imp_ws_avg']:.4f}"
+                        )
+                    
+                else:
+                    evaluation_results = None
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Epoch {epoch} ..."
+                        )
 
                 tracker.record_round(
                     round_num=epoch + 1,
                     imp_quality=evaluation_results,
                     data=[client.X_train_imp for client in clients],
                     model_params=[],  # todo make it
-                    other_info=[{} for _ in clients]
+                    other_info=[other_infos[client_id] for client_id in range(len(clients))]
                 )
-
-                if log_eval:
-                    loguru.logger.info(
-                        f"Epoch {epoch}: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
-                    )
 
                 return evaluator.get_imp_quality(evaluation_results)
 
@@ -198,40 +235,53 @@ class BaseWorkflow(ABC):
             if any(client.no_ground_truth for client in clients):
                 
                 tracker.record_final(
-                    imp_quality=[],
+                    imp_quality=None,
                     data=[client.X_train_imp for client in clients],
                     model_params=[],
-                    other_info=[{} for _ in clients]
+                    other_info=None
                 )
-
-                loguru.logger.info(f"Final Round ...")
+                
+                if log_eval:
+                    loguru.logger.info(f"Final Round ...")
                 
                 return None
                 
             else:
-                evaluation_results = evaluator.evaluate_imputation(
-                    X_train_imps=[client.X_train_imp for client in clients],
-                    X_train_origins=[client.X_train for client in clients],
-                    X_train_masks=[client.X_train_mask for client in clients],
-                    central_client=central_client
-                )
+                
+                if eval:
+                    evaluation_results = evaluator.evaluate_imputation(
+                        X_train_imps=[client.X_train_imp for client in clients],
+                        X_train_origins=[client.X_train for client in clients],
+                        X_train_masks=[client.X_train_mask for client in clients],
+                        central_client=central_client
+                    )
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Final: rmse - {evaluation_results['imp_rmse_avg']:.4f} "
+                            f"ws - {evaluation_results['imp_ws_avg']:.4f}"
+                        )
+                    
+                else:
+                    evaluation_results = None
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Final Round ..."
+                        )
 
                 tracker.record_final(
                     imp_quality=evaluation_results,
                     data=[client.X_train_imp for client in clients],
                     model_params=[],
-                    other_info=[{} for _ in clients]
+                    other_info=None
                 )
-
-                loguru.logger.info(
-                    f"Final: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
-                )
-
+                
                 return evaluator.get_imp_quality(evaluation_results)
 
     @staticmethod
     def eval_and_track_parallel(
-        evaluator, tracker, clients_data, phase='round', epoch=0, log_eval=True, central_client=True
+        evaluator, tracker, clients_data, phase='round', epoch=0, log_eval=True, central_client=True, other_infos=None
     ):
 
         ############################################################################################################
@@ -247,23 +297,35 @@ class BaseWorkflow(ABC):
             
             if any(client.no_ground_truth for client in clients):
                 tracker.record_initial(
-                    data=X_train_origins, mask=X_train_masks, imp_quality=[],
+                    data=X_train_origins, mask=X_train_masks, imp_quality=None,
                 )
 
-                loguru.logger.info("Initial Imputation.")
+                if log_eval:
+                    loguru.logger.info("Initial Imputation.")
                 
             else:
-                evaluation_results = evaluator.evaluate_imputation(
-                    X_train_imps=X_train_imps, X_train_origins=X_train_origins, X_train_masks=X_train_masks,
-                    central_client=central_client
-                )
+                if eval:
+                    evaluation_results = evaluator.evaluate_imputation(
+                        X_train_imps=X_train_imps, X_train_origins=X_train_origins, X_train_masks=X_train_masks,
+                        central_client=central_client
+                    )
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Initial: rmse - {evaluation_results['imp_rmse_avg']:.4f} "
+                            f"ws - {evaluation_results['imp_ws_avg']:.4f}"
+                        )
+                    
+                else:
+                    evaluation_results = None
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Initial Imputation."
+                        )
 
                 tracker.record_initial(
                     data=X_train_origins, mask=X_train_masks, imp_quality=evaluation_results,
-                )
-
-                loguru.logger.info(
-                    f"\nInitial: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
                 )
 
             return None
@@ -276,35 +338,52 @@ class BaseWorkflow(ABC):
                 
                 tracker.record_round(
                     round_num=epoch + 1,
-                    imp_quality=[],
+                    imp_quality=None,
                     data=X_train_imps,
                     model_params=[],
-                    other_info=[{} for _ in range(len(X_train_imps))]
+                    other_info=[other_infos[client_id] for client_id in range(len(X_train_imps))]
                 )
                 
-                loguru.logger.info(f"Epoch {epoch} ...")
+                avg_other_info = {}
+                for key in other_infos[0].keys():
+                    avg_other_info[key] = sum(info[key] for info in other_infos) / len(other_infos)
+                
+                info_str = f"Epoch {epoch} "
+                for key in avg_other_info.keys():
+                    info_str += f"{key}: {avg_other_info[key]:.4f} "
+                
+                loguru.logger.info(info_str)
                 
                 return None
 
             else:
-
-                evaluation_results = evaluator.evaluate_imputation(
-                    X_train_imps=X_train_imps, X_train_origins=X_train_origins, X_train_masks=X_train_masks,
-                    central_client=central_client
-                )
+                if eval:
+                    evaluation_results = evaluator.evaluate_imputation(
+                        X_train_imps=X_train_imps, X_train_origins=X_train_origins, X_train_masks=X_train_masks,
+                        central_client=central_client
+                    )
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Epoch {epoch}: rmse - {evaluation_results['imp_rmse_avg']:.4f} "
+                            f"ws - {evaluation_results['imp_ws_avg']:.4f}"
+                        )
+                    
+                else:
+                    evaluation_results = None
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Epoch {epoch} ..."
+                        )
 
                 tracker.record_round(
                     round_num=epoch + 1,
                     imp_quality=evaluation_results,
                     data=X_train_imps,
                     model_params=[],  # todo make it
-                    other_info=[{} for _ in range(len(X_train_imps))]
+                    other_info=[other_infos[client_id] for client_id in range(len(X_train_imps))]
                 )
-
-                if log_eval:
-                    loguru.logger.info(
-                        f"Epoch {epoch}: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
-                    )
 
                 return evaluator.get_imp_quality(evaluation_results)
 
@@ -315,30 +394,41 @@ class BaseWorkflow(ABC):
             if any(client.no_ground_truth for client in clients):
                 
                 tracker.record_final(
-                    imp_quality=[],
+                    imp_quality=None,
                     data=X_train_imps,
                     model_params=[],
-                    other_info=[{} for _ in range(len(X_train_imps))]
+                    other_info=None
                 )
 
-                loguru.logger.info(f"Final Round ...")
+                if log_eval:
+                    loguru.logger.info(f"Final Round ...")
                 
                 return None
 
             else:
-
-                evaluation_results = evaluator.evaluate_imputation(
-                    X_train_imps=X_train_imps, X_train_origins=X_train_origins,
-                    X_train_masks=X_train_masks, central_client=central_client
-                )
+                if eval:
+                    evaluation_results = evaluator.evaluate_imputation(
+                        X_train_imps=X_train_imps, X_train_origins=X_train_origins,
+                        X_train_masks=X_train_masks, central_client=central_client
+                    )
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Final: rmse - {evaluation_results['imp_rmse_avg']:.4f} "
+                            f"ws - {evaluation_results['imp_ws_avg']:.4f}"
+                        )
+                    
+                else:
+                    evaluation_results = None
+                    
+                    if log_eval:
+                        loguru.logger.info(
+                            f"Final Round ..."
+                        )
 
                 tracker.record_final(
                     imp_quality=evaluation_results, data=X_train_imps, model_params=[],
-                    other_info=[{} for _ in range(len(X_train_imps))]
-                )
-
-                loguru.logger.info(
-                    f"Final: rmse - {evaluation_results['imp_rmse_avg']:.4f} ws - {evaluation_results['imp_ws_avg']:.4f}"
+                    other_info=None
                 )
 
                 return evaluator.get_imp_quality(evaluation_results)

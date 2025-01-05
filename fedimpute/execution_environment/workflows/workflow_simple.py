@@ -32,7 +32,7 @@ class WorkflowSimple(BaseWorkflow):
 
         ############################################################################################################
         # Initial Imputation
-        clients = initial_imputation(server.fed_strategy.initial_impute, clients)
+        clients, server = initial_imputation(clients, server)
 
         # initial evaluation and tracking
         self.eval_and_track(
@@ -55,6 +55,8 @@ class WorkflowSimple(BaseWorkflow):
         for global_model, client in zip(global_models, clients):
             client.update_local_imp_model(global_model, params={})
             client.local_imputation(params={})
+            
+        server.local_imputation(params={})
 
         ########################################################################################################
         # Final Evaluation and Tracking and saving imputation model
@@ -76,12 +78,12 @@ class WorkflowSimple(BaseWorkflow):
         if server.fed_strategy.name == 'central':
             clients.append(formulate_centralized_client(clients))
 
-        clients = initial_imputation(server.fed_strategy.initial_impute, clients)
+        clients, server = initial_imputation(clients, server)
         clients_data = [(client.X_train_imp, client.X_train, client.X_train_mask) for client in clients]
         self.eval_and_track_parallel(
             evaluator, tracker, clients_data, phase='initial', central_client=server.fed_strategy.name == 'central'
         )
-
+        
         ############################################################################################################
         # Server and Client setup
 
@@ -111,7 +113,7 @@ class WorkflowSimple(BaseWorkflow):
         main_pipe.send("aggregate")
         global_models, agg_res = main_pipe.recv()
 
-        # Client updata and local imputation
+        # Client update and local imputation
         for pipe, global_model in zip(client_pipes, global_models):
             pipe[0].send(("update_and_impute", {'global_model_params': global_model, 'params': {}}))
 
@@ -126,6 +128,10 @@ class WorkflowSimple(BaseWorkflow):
         # Save Clients Model
         for pipe in client_pipes:
             pipe[0].send(("save_model", None))
+            
+        # Server local imputation
+        main_pipe.send(("local_impute", {}))
+        server.X_test_imp, server.X_test, server.X_test_mask = main_pipe.recv()
 
         # Terminate processes and update clients and server
         for pipe, client in zip(client_pipes, clients):
@@ -136,9 +142,13 @@ class WorkflowSimple(BaseWorkflow):
             client.X_train_mask = new_client.X_train_mask
             client.imputer = new_client.imputer
             client.fed_strategy = new_client.fed_strategy
+        
         main_pipe.send("terminate")
         new_server = main_pipe.recv()
         server.fed_strategy = new_server.fed_strategy
+        server.X_test_imp = new_server.X_test_imp
+        server.X_test = new_server.X_test
+        server.X_test_mask = new_server.X_test_mask
 
         # Join processes
         for p in client_processes + [server_process]:

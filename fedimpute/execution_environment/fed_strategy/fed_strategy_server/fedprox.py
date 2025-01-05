@@ -1,7 +1,8 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union, OrderedDict
 import torch
-from ...fed_strategy.fed_strategy_server import NNStrategyBaseServer
 import numpy as np
+
+from ...fed_strategy.fed_strategy_server import NNStrategyBaseServer
 
 
 class FedproxStrategyServer(NNStrategyBaseServer):
@@ -11,6 +12,7 @@ class FedproxStrategyServer(NNStrategyBaseServer):
         super().__init__('fedprox', 'fedavg', fine_tune_epochs)
         self.initial_impute = 'fedavg'
         self.fine_tune_epochs = 0
+        self.global_model_params_dict: OrderedDict = None
 
     def initialization(self, global_model, params: dict):
         """
@@ -53,6 +55,9 @@ class FedproxStrategyServer(NNStrategyBaseServer):
             # copy parameters for each client
             agg_model_parameters = [averaged_model_state_dict for _ in range(len(local_model_parameters))]
             agg_res = {}
+            
+            # update global model parameters
+            self.global_model_params_dict = averaged_model_state_dict
 
             return agg_model_parameters, agg_res
 
@@ -89,3 +94,6 @@ class FedproxStrategyServer(NNStrategyBaseServer):
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return convert_params_format(self.global_model_params_dict, output_type='state_dict')

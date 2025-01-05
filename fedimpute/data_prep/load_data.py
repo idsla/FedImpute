@@ -70,6 +70,14 @@ def load_data(data_name: str):
         df_target = df_target.apply(lambda x: 0 if x == 0 else 1)
         
         cat_cols = [col for col in df_features.columns if col not in num_cols]
+        
+        from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+        scaler = StandardScaler()
+        df_features[num_cols] = scaler.fit_transform(df_features[num_cols])
+        scaler = MinMaxScaler()
+        df_features[num_cols] = scaler.fit_transform(df_features[num_cols])
+        
         data = pd.concat([df_features, df_target], axis=1)
         
         data_config = {

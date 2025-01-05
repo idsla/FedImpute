@@ -293,14 +293,6 @@ class FedImputeEnv:
                 )
             else:
                 return [self.clients[client_id].X_test for client_id in client_ids]
-        elif data_type == 'train_imp':
-            if include_y:
-                raise ValueError("Not y for train_imp data, please set include_y to False")
-            return [self.clients[client_id].X_train_imp for client_id in client_ids]
-        elif data_type == 'train_mask':
-            if include_y:
-                raise ValueError("Not y for train_mask data, please set include_y to False")
-            return [self.clients[client_id].X_train_mask for client_id in client_ids]
         elif data_type == 'global_test':
             if include_y:
                 return (
@@ -309,6 +301,30 @@ class FedImputeEnv:
                 )
             else:
                 return self.server.X_test
+        elif data_type == 'train_imp':
+            if include_y:
+                raise ValueError("Not y for train_imp data, please set include_y to False")
+            return [self.clients[client_id].X_train_imp for client_id in client_ids]
+        elif data_type == 'test_imp':
+            if include_y:
+                raise ValueError("Not y for test_imp data, please set include_y to False")
+            return [self.clients[client_id].X_test_imp for client_id in client_ids]
+        elif data_type == 'global_test_imp':
+            if include_y:
+                raise ValueError("Not y for global_test_imp data, please set include_y to False")
+            return self.server.X_test_imp
+        elif data_type == 'train_mask':
+            if include_y:
+                raise ValueError("Not y for train_mask data, please set include_y to False")
+            return [self.clients[client_id].X_train_mask for client_id in client_ids]
+        elif data_type == 'global_test_mask':
+            if include_y:
+                raise ValueError("Not y for global_test_mask data, please set include_y to False")
+            return self.server.X_test_mask
+        elif data_type == 'test_mask':
+            if include_y:
+                raise ValueError("Not y for test_mask data, please set include_y to False")
+            return [self.clients[client_id].X_test_mask for client_id in client_ids]
         elif data_type == 'config':
             return self.server.data_config
         else:

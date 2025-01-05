@@ -5,7 +5,7 @@ import numpy as np
 ########################################################################################################################
 # Local Initial Imputation
 ########################################################################################################################
-def local(clients_data_utils, key='mean', col_type='num'):
+def local(clients_data_utils, key='mean', col_type='num') -> List[np.ndarray]:
     if col_type == 'num':
         if key not in ['mean', 'median', 'zero']:
             raise ValueError("key must be one of 'mean', 'std', 'min', 'max'")
@@ -39,7 +39,7 @@ def local(clients_data_utils, key='mean', col_type='num'):
 ########################################################################################################################
 # FedAvg Initial Imputation
 ########################################################################################################################
-def fedavg(clients_data_utils, key='mean', col_type='num'):
+def fedavg(clients_data_utils, key='mean', col_type='num') -> List[np.ndarray]:
 
     if col_type == 'cat':
         if key not in ['mean']:
@@ -87,7 +87,8 @@ def fedavg(clients_data_utils, key='mean', col_type='num'):
         return clients_impute_values
 
 
-def central(clients_data_utils, key='mean', col_type='num'):
+def central(clients_data_utils, key='mean', col_type='num') -> List[np.ndarray]:
+    
     if col_type == 'num':
         if key not in ['mean', 'median', 'zero']:
             raise ValueError("key must be one of 'mean', 'std', 'min', 'max'")

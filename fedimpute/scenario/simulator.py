@@ -550,7 +550,7 @@ class Simulator:
         clients_train_data = clients_train_data_list
         clients_test_data = clients_test_data_list
         global_test_data = global_test_data
-        clients_train_data_ms = [item.copy() for item in clients_train_data_list]
+        clients_train_data_ms = [item[:, :-1].copy() for item in clients_train_data_list]
         
         # save results
         self.stats = stats
@@ -681,7 +681,8 @@ class Simulator:
         self, 
         client_ids: List[int],
         dpi: int = 300,
-        fontsize: int = 18
+        fontsize: int = 18,
+        data_type: str = 'train'
     ):
         n_rows = ceil(len(client_ids) / 4)
         n_cols = 4
@@ -701,7 +702,13 @@ class Simulator:
             col = idx % 4
             
             # Get missing pattern for current client
-            mask = np.isnan(self.clients_train_data_ms[client_id])
+            if data_type == 'train':
+                mask = np.isnan(self.clients_train_data_ms[client_id])
+            elif data_type == 'test':
+                mask = np.isnan(self.clients_test_data[client_id])
+            else:
+                raise ValueError(f"Invalid data type: {data_type}")
+            
             pattern = pd.DataFrame(mask).astype(int).astype(str).apply(lambda x: ''.join(x), axis=1)
             sorted_mask = pd.DataFrame(mask).reindex(pattern.sort_values().index).values
             
@@ -755,12 +762,19 @@ class Simulator:
         fontsize: int = 18,
         bins: int = 30,
         stat: str = 'density',
-        kde: bool = False
+        kde: bool = False,
+        data_type: str = 'train'
     ):
+        if data_type == 'train':
+            client_datas = [self.clients_train_data[client_id] for client_id in client_ids]
+            client_data_ms = [self.clients_train_data_ms[client_id] for client_id in client_ids]
+        elif data_type == 'test':
+            client_datas = [self.clients_test_data[client_id] for client_id in client_ids]
+            client_data_ms = [self.clients_test_data[client_id] for client_id in client_ids]
+        else:
+            raise ValueError(f"Invalid data type: {data_type}")
         
-        client_train_datas = [self.clients_train_data[client_id] for client_id in client_ids]
-        client_train_data_ms = [self.clients_train_data_ms[client_id] for client_id in client_ids]
-        masks = [np.isnan(client_train_data_ms[i]) for i in range(len(client_ids))]
+        masks = [np.isnan(client_data_ms[i]) for i in range(len(client_ids))]
         
         n_features = len(feature_ids)
         n_clients = len(client_ids)
@@ -785,8 +799,8 @@ class Simulator:
                 
                 # missing value distribution
                 mask_i = masks[i][:, j]
-                missing_values = client_train_datas[i][mask_i, j]
-                observed_values = client_train_datas[i][~mask_i, j]
+                missing_values = client_datas[i][mask_i, j]
+                observed_values = client_datas[i][~mask_i, j]
                 
                 data = pd.DataFrame({
                     'values': np.concatenate([missing_values, observed_values]),
@@ -819,6 +833,7 @@ class Simulator:
             plt.Rectangle((0,0),1,1, facecolor=observed_color, edgecolor='black', label='Observed'),
             plt.Rectangle((0,0),1,1, facecolor=missing_color, edgecolor='black', label='Missing')
         ]
+        
         fig.legend(
             handles=legend_elements, 
             loc='center',
@@ -838,14 +853,20 @@ class Simulator:
         pca_col_threshold: int = 20,
         dpi: int = 300,
         fontsize: int = 18,
-        title: bool = True
+        title: bool = True,
+        data_type: str = 'train'
     ):
         DISTANCE_METHOD_NAME = {
             'swd': 'Sliced Wasserstein Distance',
             'correlation': 'Correlation Distance',
         }
         
-        clients_data = [self.clients_train_data[client_id] for client_id in client_ids]
+        if data_type == 'train':
+            clients_data = [self.clients_train_data[client_id] for client_id in client_ids]
+        elif data_type == 'test':
+            clients_data = [self.clients_test_data[client_id] for client_id in client_ids]
+        else:
+            raise ValueError(f"Invalid data type: {data_type}")
         
         distance_matrix = DistanceComputation.compute_distance_matrix(
             clients_data, 

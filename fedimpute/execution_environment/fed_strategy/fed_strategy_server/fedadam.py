@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional, Dict, Union
+from typing import List, Tuple, Optional, Dict, Union, OrderedDict
 import numpy as np
 import torch
 
@@ -97,3 +97,6 @@ class FedAdamStrategyServer(NNStrategyBaseServer):
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return get_parameters(self.global_model, trainable_only=True, return_type='state_dict')

@@ -76,12 +76,15 @@ class Evaluator:
                 raise ValueError(f"Invalid metric: {metric}")
 
         results = {}
-        X_train_imps = [client.X_train_imp for client in env.clients]
-        X_train_origins = [client.X_train for client in env.clients]
-        X_train_masks = [client.X_train_mask for client in env.clients]
-        y_trains = [client.y_train for client in env.clients]
-        X_tests = [client.X_test for client in env.clients]
-        y_tests = [client.y_test for client in env.clients]
+        
+        X_train_origins, y_trains = env.get_data(client_ids='all', data_type = 'train', include_y=True)
+        X_tests, y_tests = env.get_data(client_ids='all', data_type = 'test', include_y=True)
+        X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
+        X_test_imps = env.get_data(client_ids='all', data_type = 'test_imp')
+        X_train_masks = env.get_data(client_ids='all', data_type = 'train_mask')
+        X_test_masks = env.get_data(client_ids='all', data_type = 'test_mask')
+        X_global_test_imp, y_global_test = env.get_data(data_type = 'global_test_imp', include_y = True)
+        data_config = env.get_data(data_type = 'config')
 
         if 'imp_quality' in metrics:
             if verbose >= 1:
@@ -100,8 +103,8 @@ class Evaluator:
             if verbose >= 1:
                 loguru.logger.info("Evaluating downstream prediction...")
             ret = self.evaluate_local_pred(
-                X_train_imps=X_train_imps, X_train_origins=X_train_origins, y_trains=y_trains,
-                X_tests=X_tests, y_tests=y_tests, data_config=env.data_config, model = 'nn', seed = seed
+                X_train_imps=X_train_imps, y_trains=y_trains, X_tests=X_test_imps, y_tests=y_tests, 
+                data_config=data_config, model = 'nn', seed = seed
             )
             results['local_pred'] = ret['local_pred']
             results['local_pred_fairness'] = ret['local_pred_fairness']
@@ -112,9 +115,9 @@ class Evaluator:
             if verbose >= 1:
                 loguru.logger.info("Evaluating federated downstream prediction...")
             ret = self.evaluate_fed_pred(
-                X_train_imps=X_train_imps, X_train_origins=X_train_origins, y_trains=y_trains,
-                X_tests=X_tests, y_tests=y_tests, X_test_global=env.server.X_test,
-                y_test_global=env.server.y_test, data_config=env.data_config, seed=seed
+                X_train_imps=X_train_imps, y_trains=y_trains, X_tests=X_test_imps, y_tests=y_tests, 
+                X_test_global=X_global_test_imp, y_test_global=y_global_test, 
+                data_config=data_config, seed=seed
             )
             results['fed_pred'] = ret['fed_pred']
             if verbose >= 1:
@@ -323,7 +326,6 @@ class Evaluator:
     def evaluate_local_pred(
         self, 
         X_train_imps: List[np.ndarray], 
-        X_train_origins: List[np.ndarray], 
         y_trains: List[np.ndarray],
         X_tests: List[np.ndarray], 
         y_tests: List[np.ndarray], 
@@ -354,7 +356,7 @@ class Evaluator:
             model_params = {'weight_decay': 0.0}
 
         pred_performance = self._evaluation_downstream_prediction(
-            model, model_params, X_train_imps, X_train_origins, y_trains,
+            model, model_params, X_train_imps, y_trains,
             X_tests, y_tests, data_config, seed, verbose
         )
         pred_performance_fairness = self._evaluation_imp_fairness(pred_fairness_metrics, pred_performance)
@@ -429,7 +431,6 @@ class Evaluator:
     def evaluate_fed_pred(
         self, 
         X_train_imps: List[np.ndarray], 
-        X_train_origins: List[np.ndarray], 
         y_trains: List[np.ndarray],
         X_tests: List[np.ndarray], 
         y_tests: List[np.ndarray], 
@@ -475,7 +476,7 @@ class Evaluator:
             train_params['batchnorm_avg'] = True
 
         pred_performance = self._eval_downstream_fed_prediction(
-            model_params, train_params, X_train_imps, X_train_origins, y_trains, X_tests, y_tests,
+            model_params, train_params, X_train_imps, y_trains, X_tests, y_tests,
             X_test_global, y_test_global, data_config, seed, verbose
         )
         
@@ -616,7 +617,6 @@ class Evaluator:
         model: str, 
         model_params: dict,
         X_train_imps: List[np.ndarray], 
-        X_train_origins: List[np.ndarray], 
         y_trains: List[np.ndarray],
         X_tests: List[np.ndarray], 
         y_tests: List[np.ndarray], 
@@ -703,7 +703,6 @@ class Evaluator:
         model_params: dict, 
         train_params: dict,
         X_train_imps: List[np.ndarray], 
-        X_train_origins: List[np.ndarray], 
         y_trains: List[np.ndarray],
         X_tests: List[np.ndarray], 
         y_tests: List[np.ndarray], 
@@ -763,9 +762,7 @@ class Evaluator:
             ############################################################################################################
             # Local training
             losses = {}
-            for idx, (X_train_imp, X_train_origin, y_train, clf) in enumerate(zip(
-                    X_train_imps, X_train_origins, y_trains, models
-            )):
+            for idx, (X_train_imp, y_train, clf) in enumerate(zip(X_train_imps, y_trains, models)):
                 if early_stopping_signs[idx]:
                     continue
                 ret = clf.fit(X_train_imp, y_train)
@@ -820,9 +817,7 @@ class Evaluator:
         local_ret = {eval_metric: [] for eval_metric in eval_metrics}
         y_min = np.concatenate(y_trains).min()
         y_max = np.concatenate(y_trains).max()
-        for idx, (X_train_imp, X_train_origin, y_train, X_test, y_test) in enumerate(zip(
-                X_train_imps, X_train_origins, y_trains, X_tests, y_tests
-        )):
+        for idx, (X_train_imp, y_train, X_test, y_test) in enumerate(zip(X_train_imps, y_trains, X_tests, y_tests)):
             y_pred = clf.predict(X_test)
             if task_type == 'classification':
                 y_pred_proba = clf.predict_proba(X_test)
@@ -852,15 +847,13 @@ class Evaluator:
 
         ################################################################################################################
         # fine-tuning
-        for idx, (X_train_imp, X_train_origin, y_train, clf) in enumerate(
-                zip(X_train_imps, X_train_origins, y_trains, models)
-        ):
+        for idx, (X_train_imp, y_train, clf) in enumerate(zip(X_train_imps, y_trains, models)):
             clf.epochs = fine_tune_epoch
             clf.fit(X_train_imp, y_train)
 
         ret_personalized = {eval_metric: [] for eval_metric in eval_metrics}
-        for idx, (X_train_imp, X_train_origin, y_train, X_test, y_test, clf) in enumerate(zip(
-                X_train_imps, X_train_origins, y_trains, X_tests, y_tests, models
+        for idx, (X_train_imp, y_train, X_test, y_test, clf) in enumerate(zip(
+                X_train_imps, y_trains, X_tests, y_tests, models
         )):
             y_pred = clf.predict(X_test)
             if task_type == 'classification':

@@ -153,6 +153,7 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
         estimator = self.imp_models[feature_idx]
         estimator.fit(X_train, y_train)
         y_pred = estimator.predict(X_train)
+        loss = np.mean((y_pred - y_train) ** 2)
         coef = np.concatenate([estimator.coef_, np.expand_dims(estimator.intercept_, 0)])
 
         # Fit mechanism models
@@ -161,10 +162,11 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
         # else:
         #     self.mm_model.fit(X, row_mask)
         #     mm_coef = np.concatenate([self.mm_model.coef_[0], self.mm_model.intercept_])
+        
 
         return {
             'coef': coef,
-            'loss': {},
+            'loss': loss,
             'sample_size': X_train.shape[0]
         }
 

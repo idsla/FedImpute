@@ -107,7 +107,7 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         if 'estimators_' not in imp_model.__dict__:
             return OrderedDict({"estimators": []})
         else:
-            return OrderedDict({"estimators": imp_model.estimators_})
+            return OrderedDict({"estimators": imp_model.estimators_})  #TODO: Need consistent type for all ICE workflows and imputers
 
     def fit(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> dict:
 
@@ -124,9 +124,11 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         # fit linear imputation models
         estimator = self.imp_models[feature_idx]
         estimator.fit(X_train, y_train)
+        y_pred = estimator.predict(X_train)
+        loss = np.mean((y_pred - y_train) ** 2)
 
         return {
-            'loss': {},
+            'loss': loss,
             'sample_size': X_train.shape[0]
         }
 

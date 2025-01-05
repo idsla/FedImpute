@@ -1,5 +1,5 @@
-from typing import List, Tuple
-from collections import OrderedDict
+from typing import List, Tuple, Union
+from typing import List, OrderedDict, Tuple, Union
 import numpy as np
 
 from ...fed_strategy.fed_strategy_server.strategy_base import NNStrategyBaseServer
@@ -43,3 +43,6 @@ class LocalNNStrategyServer(NNStrategyBaseServer):
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return None

@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from functools import reduce
-
+import loguru
 from sklearn.impute import SimpleImputer
 
 from ..base.ice_imputer import ICEImputerMixin
@@ -120,13 +120,13 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
                 mu_new, sigma_new, X_new = self._em(X, self.miss, self.obs, self.mu, self.sigma)
 
                 if self._converged(self.mu, self.sigma, mu_new, sigma_new, convergence_threshold):
-                    print(f"EM converged after {iteration} iterations.")
+                    loguru.logger.debug(f"EM converged after {iteration} iterations.")
                     converged = True
                     break
 
                 self.mu, self.sigma = mu_new, sigma_new
             except BaseException as e:
-                print(f"EM step failed. {e}")
+                loguru.logger.error(f"EM step failed. {e}")
                 converged = True
                 break
 

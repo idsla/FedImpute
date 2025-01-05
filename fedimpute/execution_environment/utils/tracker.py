@@ -46,6 +46,7 @@ class Tracker:
         self.imp_quality = []  # tracking history results of imputation quality
         self.imp_data = []  # tracking final imputed data
         self.model_params = []  # tracking final imputation model parameters
+        self.other_info = []  # tracking other parameters
         self.misc = []  # tracking other parameters
 
         self.origin_data = None  # tracking original data
@@ -60,6 +61,7 @@ class Tracker:
         # self.split_indices = np.cumsum([item.shape[0] for item in data])[:-1]
         # self.rounds.append(0)
         self.imp_quality.append(imp_quality)
+        self.other_info.append(None)
 
     def record_round(
             self, round_num: int, imp_quality: dict,
@@ -68,9 +70,10 @@ class Tracker:
 
         self.rounds.append(round_num)
         self.imp_quality.append(imp_quality)
+        self.other_info.append(other_info)
 
-        if self.track_misc and other_info is not None:
-            self.misc.append(other_info)
+        # if self.track_misc and other_info is not None:
+        #     self.misc.append(other_info)
 
     def record_final(
             self,
@@ -80,10 +83,11 @@ class Tracker:
 
         self.rounds.append(len(self.rounds) + 1)
         self.imp_quality.append(imp_quality)
+        self.other_info.append(other_info)
         # self.imp_data_final = np.concatenate(data)
 
-        if self.track_misc and other_info is not None:
-            self.misc.append(other_info)
+        # if self.track_misc and other_info is not None:
+        #     self.misc.append(other_info)
 
     def to_dict(self) -> dict:
 
@@ -91,6 +95,7 @@ class Tracker:
             "results": {
                 'rounds': self.rounds,
                 "imp_quality": self.imp_quality,
+                "other_info": self.other_info,
             }
         }
 

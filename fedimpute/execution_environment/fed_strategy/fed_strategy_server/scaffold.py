@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, OrderedDict, Tuple, Union
 import torch
 from ...fed_strategy.fed_strategy_server import NNStrategyBaseServer
 import copy
@@ -78,3 +78,7 @@ class ScaffoldStrategyServer(NNStrategyBaseServer):
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return get_parameters(self.global_model, trainable_only=True, return_type='state_dict')
+

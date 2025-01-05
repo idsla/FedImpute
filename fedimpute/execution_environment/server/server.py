@@ -21,7 +21,6 @@ class Server:
         fed_strategy_params: dict - parameters of the federated strategy
         server_config: dict - configuration of the server
         X_test_global: np.ndarray - global test data
-
     """
 
     def __init__(
@@ -37,12 +36,19 @@ class Server:
     ):
 
         self.server_config = server_config
+        
+        # global test data
         self.X_test = global_test[:, :-1]
         self.y_test = global_test[:, -1]
+        self.X_test_imp = self.X_test.copy()
         self.X_test_mask = np.isnan(self.X_test)
+        self.test_missing = np.any(self.X_test_mask)
         self.seed = seed
         self.data_config = data_config
         self.data_utils = self.calculate_data_utils(data_config)
+        
+        # imputer
+        self.imputer = load_imputer(imputer_name, imputer_params)
 
         # initialize server side strategy
         self.fed_strategy = load_fed_strategy_server(fed_strategy_name, fed_strategy_params)
@@ -53,10 +59,45 @@ class Server:
 
         if isinstance(self.fed_strategy, NNStrategyBaseServer):
             self.fed_strategy.initialization(self.global_imputer.model, {})
+    
+    def initial_impute(self, imp_values: np.ndarray, col_type: str = 'num') -> None:
+        """
+        Initial imputation
 
-    def global_evaluation(self, eval_res: dict) -> dict:
-        # global evaluation of imputation models
-        raise NotImplementedError
+        Args:
+            imp_values (np.ndarray): imputation values
+            col_type (str): column type, 'num' or 'cat'
+        """
+        num_cols = self.data_utils['num_cols']
+        if col_type == 'num':
+            for i in range(num_cols):
+                if self.X_test_mask[:, i].any():
+                    self.X_test_imp[:, i][self.X_test_mask[:, i]] = imp_values[i]
+        
+        elif col_type == 'cat':
+            for i in range(num_cols, self.X_test_imp.shape[1]):
+                if self.test_missing:
+                    self.X_test_imp[:, i][self.X_test_mask[:, i]] = imp_values[i - num_cols]
+
+        # initialize global imputer after local imputation
+        self.imputer.initialize(self.X_test_imp, self.X_test_mask, self.data_utils, {}, self.seed)
+
+    def local_imputation(self, params: dict) -> Union[None, np.ndarray]:
+        """
+        Perform local imputation
+
+        Args:
+            params (dict): instructions for imputation - e.g `temp_imp` for temporary imputation
+
+        Returns:
+            Union[None, np.ndarray]: imputed data or None
+        """
+        global_model_params = self.fed_strategy.get_global_model_params()
+        if global_model_params is not None:
+            self.imputer.set_imp_model_params(global_model_params, params)
+            self.X_test_imp = self.imputer.impute(self.X_test_imp, self.y_test, self.X_test_mask, params)
+        
+        return None
 
     def calculate_data_utils(self, data_config: dict) -> dict:
         data_utils = {
@@ -127,3 +168,22 @@ class Server:
             }
 
         return data_utils
+    
+    def profile(self):
+
+        mask_int = self.X_test_mask.astype(int)
+        mask_str_rows = [''.join(map(str, row)) for row in mask_int]
+        pattern_counter = Counter(mask_str_rows)
+
+        loguru.logger.debug('-' * 120)
+        loguru.logger.debug(
+            "Global Test | DS: {} | MaskDS: {} | ImputeDS: {} | MR: {:.2f} |".format(
+                self.X_test.shape, self.X_test_mask.shape, self.X_test_imp.shape,
+                np.isnan(self.X_test).sum().sum() / (self.X_test.shape[0] * self.X_test.shape[1]),
+            ))
+        
+        if self.test_missing:
+            ms_ratio_cols = np.isnan(self.X_test).sum(axis=0) / (self.X_test.shape[0])
+            loguru.logger.debug(
+                "| MR Cols (Test): {} |".format(np.array2string(ms_ratio_cols, precision=2, suppress_small=True))
+            )
