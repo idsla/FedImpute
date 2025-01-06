@@ -126,9 +126,9 @@ class Client:
                 fit_res.update({'sample_size': self.X_train_imp.shape[0], 'converged': True})
                 return self.fed_strategy.get_parameters(self.imputer.model, params), fit_res
             else:
-                return self.imputer.get_imp_model_params(params), {
-                    'sample_size': self.X_train_imp.shape[0], 'converged': True
-                }
+                fit_res = self.imputer.get_fit_res(params)
+                fit_res.update({'sample_size': self.X_train_imp.shape[0], 'converged': True})
+                return self.imputer.get_imp_model_params(params), fit_res
         else:
             ############################################################################################################
             # NN based Imputation Models
@@ -146,7 +146,7 @@ class Client:
                     self.X_train_imp, self.y_train, self.X_train_mask, params
                 )
                 model_parameters = self.imputer.get_imp_model_params(params)
-                fit_res.update(self.data_utils)
+                #fit_res.update(self.data_utils)
 
             return model_parameters, fit_res
 
@@ -239,7 +239,8 @@ class Client:
         data_utils = {
             'task_type': data_config['task_type'],
             'n_features': X.shape[1],
-            'num_cols': data_config['num_cols'] if 'num_cols' in data_config else X.shape[1]
+            'num_cols': data_config['num_cols'] if 'num_cols' in data_config else X.shape[1],
+            'ms_cols_idx': np.where(X_mask.any(axis=0))[0]
         }
 
         #########################################################################################################

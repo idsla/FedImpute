@@ -532,8 +532,11 @@ class WorkflowJM(BaseWorkflow):
         
         if log:
             loguru.logger.info("\nLoss: {:.2f} ({:2f})".format(loss_mean, loss_std))
-        
-        return [{'loss': client_fit_res['loss'] if 'loss' in client_fit_res else 0} for client_fit_res in clients_fit_res]
+            
+        return {
+            'loss': {client_idx: client_fit_res['loss'] if 'loss' in client_fit_res else 0 
+                     for client_idx, client_fit_res in enumerate(clients_fit_res)}
+        }
 
     @staticmethod
     def pseudo_imp_eval(clients, evaluator: Evaluator):

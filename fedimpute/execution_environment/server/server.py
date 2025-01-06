@@ -100,10 +100,12 @@ class Server:
         return None
 
     def calculate_data_utils(self, data_config: dict) -> dict:
+        X_mask = self.X_test_mask
         data_utils = {
             'task_type': data_config['task_type'],
             'n_features': self.X_test.shape[1],
-            'num_cols': data_config['num_cols'] if 'num_cols' in data_config else self.X_test.shape[1]
+            'num_cols': data_config['num_cols'] if 'num_cols' in data_config else self.X_test.shape[1],
+            'ms_cols_idx': np.where(self.X_test_mask.any(axis=0))[0]
         }
 
         #########################################################################################################

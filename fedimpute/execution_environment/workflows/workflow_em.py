@@ -158,17 +158,21 @@ class WorkflowEM(BaseWorkflow):
 
                 ########################################################################################################
                 # Impute and Evaluation
-                if iteration % evaluation_interval == 0:
-                    other_infos = []
-                    for client_id in range(len(clients)):
-                        other_infos.append({
-                            'mu_norm': np.linalg.norm(local_models[client_id]['mu']),
-                            'sigma_norm': np.linalg.norm(local_models[client_id]['sigma'])
-                        })
-                    self.eval_and_track(
-                        evaluator, tracker, clients, phase='round', epoch=iteration, central_client=False,
-                        other_infos=other_infos
-                    )
+                other_infos = {
+                    'mu_norm': {
+                        client_id: np.linalg.norm(local_models[client_id]['mu']) 
+                        for client_id in range(len(clients))
+                    },
+                    'sigma_norm': {
+                        client_id: np.linalg.norm(local_models[client_id]['sigma']) 
+                        for client_id in range(len(clients))
+                    }
+                }
+                
+                self.eval_and_track(
+                    evaluator, tracker, clients, phase='round', epoch=iteration, central_client=False,
+                    other_infos=other_infos, eval = ((iteration % evaluation_interval) == 0)
+                )
 
         ########################################################################################################
         # Final Evaluation and Tracking
@@ -357,18 +361,21 @@ class WorkflowEM(BaseWorkflow):
                 # Receive client imputation results and Evaluate
                 clients_data = [pipe[0].recv() for pipe in client_pipes]
                 
-                if iteration % evaluation_interval == 0:
-                    other_infos = []
-                    for client_id in range(len(clients)):
-                        other_infos.append({
-                            'mu_norm': np.linalg.norm(local_models[client_id]['mu']),
-                            'sigma_norm': np.linalg.norm(local_models[client_id]['sigma'])
-                        })
-                        
-                    self.eval_and_track_parallel(
-                        evaluator, tracker, clients_data, phase='round', epoch=iteration, central_client=False,
-                        other_infos=other_infos
-                    )
+                other_infos = {
+                    'mu_norm': {
+                        client_id: np.linalg.norm(local_models[client_id]['mu']) 
+                        for client_id in range(len(clients))
+                    },
+                    'sigma_norm': {
+                        client_id: np.linalg.norm(local_models[client_id]['sigma']) 
+                        for client_id in range(len(clients))
+                    }
+                }
+                    
+                self.eval_and_track(
+                    evaluator, tracker, clients, phase='round', epoch=iteration, central_client=False,
+                    other_infos=other_infos, eval = ((iteration % evaluation_interval) == 0)
+                )
 
                 # Save model
                 if iteration % save_model_interval == 0:

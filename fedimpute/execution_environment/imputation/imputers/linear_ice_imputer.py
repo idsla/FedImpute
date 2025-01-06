@@ -61,6 +61,7 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
         self.model_type = 'sklearn'
         self.name = 'mice'
         self.model_persistable = False
+        self.fit_res_history = {}
 
     def initialize(
             self, X: np.array, missing_mask: np.array, data_utils: dict, params: dict, seed: int
@@ -162,7 +163,14 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
         # else:
         #     self.mm_model.fit(X, row_mask)
         #     mm_coef = np.concatenate([self.mm_model.coef_[0], self.mm_model.intercept_])
-        
+        if feature_idx not in self.fit_res_history:
+            self.fit_res_history[feature_idx] = []
+            
+        self.fit_res_history[feature_idx].append({
+            'coef': coef,
+            'loss': loss,
+            'sample_size': X_train.shape[0]
+        })
 
         return {
             'coef': coef,
@@ -215,3 +223,11 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
 
     def load_model(self, model_path: str, version: str) -> None:
         pass
+    
+    def get_fit_res(self, params: dict) -> dict:
+        try:
+            feature_idx = params['feature_idx']
+        except KeyError:
+            raise ValueError("Feature index not found in params")
+        
+        return self.fit_res_history[feature_idx][-1]

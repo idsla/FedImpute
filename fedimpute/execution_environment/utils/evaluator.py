@@ -30,27 +30,23 @@ class Evaluator:
     ) -> dict:
 
         evaluation_results = {
-            'imp_rmse_clients': [],
-            'imp_ws_clients': [],
-            'imp_rmse_avg': 0,
-            'imp_ws_avg': 0,
-            'imp_rmse_global': 0,
-            'imp_ws_global': 0
+            'imp_rmse': {},
+            'imp_ws': {},
         }
 
         # imputation quality evaluation
-        for X_train_imp, X_train_origin, X_train_mask in zip(X_train_imps, X_train_origins, X_train_masks):
+        if central_client:
+            X_train_imps = [X_train_imps[-1]]
+            X_train_origins = [X_train_origins[-1]]
+            X_train_masks = [X_train_masks[-1]]
+        
+        for client_idx, (X_train_imp, X_train_origin, X_train_mask) in enumerate(
+            zip(X_train_imps, X_train_origins, X_train_masks)
+        ):
             imp_rmse = rmse(X_train_imp, X_train_origin, X_train_mask)
             imp_ws = sliced_ws(X_train_imp, X_train_origin)
-            evaluation_results['imp_rmse_clients'].append(imp_rmse)
-            evaluation_results['imp_ws_clients'].append(imp_ws)
-
-        if central_client:
-            evaluation_results['imp_rmse_avg'] = float(np.mean(evaluation_results['imp_rmse_clients'][:-1]))
-            evaluation_results['imp_ws_avg'] = float(np.mean(evaluation_results['imp_ws_clients'][:-1]))
-        else:
-            evaluation_results['imp_rmse_avg'] = float(np.mean(evaluation_results['imp_rmse_clients']))
-            evaluation_results['imp_ws_avg'] = float(np.mean(evaluation_results['imp_ws_clients']))
+            evaluation_results['imp_rmse'][client_idx] = imp_rmse
+            evaluation_results['imp_ws'][client_idx] = imp_ws
 
         # global imputation quality evaluation
         # merged_X_imp = np.concatenate(X_train_imps, axis=0)
@@ -64,13 +60,16 @@ class Evaluator:
         return evaluation_results
 
     @staticmethod
-    def get_imp_quality(evaluation_results: dict, individual: bool = True, metric='rmse') -> Union[dict, float]:
-
-        if individual is True:
-            return evaluation_results[f'imp_{metric}_clients']
+    def get_average_imp_quality(
+        evaluation_results: dict, 
+        metric='rmse',
+    ) -> float:
+        
+        if metric == 'rmse':
+            imp_rmse_avg = float(np.mean(list(evaluation_results['imp_rmse'].values())))
+            return imp_rmse_avg
+        elif metric == 'ws':
+            imp_ws_avg = float(np.mean(list(evaluation_results['imp_ws'].values())))
+            return imp_ws_avg
         else:
-            return evaluation_results[f'imp_{metric}_avg']
-
-    @staticmethod
-    def evaluation_prediction(clients: List[Client]):
-        pass
+            raise ValueError(f"Invalid metric: {metric}")

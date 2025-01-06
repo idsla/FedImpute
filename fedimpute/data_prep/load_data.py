@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
 from sklearn.datasets import fetch_openml
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import (
+    StandardScaler, MinMaxScaler
+)
 
 from fedimpute.data_prep.helper import download_data
 
@@ -71,8 +73,6 @@ def load_data(data_name: str):
         
         cat_cols = [col for col in df_features.columns if col not in num_cols]
         
-        from sklearn.preprocessing import StandardScaler, MinMaxScaler
-
         scaler = StandardScaler()
         df_features[num_cols] = scaler.fit_transform(df_features[num_cols])
         scaler = MinMaxScaler()

@@ -85,7 +85,7 @@ class WorkflowICE(BaseWorkflow):
             central_client = clients[-1]
             for epoch in trange(iterations, desc='ICE Iterations', colour='blue'):
                 
-                other_info = [{}]
+                other_info, data_utils = [{}], [central_client.data_utils]
                 for feature_idx in trange(data_dim, desc='Feature_idx', leave=False, colour='blue'):
                     # client local train imputation model
                     fit_params = {'feature_idx': feature_idx, 'fit_model': True}
@@ -102,19 +102,22 @@ class WorkflowICE(BaseWorkflow):
                         client.local_imputation(params={'feature_idx': feature_idx})
 
                 # evaluation and early stopping and model saving
-                other_infos = self.calculate_other_info(other_info, metric=self.early_stopping_metric)
+                if epoch % save_model_interval == 0:
+                    central_client.save_imp_model(version=f'{epoch}')
+                
+                other_infos = self.calculate_other_info(
+                    other_info, metric=self.early_stopping_metric, data_utils=data_utils
+                )
+                
                 imp_qualities = self.eval_and_track(
                     evaluator, tracker, clients, phase='round', epoch=epoch,
                     central_client=server.fed_strategy.name == 'central', other_infos=other_infos
-                )
-
-                if epoch % save_model_interval == 0:
-                    central_client.save_imp_model(version=f'{epoch}')
+                )   # TODO: merge other info （fit res) into eval and track function
 
                 if self.early_stopping:
                     # if has ground truth, use it to check convergence
                     if imp_qualities is not None:
-                        central_imp_quality = imp_qualities[-1]
+                        central_imp_quality = imp_qualities[0]
                         early_stopping.update(central_imp_quality)
                         if early_stopping.check_convergence():
                             loguru.logger.info(f"Central client converged, iteration {epoch}")
@@ -149,6 +152,8 @@ class WorkflowICE(BaseWorkflow):
                 ########################################################################################################
                 # federated imputation for each feature
                 other_infos = [{} for _ in range(len(clients))]
+                data_utils = [client.data_utils for client in clients]
+                
                 for feature_idx in trange(data_dim, desc='Feature_idx', leave=False, colour='blue'):
                     # client local train imputation model
                     local_models, clients_fit_res = [], []
@@ -181,15 +186,17 @@ class WorkflowICE(BaseWorkflow):
 
                 ########################################################################################################
                 # Evaluation and early stopping
-                other_infos = self.calculate_other_info(other_infos, metric=self.early_stopping_metric)
+                if epoch % save_model_interval == 0:
+                    for client in clients:
+                        client.save_imp_model(version=f'{epoch}')
+                
+                other_infos = self.calculate_other_info(
+                    other_infos, metric=self.early_stopping_metric, data_utils=data_utils
+                )
                 imp_qualities = self.eval_and_track(
                     evaluator, tracker, clients, phase='round', epoch=epoch,
                     central_client=server.fed_strategy.name == 'central', other_infos=other_infos
                 )
-
-                if epoch % save_model_interval == 0:
-                    for client in clients:
-                        client.save_imp_model(version=f'{epoch}')
 
                 if self.early_stopping:
                     # if has ground truth, use it to check convergence
@@ -350,7 +357,7 @@ class WorkflowICE(BaseWorkflow):
 
                 ########################################################################################################
                 # federated imputation for each feature
-                other_info = [{} for _ in range(len(clients))]  # TODO: check how to get model parameters
+                other_info = [{} for _ in range(len(clients))]
                 for feature_idx in trange(data_dim, desc='Feature_idx', leave=False, colour='blue'):
 
                     # client local train imputation model
@@ -443,18 +450,26 @@ class WorkflowICE(BaseWorkflow):
 
         return tracker
     
-    def calculate_other_info(self, other_info: List[dict], metric: str = 'loss'):
+    def calculate_other_info(self, other_info: List[dict], metric: str = 'loss', data_utils: List[dict] = None):
         
-        other_info_calculated = []
+        other_info_calculated = {
+            f"{metric}": {client_idx: 0 for client_idx in range(len(other_info))}
+        }
         
         for client_idx, fit_res in enumerate(other_info):
-            cum_metric = 0
-            for feature_idx, param in fit_res.items():
-                cum_metric += param[metric]
+            ms_cols_idx = data_utils[client_idx]['ms_cols_idx']
             
-            avg_metric = cum_metric / len(fit_res)
+            if len(ms_cols_idx) == 0:
+                avg_metric = 0
+            else:
+                cum_metric = 0
+                for feature_idx, param in fit_res.items():
+                    if feature_idx in ms_cols_idx:
+                        cum_metric += param[metric]
             
-            other_info_calculated.append({f'{metric}': avg_metric})
+                avg_metric = cum_metric / len(ms_cols_idx)
+                        
+            other_info_calculated[f"{metric}"][client_idx] = avg_metric
         
         return other_info_calculated
         

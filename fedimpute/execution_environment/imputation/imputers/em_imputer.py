@@ -52,6 +52,7 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
         self.miss = None
         self.obs = None
         self.model_persistable = True
+        self.fit_res_history = []
 
     def initialize(
             self, X: np.array, missing_mask: np.array, data_utils: dict, params: dict, seed: int
@@ -129,6 +130,13 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
                 loguru.logger.error(f"EM step failed. {e}")
                 converged = True
                 break
+        
+        self.fit_res_history.append({
+            'mu': self.mu,
+            'sigma': self.sigma,
+            'sample_size': X.shape[0],
+            'converged': converged
+        })
 
         return {
             'sample_size': X.shape[0],
@@ -244,3 +252,7 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
                 np.linalg.norm(Mu - Mu_new) < convergence_threshold
                 and np.linalg.norm(Sigma - Sigma_new, ord=2) < convergence_threshold
         )
+        
+    def get_fit_res(self, params: dict) -> dict:
+        
+        return self.fit_res_history[-1]
