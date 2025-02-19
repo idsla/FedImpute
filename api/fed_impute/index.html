@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>FedImpute Execution Environment - FedImpute</title>
+    <title>Imputation Execution Environment - FedImpute</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -16,7 +16,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "FedImpute Execution Environment";
+        var mkdocs_page_name = "Imputation Execution Environment";
         var mkdocs_page_input_path = "api\\fed_impute.md";
         var mkdocs_page_url = null;
       </script>
@@ -54,18 +54,29 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../../user-guide/data_prep/">Data Preparation</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/scenario_simulation/">Federated Missing Data Scenario Simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/scenario_simulation/">Distributed Missing Data Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/fed_imp/">Federated Imputation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/fed_imp/">Distributed Imputation</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../user-guide/evaluation/">Evaluation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/pipeline/">Pipeline API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/basic_usage/">Basic Usage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/benchmark/">Benchmarking Pipeline Demo</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/real_scenario/">Real World Distributed Imputation</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul class="current">
-                  <li class="toctree-l1"><a class="reference internal" href="../simulation/">Scenario simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../simulation/">Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">FedImpute Execution Environment</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Imputation Execution Environment</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#client">Client</a>
     </li>
@@ -93,7 +104,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">API Reference</li>
-      <li class="breadcrumb-item active">FedImpute Execution Environment</li>
+      <li class="breadcrumb-item active">Imputation Execution Environment</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -357,11 +368,21 @@ np.ndarray - global test data
 <p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
 <ul>
 <li>
-<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.server.server.Server.global_evaluation">global_evaluation</span></span>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.server.server.Server.initial_impute">initial_impute</span></span> &mdash;
+Initial imputation
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.server.server.Server.local_imputation">local_imputation</span></span> &mdash;
+Perform local imputation
   </p>
 </li>
 <li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.server.server.Server.calculate_data_utils">calculate_data_utils</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.server.server.Server.profile">profile</span></span>
   </p>
 </li>
 </ul>
@@ -374,7 +395,7 @@ np.ndarray - global test data
 </p>
 <p class="mkapi-object">
   <span class="mkapi-object-kind">class</span>
-  <span class="mkapi-object-name"><span class="mkapi-name">BaseWorkflow</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span></span></p>
+  <span class="mkapi-object-name"><span class="mkapi-name">BaseWorkflow</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-paren">)</span></span></p>
 <p class="mkapi-object-bases">Bases :
 <span class="mkapi-object-base"><span class="mkapi-tooltip" title="abc.ABC">ABC</span></span>
 </p>
@@ -413,7 +434,7 @@ Run the federated imputation workflow based on the
 </p>
 <p class="mkapi-object">
   <span class="mkapi-object-kind">method</span>
-  <span class="mkapi-object-name"><span class="mkapi-prefix">BaseWorkflow</span><span class="mkapi-dot">.</span><span class="mkapi-name">run_fed_imp</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">clients</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.List">List</span>[<span class="mkapi-tooltip" title="fedimpute.execution_environment.client.client.Client">Client</span>]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">server</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="fedimpute.execution_environment.server.server.Server">Server</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">evaluator</span><span class="mkapi-comma">, </span><span class="mkapi-arg">tracker</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="fedimpute.execution_environment.utils.tracker.Tracker">Tracker</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">run_type</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="fedimpute.execution_environment.utils.tracker.Tracker">Tracker</span></span></span></p>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">BaseWorkflow</span><span class="mkapi-dot">.</span><span class="mkapi-name">run_fed_imp</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">clients</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.List">List</span>[<span class="mkapi-tooltip" title="fedimpute.execution_environment.client.client.Client">Client</span>]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">server</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="fedimpute.execution_environment.server.server.Server">Server</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">evaluator</span><span class="mkapi-comma">, </span><span class="mkapi-arg">tracker</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="fedimpute.execution_environment.utils.tracker.Tracker">Tracker</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">run_type</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">verbose</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-paren">)</span><span class="mkapi-arrow"> → </span><span class="mkapi-return"><span class="mkapi-tooltip" title="fedimpute.execution_environment.utils.tracker.Tracker">Tracker</span></span></span></p>
 <p>Run the federated imputation workflow based on the</p>
 <p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
 <ul>
@@ -468,7 +489,7 @@ Tracker - tracker with tracked results
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../simulation/" class="btn btn-neutral float-left" title="Scenario simulation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../simulation/" class="btn btn-neutral float-left" title="Scenario Builder"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../imputation_models/" class="btn btn-neutral float-right" title="Imputation Models">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 

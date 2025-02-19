@@ -56,18 +56,29 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="../user-guide/data_prep/">Data Preparation</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/scenario_simulation/">Federated Missing Data Scenario Simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/scenario_simulation/">Distributed Missing Data Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/fed_imp/">Federated Imputation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/fed_imp/">Distributed Imputation</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../user-guide/evaluation/">Evaluation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../user-guide/pipeline/">Pipeline API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/basic_usage/">Basic Usage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/benchmark/">Benchmarking Pipeline Demo</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tutorials/real_scenario/">Real World Distributed Imputation</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../api/simulation/">Scenario simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/simulation/">Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../api/fed_impute/">FedImpute Execution Environment</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/fed_impute/">Imputation Execution Environment</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../api/imputation_models/">Imputation Models</a>
                   </li>
@@ -121,50 +132,51 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <h1 id="basic-usage">Basic Usage</h1>
 <hr />
 <h3 id="step-1-prepare-data">Step 1. Prepare Data</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-<span class="n">data_config</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
-    <span class="s1">&#39;task_type&#39;</span><span class="p">:</span> <span class="s1">&#39;regression&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;clf_type&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="s1">&#39;num_cols&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div>
-<h3 id="step-2-simulate-federated-missing-data-scenario">Step 2. Simulate Federated Missing Data Scenario</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.simulator</span> <span class="kn">import</span> <span class="n">Simulator</span>
-<span class="n">simulator</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">()</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.data_prep</span> <span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
 
-<span class="c1"># classifical simulation function</span>
-<span class="n">simulation_results</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">simulate_scenario</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;iid-even&#39;</span><span class="p">,</span> <span class="n">ms_mech_type</span><span class="o">=</span><span class="s1">&#39;mcar&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
-<span class="p">)</span>
-
-<span class="c1"># lite simulation function</span>
-<span class="n">simulation_results</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">simulate_scenario_lite</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;niid-dir@0.1&#39;</span><span class="p">,</span> <span class="n">ms_scenario</span> <span class="o">=</span> <span class="s1">&#39;mar-heter&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span>
-<span class="p">)</span>
+<span class="n">data</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;codrna&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Dimensions: &quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Config:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data_config</span><span class="p">)</span>
+<span class="c1"># Structure of data_config: </span>
+<span class="c1">#   {</span>
+<span class="c1">#       &#39;target&#39;: &#39;y&#39;, </span>
+<span class="c1">#       &#39;task_type&#39;: &#39;classification&#39;, </span>
+<span class="c1">#       &#39;natural_partition&#39;: False</span>
+<span class="c1">#   }</span>
+<span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="step-3-execute-federated-imputation-algorithms">Step 3. Execute Federated Imputation Algorithms</h3>
-<p>Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior first
+<h3 id="step-2-build-distributed-missing-data-scenario">Step 2. Build Distributed Missing Data Scenario</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.scenario</span> <span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+
+<span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
+<span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;iid-even&#39;</span><span class="p">,</span> <span class="n">ms_scenario</span><span class="o">=</span><span class="s1">&#39;mnar-heter&#39;</span>
+<span class="p">)</span>
+<span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="step-3-execute-distributed-imputation-algorithms">Step 3. Execute Distributed Imputation Algorithms</h3>
+<p>Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior first</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># bash (linux)</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">CUBLAS_WORKSPACE_CONFIG</span><span class="o">=</span>:4096:8
 <span class="c1"># powershell (windows)</span>
 <span class="nv">$Env</span>:CUBLAS_WORKSPACE_CONFIG<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;:4096:8&quot;</span>
-</code></pre></div></p>
+</code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.execution_environment</span> <span class="kn">import</span> <span class="n">FedImputeEnv</span>
-<span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">()</span>
-<span class="n">env</span><span class="o">.</span><span class="n">reset_env</span><span class="p">()</span>
-<span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedavg&#39;</span><span class="p">,</span> <span class="n">fit_mode</span> <span class="o">=</span> <span class="s1">&#39;fed&#39;</span><span class="p">)</span>
-<span class="n">env</span><span class="o">.</span><span class="n">setup_from_simulator</span><span class="p">(</span><span class="n">simulator</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
-<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">(</span><span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedmice&#39;</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">setup_from_scenario_builder</span><span class="p">(</span><span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">show_env_info</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="step-4-evaluate-imputation-outcomes">Step 4. Evaluate imputation outcomes</h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
 
 <span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_local&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">])</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_results</span><span class="p">()</span>
+<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_all</span><span class="p">(</span>
+    <span class="n">env</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_local&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">evaluator</span><span class="o">.</span><span class="n">show_results_all</span><span class="p">()</span>
 </code></pre></div>
               
             </div>

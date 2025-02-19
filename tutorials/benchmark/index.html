@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Benchmarking Pipeline Demo - FedImpute</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkdocstrings.css" rel="stylesheet" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+        <link href="../../css/mkapi.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Benchmarking Pipeline Demo";
+        var mkdocs_page_input_path = "tutorials\\benchmark.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> FedImpute
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Quick Start</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../overview/">Overview of FedImpute</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../get_started/">Install & Basic Usage</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/data_prep/">Data Preparation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/scenario_simulation/">Distributed Missing Data Scenario Builder</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/fed_imp/">Distributed Imputation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/evaluation/">Evaluation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/pipeline/">Pipeline API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../basic_usage/">Basic Usage</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Benchmarking Pipeline Demo</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../real_scenario/">Real World Distributed Imputation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario Builder</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">Imputation Execution Environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/imputation_models/">Imputation Models</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">FedImpute</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Tutorial</li>
+      <li class="breadcrumb-item active">Benchmarking Pipeline Demo</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">tabulate</span>
+</code></pre></div>
+<h1 id="load-data-and-scenario">Load Data and Scenario</h1>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+
+<span class="kn">from</span> <span class="nn">fedimpute.data_prep</span> <span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
+<span class="n">data</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;codrna&quot;</span><span class="p">)</span>
+<span class="n">display_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Dimensions: &quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Config:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data_config</span><span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="nb">+--------+--------+--------+--------+--------+--------+--------+--------+--------+</span>
+<span class="c">|   X1   |   X2   |   X3   |   X4   |   X5   |   X6   |   X7   |   X8   |   y    |</span>
+<span class="c">|</span><span class="nb">--------+--------+--------+--------+--------+--------+--------+--------+--------</span><span class="c">|</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">7554 | 0</span><span class="nt">.</span><span class="c">1364 | 0</span><span class="nt">.</span><span class="c">0352 | 0</span><span class="nt">.</span><span class="c">4132 | 0</span><span class="nt">.</span><span class="c">6937 | 0</span><span class="nt">.</span><span class="c">1591 | 0</span><span class="nt">.</span><span class="c">3329 | 0</span><span class="nt">.</span><span class="c">7154 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">7334 | 0</span><span class="nt">.</span><span class="c">7879 | 0</span><span class="nt">.</span><span class="c">3819 | 0</span><span class="nt">.</span><span class="c">3693 | 0</span><span class="nt">.</span><span class="c">5619 | 0</span><span class="nt">.</span><span class="c">4830 | 0</span><span class="nt">.</span><span class="c">4351 | 0</span><span class="nt">.</span><span class="c">5160 | 0</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">7752 | 0</span><span class="nt">.</span><span class="c">1364 | 0</span><span class="nt">.</span><span class="c">1761 | 0</span><span class="nt">.</span><span class="c">3290 | 0</span><span class="nt">.</span><span class="c">7410 | 0</span><span class="nt">.</span><span class="c">4259 | 0</span><span class="nt">.</span><span class="c">4644 | 0</span><span class="nt">.</span><span class="c">5268 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">5905 | 0</span><span class="nt">.</span><span class="c">7424 | 0</span><span class="nt">.</span><span class="c">2720 | 0</span><span class="nt">.</span><span class="c">2898 | 0</span><span class="nt">.</span><span class="c">6920 | 0</span><span class="nt">.</span><span class="c">3205 | 0</span><span class="nt">.</span><span class="c">4019 | 0</span><span class="nt">.</span><span class="c">6290 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">7366 | 0</span><span class="nt">.</span><span class="c">1212 | 0</span><span class="nt">.</span><span class="c">2465 | 0</span><span class="nt">.</span><span class="c">3290 | 0</span><span class="nt">.</span><span class="c">7410 | 0</span><span class="nt">.</span><span class="c">3249 | 0</span><span class="nt">.</span><span class="c">5086 | 0</span><span class="nt">.</span><span class="c">5631 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="nb">+--------+--------+--------+--------+--------+--------+--------+--------+--------+</span>
+<span class="c">Data Dimensions:  (5000</span><span class="nt">,</span><span class="c"> 9)</span>
+<span class="c">Data Config:</span>
+<span class="c"> {&#39;target&#39;: &#39;y&#39;</span><span class="nt">,</span><span class="c"> &#39;task_type&#39;: &#39;classification&#39;</span><span class="nt">,</span><span class="c"> &#39;natural_partition&#39;: False}</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<span class="kn">from</span> <span class="nn">fedimpute.scenario</span> <span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+
+<span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
+<span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;iid-even&#39;</span><span class="p">,</span> <span class="n">ms_scenario</span><span class="o">=</span><span class="s1">&#39;mnar-heter&#39;</span>
+<span class="p">)</span>
+<span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
+<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
+<span class="n">Missing</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="n">simulation</span><span class="p">...</span>
+<span class="o">==================================================================</span>
+<span class="n">Scenario</span><span class="w"> </span><span class="n">Summary</span>
+<span class="o">==================================================================</span>
+<span class="n">Total</span><span class="w"> </span><span class="n">clients</span><span class="o">:</span><span class="w"> </span><span class="mi">4</span>
+<span class="n">Global</span><span class="w"> </span><span class="n">Test</span><span class="w"> </span><span class="n">Data</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">)</span>
+<span class="n">Missing</span><span class="w"> </span><span class="n">Mechanism</span><span class="w"> </span><span class="n">Category</span><span class="o">:</span><span class="w"> </span><span class="n">MNAR</span><span class="w"> </span><span class="p">(</span><span class="n">Self</span><span class="w"> </span><span class="n">Masking</span><span class="w"> </span><span class="n">Logit</span><span class="p">)</span>
+<span class="n">Clients</span><span class="w"> </span><span class="n">Data</span><span class="w"> </span><span class="n">Summary</span><span class="o">:</span>
+<span class="w">     </span><span class="n">Train</span><span class="w">     </span><span class="n">Test</span><span class="w">      </span><span class="n">Miss</span><span class="w">     </span><span class="n">MS</span><span class="w"> </span><span class="n">Ratio</span><span class="w">    </span><span class="n">MS</span><span class="w"> </span><span class="n">Feature</span><span class="w">    </span><span class="n">Seed</span>
+<span class="o">--</span><span class="w">  </span><span class="o">--------</span><span class="w">  </span><span class="o">-------</span><span class="w">  </span><span class="o">--------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">------------</span><span class="w">  </span><span class="o">------</span>
+<span class="n">C1</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.47</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">6077</span>
+<span class="n">C2</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.51</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">577</span>
+<span class="n">C3</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.46</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">7231</span>
+<span class="n">C4</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.47</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">5504</span>
+<span class="o">==================================================================</span>
+</code></pre></div>
+
+<h1 id="benchmarking-pipeline">Benchmarking Pipeline</h1>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<span class="kn">from</span> <span class="nn">fedimpute.pipeline</span> <span class="kn">import</span> <span class="n">FedImputePipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">FedImputePipeline</span><span class="p">()</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="s1">&#39;benchmark_demo&#39;</span><span class="p">,</span>
+    <span class="n">fed_imp_configs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;em&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;fedem&#39;</span><span class="p">],</span> <span class="p">{},</span> <span class="p">[{},</span> <span class="p">{}]),</span>
+        <span class="p">(</span><span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;fedmice&#39;</span><span class="p">],</span> <span class="p">{},</span> <span class="p">[{},</span> <span class="p">{}]),</span>
+        <span class="p">(</span><span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;fedavg&#39;</span><span class="p">],</span> <span class="p">{},</span> <span class="p">[{},</span> <span class="p">{}]),</span>
+    <span class="p">],</span>
+    <span class="n">persist_data</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;benchmark demonstration&#39;</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">pipeline_setup_summary</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
+<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
+<span class="o">==============================================================</span>
+<span class="n">Experiment</span><span class="w"> </span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="n">benchmark_demo</span>
+<span class="o">==============================================================</span>
+<span class="nl">Description</span><span class="p">:</span><span class="w"> </span><span class="n">benchmark</span><span class="w"> </span><span class="n">demonstration</span>
+<span class="n">Persist</span><span class="w"> </span><span class="n">Data</span><span class="o">:</span><span class="w"> </span><span class="n">False</span>
+<span class="nl">Evaluation</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">&#39;</span><span class="n">imp_quality</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">local_pred</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">fed_pred</span><span class="err">&#39;</span><span class="p">]</span>
+<span class="nl">Seed</span><span class="p">:</span><span class="w"> </span><span class="mi">100330201</span>
+<span class="o">--------------------------------------------------------------</span>
+<span class="w">    </span><span class="n">Imputer</span><span class="w">    </span><span class="n">Fed</span><span class="w"> </span><span class="n">Strategy</span><span class="w">    </span><span class="n">Imp</span><span class="w"> </span><span class="n">Params</span><span class="w">    </span><span class="n">Strategy</span><span class="w"> </span><span class="n">Params</span>
+<span class="o">--</span><span class="w">  </span><span class="o">---------</span><span class="w">  </span><span class="o">--------------</span><span class="w">  </span><span class="o">------------</span><span class="w">  </span><span class="o">-----------------</span>
+<span class="w"> </span><span class="mi">0</span><span class="w">  </span><span class="n">em</span><span class="w">         </span><span class="n">local</span><span class="w">           </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">1</span><span class="w">  </span><span class="n">em</span><span class="w">         </span><span class="n">fedem</span><span class="w">           </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">2</span><span class="w">  </span><span class="n">mice</span><span class="w">       </span><span class="n">local</span><span class="w">           </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">3</span><span class="w">  </span><span class="n">mice</span><span class="w">       </span><span class="n">fedmice</span><span class="w">         </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">4</span><span class="w">  </span><span class="n">gain</span><span class="w">       </span><span class="n">local</span><span class="w">           </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">5</span><span class="w">  </span><span class="n">gain</span><span class="w">       </span><span class="n">fedavg</span><span class="w">          </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="o">==============================================================</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+    <span class="n">scenario_builder</span><span class="p">,</span> <span class="n">repeats</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span>
+</code></pre></div>
+<h2 id="result-analysis">Result Analysis</h2>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;arial&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">fonttype</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;ps&#39;</span><span class="p">,</span> <span class="n">fonttype</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">plot_pipeline_results</span><span class="p">(</span>
+    <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;fed_pred_personalized&#39;</span><span class="p">,</span>
+    <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_fedpred.pdf&quot;</span>  
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../benchmark_files/benchmark_9_0.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">plot_pipeline_results</span><span class="p">(</span>
+    <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;local_pred&#39;</span><span class="p">,</span>    
+    <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_localpred.pdf&quot;</span>  
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../benchmark_files/benchmark_10_0.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">plot_pipeline_results</span><span class="p">(</span>
+    <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span>    
+    <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_impquality.pdf&quot;</span>  
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../benchmark_files/benchmark_11_0.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">plot_pipeline_results</span><span class="p">(</span>
+    <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;fed_pred_global&#39;</span><span class="p">,</span>    
+    <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_fedpredglobal.pdf&quot;</span>  
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../benchmark_files/benchmark_12_0.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">data</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">show_pipeline_results</span><span class="p">(</span>
+    <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;dataframe&#39;</span><span class="p">,</span>  
+    <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span>
+    <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;rmse&#39;</span><span class="p">,</span>
+    <span class="n">show_round_variation</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><span class="n">data</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="s2">&quot;./plots/benchmark_impquality.xlsx&quot;</span><span class="p">)</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../basic_usage/" class="btn btn-neutral float-left" title="Basic Usage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../real_scenario/" class="btn btn-neutral float-right" title="Real World Distributed Imputation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../basic_usage/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../real_scenario/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

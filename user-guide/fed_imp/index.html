@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Federated Imputation - FedImpute</title>
+    <title>Distributed Imputation - FedImpute</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -16,7 +16,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Federated Imputation";
+        var mkdocs_page_name = "Distributed Imputation";
         var mkdocs_page_input_path = "user-guide\\fed_imp.md";
         var mkdocs_page_url = null;
       </script>
@@ -54,9 +54,9 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../data_prep/">Data Preparation</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../scenario_simulation/">Federated Missing Data Scenario Simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../scenario_simulation/">Distributed Missing Data Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Federated Imputation</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Distributed Imputation</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#overview-and-basic-usage">Overview and Basic Usage</a>
     </li>
@@ -68,18 +68,31 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#execute-federated-imputation">Execute Federated Imputation</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#monitoring-imputation-process">Monitoring Imputation Process</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#miscellaneous">Miscellaneous</a>
     </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../evaluation/">Evaluation</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline/">Pipeline API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/basic_usage/">Basic Usage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/benchmark/">Benchmarking Pipeline Demo</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/real_scenario/">Real World Distributed Imputation</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">FedImpute Execution Environment</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">Imputation Execution Environment</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../api/imputation_models/">Imputation Models</a>
                   </li>
@@ -99,7 +112,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
           <li class="breadcrumb-item">User Guide</li>
-      <li class="breadcrumb-item active">Federated Imputation</li>
+      <li class="breadcrumb-item active">Distributed Imputation</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -108,7 +121,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="executing-federated-imputation-algorithms">Executing Federated Imputation Algorithms</h1>
+                <h1 id="executing-distributed-imputation-algorithms">Executing Distributed Imputation Algorithms</h1>
 <p>The <code>FedImputeEnv</code> class is the <code>execution_environment</code> module's main class. 
 It is used to configure the federated imputation environment and execute federated imputation algorithms.</p>
 <h2 id="overview-and-basic-usage">Overview and Basic Usage</h2>
@@ -119,10 +132,11 @@ see <a href="../scenario_simulation/">Scenario Simulation Section</a>.
 Finally, use the <code>run_fed_imputation</code> method to execute the federated imputation algorithms.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.execution_environment</span> <span class="kn">import</span> <span class="n">FedImputeEnv</span>
 
-<span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">()</span>
-<span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedavg&#39;</span><span class="p">,</span> <span class="n">fit_mode</span> <span class="o">=</span> <span class="s1">&#39;fed&#39;</span><span class="p">)</span>
-<span class="n">env</span><span class="o">.</span><span class="n">setup_from_simulator</span><span class="p">(</span><span class="n">simulator</span> <span class="o">=</span> <span class="n">simulator</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">(</span><span class="n">run_type</span><span class="o">=</span><span class="s1">&#39;sequential&#39;</span><span class="p">)</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedmice&#39;</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">setup_from_scenario_builder</span><span class="p">(</span><span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">show_env_info</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">()</span>
 </code></pre></div>
 <p>Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior first
 <div class="highlight"><pre><span></span><code><span class="c1"># bash (linux)</span>
@@ -162,67 +176,67 @@ Finally, use the <code>run_fed_imputation</code> method to execute the federated
 </thead>
 <tbody>
 <tr>
-<td style="text-align: center;">Fed-Mean</td>
+<td style="text-align: center;">Mean</td>
 <td style="text-align: center;">Non-NN</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;"><code>fed_mean</code></td>
-<td style="text-align: left;"><code>simple</code></td>
+<td style="text-align: center;"><code>local</code>, <code>fedmean</code></td>
+<td style="text-align: center;"><code>mean</code></td>
+<td style="text-align: left;"><code>MEAN</code></td>
 <td style="text-align: left;">-</td>
 </tr>
 <tr>
-<td style="text-align: center;">Fed-EM</td>
+<td style="text-align: center;">EM</td>
 <td style="text-align: center;">Non-NN</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;"><code>fed_em</code></td>
-<td style="text-align: left;"><code>em</code></td>
+<td style="text-align: center;"><code>local</code>, <code>fedem</code></td>
+<td style="text-align: center;"><code>em</code></td>
+<td style="text-align: left;"><code>EM</code></td>
 <td style="text-align: left;"><a href="https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_EM.py">EM</a>, <a href="https://arxiv.org/abs/2108.10252">FedEM</a></td>
 </tr>
 <tr>
-<td style="text-align: center;">Fed-ICE</td>
+<td style="text-align: center;">MICE</td>
 <td style="text-align: center;">Non-NN</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;"><code>fed_ice</code></td>
-<td style="text-align: left;"><code>ice</code></td>
+<td style="text-align: center;"><code>local</code>, <code>fedmice</code></td>
+<td style="text-align: center;"><code>mice</code></td>
+<td style="text-align: left;"><code>ICE</code></td>
 <td style="text-align: left;"><a href="https://pubmed.ncbi.nlm.nih.gov/33122624/">FedICE</a></td>
 </tr>
 <tr>
-<td style="text-align: center;">Fed-MissForest</td>
+<td style="text-align: center;">MissForest</td>
 <td style="text-align: center;">Non-NN</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;"><code>fed_missforest</code></td>
-<td style="text-align: left;"><code>ice</code></td>
+<td style="text-align: center;"><code>local</code>, <code>fedtree</code></td>
+<td style="text-align: center;"><code>missforest</code></td>
+<td style="text-align: left;"><code>ICE</code></td>
 <td style="text-align: left;"><a href="https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_missforest.py">MissForest</a>, <a href="https://pubmed.ncbi.nlm.nih.gov/35139148/">Fed Randomforest</a></td>
 </tr>
 <tr>
 <td style="text-align: center;">MIWAE</td>
 <td style="text-align: center;">NN</td>
-<td style="text-align: center;"><code>fedavg</code>, <code>fedprox</code>,...</td>
+<td style="text-align: center;"><code>local</code>, <code>fedavg</code>, ...</td>
 <td style="text-align: center;"><code>miwae</code></td>
-<td style="text-align: left;"><code>jm</code></td>
+<td style="text-align: left;"><code>JM</code></td>
 <td style="text-align: left;"><a href="https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_miwae.py">MIWAE</a></td>
 </tr>
 <tr>
 <td style="text-align: center;">GAIN</td>
 <td style="text-align: center;">NN</td>
-<td style="text-align: center;"><code>fedavg</code>, <code>fedprox</code>, ...</td>
+<td style="text-align: center;"><code>local</code>, <code>fedavg</code>, ...</td>
 <td style="text-align: center;"><code>gain</code></td>
-<td style="text-align: left;"><code>jm</code></td>
+<td style="text-align: left;"><code>JM</code></td>
 <td style="text-align: left;"><a href="https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_gain.py">GAIN</a></td>
 </tr>
 <tr>
 <td style="text-align: center;">Not-MIWAE</td>
 <td style="text-align: center;">NN</td>
-<td style="text-align: center;"><code>fedavg</code>, <code>fedprox</code>, <code>fedavg_ft</code>, ...</td>
+<td style="text-align: center;"><code>local</code>, <code>fedavg</code>, ...</td>
 <td style="text-align: center;"><code>notmiwae</code></td>
-<td style="text-align: left;"><code>jm</code></td>
+<td style="text-align: left;"><code>JM</code></td>
 <td style="text-align: left;"><a href="https://arxiv.org/abs/2006.12871">Not-MIWAE</a></td>
 </tr>
 <tr>
 <td style="text-align: center;">GNR</td>
 <td style="text-align: center;">NN</td>
-<td style="text-align: center;"><code>fedavg</code>, <code>fedprox</code>, <code>fedavg_ft</code>, ...</td>
+<td style="text-align: center;"><code>local</code>, <code>fedavg</code>, ...</td>
 <td style="text-align: center;"><code>gnr</code></td>
-<td style="text-align: left;"><code>jm</code></td>
+<td style="text-align: left;"><code>JM</code></td>
 <td style="text-align: left;"><a href="https://dl.acm.org/doi/abs/10.1145/3583780.3614835?casa_token=o8dv16sHJcMAAAAA:aAIvug_7cp9oUJSB7ZfTvzUksPyuP6Jbcl3TlHsvXXGEwIe4AbQuHCTlxXZtjDKlymfO30n2o-E9iw">GNR</a></td>
 </tr>
 </tbody>
@@ -238,6 +252,36 @@ Finally, use the <code>run_fed_imputation</code> method to execute the federated
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align: center;">Local</td>
+<td style="text-align: center;">non-federated</td>
+<td style="text-align: center;"><code>local</code></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr>
+<td style="text-align: center;">FedMean</td>
+<td style="text-align: center;">traditional</td>
+<td style="text-align: center;"><code>fedmean</code></td>
+<td style="text-align: left;">-</td>
+</tr>
+<tr>
+<td style="text-align: center;">FedEM</td>
+<td style="text-align: center;">traditional</td>
+<td style="text-align: center;"><code>fedem</code></td>
+<td style="text-align: left;"><a href="">FedEM</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">FedMICE</td>
+<td style="text-align: center;">traditional</td>
+<td style="text-align: center;"><code>fedmice</code></td>
+<td style="text-align: left;"><a href="">FedMICE</a></td>
+</tr>
+<tr>
+<td style="text-align: center;">FedTree</td>
+<td style="text-align: center;">traditional</td>
+<td style="text-align: center;"><code>fedtree</code></td>
+<td style="text-align: left;"><a href="">FedTree</a></td>
+</tr>
 <tr>
 <td style="text-align: center;">FedAvg</td>
 <td style="text-align: center;">global FL</td>
@@ -312,6 +356,11 @@ in the scenario where user have their own data that not simulated from simulator
 <p>After setting up the environment, we can execute the federated imputation algorithms using <code>run_fed_imputation()</code> method. Currently, we support two types of simulation execution (1) Run FL in sequential mode (<code>run_type="sequential"</code>), in this model, there is no parallel, whole processes of imputation for clients  run sequantially by using for loop (2) Run federated imputation in parallel mode (<code>run_type="parallel"</code>), it will simulate different processes for clients and server and then using workflow to manage communication between clients and server to approach the real world FL environment.</p>
 <div class="highlight"><pre><span></span><code><span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">(</span><span class="n">run_type</span><span class="o">=</span><span class="s1">&#39;squential&#39;</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="monitoring-imputation-process">Monitoring Imputation Process</h2>
+<p>We provide the Tensorboard utilty so that user can monitoring the imputation progress in real time. By using tensorboard, user need to run the following command in the terminal:</p>
+<div class="highlight"><pre><span></span><code>tensorboard --logdir .logs
+</code></pre></div>
+<p>We also provide another API <code>env.tracker.visualize_imputation_process()</code> it will show the line chart of imputation process measured by imputation quality or loss, it can only be run after imputation finished unlike tensorboard utility.</p>
 <h2 id="miscellaneous">Miscellaneous</h2>
 <ul>
 <li><strong>verbose</strong> (int) - Verbosity level. 0: no output, 1: minimal output, 2: detailed output</li>
@@ -322,7 +371,7 @@ in the scenario where user have their own data that not simulated from simulator
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../scenario_simulation/" class="btn btn-neutral float-left" title="Federated Missing Data Scenario Simulation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../scenario_simulation/" class="btn btn-neutral float-left" title="Distributed Missing Data Scenario Builder"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../evaluation/" class="btn btn-neutral float-right" title="Evaluation">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 

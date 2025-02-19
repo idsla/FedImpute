@@ -54,18 +54,29 @@
               <ul>
                   <li class="toctree-l1"><a class="reference internal" href="user-guide/data_prep/">Data Preparation</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="user-guide/scenario_simulation/">Federated Missing Data Scenario Simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="user-guide/scenario_simulation/">Distributed Missing Data Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="user-guide/fed_imp/">Federated Imputation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="user-guide/fed_imp/">Distributed Imputation</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="user-guide/evaluation/">Evaluation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="user-guide/pipeline/">Pipeline API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="tutorials/basic_usage/">Basic Usage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="tutorials/benchmark/">Benchmarking Pipeline Demo</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="tutorials/real_scenario/">Real World Distributed Imputation</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="api/simulation/">Scenario simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="api/simulation/">Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="api/fed_impute/">FedImpute Execution Environment</a>
+                  <li class="toctree-l1"><a class="reference internal" href="api/fed_impute/">Imputation Execution Environment</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="api/imputation_models/">Imputation Models</a>
                   </li>
@@ -95,19 +106,18 @@
               
                 <p><img src="icon.jpg" width="300" height="180"></p>
 <h1 id="welcome-to-fedimpute">Welcome to FedImpute</h1>
-<p>FedImpute is a benchmarking and evaluation tool to assess the effectiveness of federated imputation across various missing data scenarios.</p>
+<p>FedImpute is an open-source framework implemented in Python for distributed imputation research for horizontally partitioned data.</p>
 <h2 id="features-of-fedimpute">Features of FedImpute</h2>
 <ul>
-<li><strong>Flexible Missing Data Simulation</strong>: Provide flexible API to simulate missing data scenarios under various missing data distribution and data partition strategies.</li>
-<li><strong>Built-in Federated Imputation Methods</strong>: Supports multiple imputation techniques, including mean, and model-based approaches, 
-tailored for distributed data.</li>
-<li><strong>Easy Integration</strong>: Designed to be easily extended with federated imputation algorithms and workflows.</li>
+<li><strong>Flexible Distributed Missing Data Scenario Builder</strong>: Provide flexible API to construct distributedmissing data scenarios under various missing data distribution and data partition strategies or naturally distributed data with existing missingness.</li>
+<li><strong>Built-in Distributed Imputation Methods</strong>: Supports multiple distributed imputation techniques, including mean, and model-based approaches, tailored for distributed data.</li>
+<li><strong>Easy Integration</strong>: Designed to be easily extended with distributed imputation algorithms and workflows.</li>
 <li><strong>Customizability</strong>: Offers extensive configuration options to adapt the imputation process to specific needs.</li>
 </ul>
 <h2 id="quick-start">Quick Start</h2>
 <ul>
 <li>
-<p><a href="overview/">Overview of FedImpute</a></p>
+<p><a href="overview/">Overview</a></p>
 </li>
 <li>
 <p><a href="get_started/">Installation and Basic Usage</a></p>
@@ -116,10 +126,11 @@ tailored for distributed data.</li>
 <h2 id="user-guide">User Guide</h2>
 <ul>
 <li><a href="user-guide/data_prep/">Data Preparation</a></li>
-<li><a href="user-guide/scenario_simulation/">Federated Missing Data Scenario Simulation</a></li>
-<li><a href="user-guide/fed_imp/">Federated Imputation</a></li>
+<li><a href="user-guide/scenario_simulation/">Distributed Missing Data Scenario Builder</a></li>
+<li><a href="user-guide/fed_imp/">Distributed Imputation</a></li>
 <li><a href="user-guide/evaluation/">Evaluation</a></li>
 </ul>
+<h2 id="tutorials">Tutorials</h2>
 <h2 id="support-and-contact">Support and Contact</h2>
 <p>FedImpute is developed by Rutgers <a href="https://sites.rutgers.edu/idsla/">Institute for Data Science, Learning, and Applications (i-DLSA)</a>, lead by Professor <a href="https://www.business.rutgers.edu/faculty/jaideep-vaidya">Jaideep Vaidya</a>. For any questions, please contact <a href="mailto:sm2370@rutgers.edu">Sitao Min</a> for support.</p>
               
@@ -166,5 +177,5 @@ tailored for distributed data.</li>
 
 <!--
 MkDocs version : 1.6.0
-Build Date UTC : 2024-08-19 04:12:05.615781+00:00
+Build Date UTC : 2025-02-19 18:45:22.022601+00:00
 -->

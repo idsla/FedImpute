@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Basic Usage - FedImpute</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkdocstrings.css" rel="stylesheet" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+        <link href="../../css/mkapi.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Basic Usage";
+        var mkdocs_page_input_path = "tutorials\\basic_usage.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> FedImpute
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Quick Start</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../overview/">Overview of FedImpute</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../get_started/">Install & Basic Usage</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/data_prep/">Data Preparation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/scenario_simulation/">Distributed Missing Data Scenario Builder</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/fed_imp/">Distributed Imputation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/evaluation/">Evaluation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/pipeline/">Pipeline API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Basic Usage</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../benchmark/">Benchmarking Pipeline Demo</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../real_scenario/">Real World Distributed Imputation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario Builder</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">Imputation Execution Environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/imputation_models/">Imputation Models</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">FedImpute</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Tutorial</li>
+      <li class="breadcrumb-item active">Basic Usage</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">tabulate</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;arial&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">fonttype</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;ps&#39;</span><span class="p">,</span> <span class="n">fonttype</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>
+</code></pre></div>
+<h1 id="load-data">Load Data</h1>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+
+<span class="kn">from</span> <span class="nn">fedimpute.data_prep</span> <span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
+<span class="n">data</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;codrna&quot;</span><span class="p">)</span>
+<span class="n">display_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Dimensions: &quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Config:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data_config</span><span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="nb">+--------+--------+--------+--------+--------+--------+--------+--------+--------+</span>
+<span class="c">|   X1   |   X2   |   X3   |   X4   |   X5   |   X6   |   X7   |   X8   |   y    |</span>
+<span class="c">|</span><span class="nb">--------+--------+--------+--------+--------+--------+--------+--------+--------</span><span class="c">|</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">7554 | 0</span><span class="nt">.</span><span class="c">1364 | 0</span><span class="nt">.</span><span class="c">0352 | 0</span><span class="nt">.</span><span class="c">4132 | 0</span><span class="nt">.</span><span class="c">6937 | 0</span><span class="nt">.</span><span class="c">1591 | 0</span><span class="nt">.</span><span class="c">3329 | 0</span><span class="nt">.</span><span class="c">7154 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">7334 | 0</span><span class="nt">.</span><span class="c">7879 | 0</span><span class="nt">.</span><span class="c">3819 | 0</span><span class="nt">.</span><span class="c">3693 | 0</span><span class="nt">.</span><span class="c">5619 | 0</span><span class="nt">.</span><span class="c">4830 | 0</span><span class="nt">.</span><span class="c">4351 | 0</span><span class="nt">.</span><span class="c">5160 | 0</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">7752 | 0</span><span class="nt">.</span><span class="c">1364 | 0</span><span class="nt">.</span><span class="c">1761 | 0</span><span class="nt">.</span><span class="c">3290 | 0</span><span class="nt">.</span><span class="c">7410 | 0</span><span class="nt">.</span><span class="c">4259 | 0</span><span class="nt">.</span><span class="c">4644 | 0</span><span class="nt">.</span><span class="c">5268 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">5905 | 0</span><span class="nt">.</span><span class="c">7424 | 0</span><span class="nt">.</span><span class="c">2720 | 0</span><span class="nt">.</span><span class="c">2898 | 0</span><span class="nt">.</span><span class="c">6920 | 0</span><span class="nt">.</span><span class="c">3205 | 0</span><span class="nt">.</span><span class="c">4019 | 0</span><span class="nt">.</span><span class="c">6290 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="c">| 0</span><span class="nt">.</span><span class="c">7366 | 0</span><span class="nt">.</span><span class="c">1212 | 0</span><span class="nt">.</span><span class="c">2465 | 0</span><span class="nt">.</span><span class="c">3290 | 0</span><span class="nt">.</span><span class="c">7410 | 0</span><span class="nt">.</span><span class="c">3249 | 0</span><span class="nt">.</span><span class="c">5086 | 0</span><span class="nt">.</span><span class="c">5631 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
+<span class="nb">+--------+--------+--------+--------+--------+--------+--------+--------+--------+</span>
+<span class="c">Data Dimensions:  (5000</span><span class="nt">,</span><span class="c"> 9)</span>
+<span class="c">Data Config:</span>
+<span class="c"> {&#39;target&#39;: &#39;y&#39;</span><span class="nt">,</span><span class="c"> &#39;task_type&#39;: &#39;classification&#39;</span><span class="nt">,</span><span class="c"> &#39;natural_partition&#39;: False}</span>
+</code></pre></div>
+
+<h1 id="scenario-simulation">Scenario Simulation</h1>
+<h2 id="basic-usage">Basic Usage</h2>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<span class="kn">from</span> <span class="nn">fedimpute.scenario</span> <span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+
+<span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
+<span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;iid-even&#39;</span><span class="p">,</span> <span class="n">ms_scenario</span><span class="o">=</span><span class="s1">&#39;mnar-heter&#39;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Results Structure (Dict Keys):&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">scenario_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
+<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
+<span class="n">Missing</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="n">simulation</span><span class="p">...</span>
+<span class="n">Results</span><span class="w"> </span><span class="n">Structure</span><span class="w"> </span><span class="p">(</span><span class="n">Dict</span><span class="w"> </span><span class="n">Keys</span><span class="p">)</span><span class="o">:</span>
+<span class="p">[</span><span class="err">&#39;</span><span class="n">clients_train_data</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">clients_test_data</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">clients_train_data_ms</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">clients_seeds</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">global_test_data</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">data_config</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">stats</span><span class="err">&#39;</span><span class="p">]</span>
+<span class="o">==================================================================</span>
+<span class="n">Scenario</span><span class="w"> </span><span class="n">Summary</span>
+<span class="o">==================================================================</span>
+<span class="n">Total</span><span class="w"> </span><span class="n">clients</span><span class="o">:</span><span class="w"> </span><span class="mi">4</span>
+<span class="n">Global</span><span class="w"> </span><span class="n">Test</span><span class="w"> </span><span class="n">Data</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">)</span>
+<span class="n">Missing</span><span class="w"> </span><span class="n">Mechanism</span><span class="w"> </span><span class="n">Category</span><span class="o">:</span><span class="w"> </span><span class="n">MNAR</span><span class="w"> </span><span class="p">(</span><span class="n">Self</span><span class="w"> </span><span class="n">Masking</span><span class="w"> </span><span class="n">Logit</span><span class="p">)</span>
+<span class="n">Clients</span><span class="w"> </span><span class="n">Data</span><span class="w"> </span><span class="n">Summary</span><span class="o">:</span>
+<span class="w">     </span><span class="n">Train</span><span class="w">     </span><span class="n">Test</span><span class="w">      </span><span class="n">Miss</span><span class="w">     </span><span class="n">MS</span><span class="w"> </span><span class="n">Ratio</span><span class="w">    </span><span class="n">MS</span><span class="w"> </span><span class="n">Feature</span><span class="w">    </span><span class="n">Seed</span>
+<span class="o">--</span><span class="w">  </span><span class="o">--------</span><span class="w">  </span><span class="o">-------</span><span class="w">  </span><span class="o">--------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">------------</span><span class="w">  </span><span class="o">------</span>
+<span class="n">C1</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.47</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">6077</span>
+<span class="n">C2</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.51</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">577</span>
+<span class="n">C3</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.46</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">7231</span>
+<span class="n">C4</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.47</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">5504</span>
+<span class="o">==================================================================</span>
+</code></pre></div>
+
+<h2 id="exploring-scenario">Exploring Scenario</h2>
+<h3 id="data-heterogeneity">Data Heterogeneity</h3>
+<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_data_heterogeneity</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> 
+    <span class="n">distance_method</span><span class="o">=</span><span class="s1">&#39;swd&#39;</span><span class="p">,</span>
+    <span class="n">pca_col_threshold</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/data_heterogeneity.svg&#39;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../basic_usage_files/basic_usage_9_0.png" /></p>
+<h3 id="missing-data-inspection">Missing Data Inspection</h3>
+<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_pattern</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/ms_pattern.pdf&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../basic_usage_files/basic_usage_11_0.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_distribution</span><span class="p">(</span>
+    <span class="n">client_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">feature_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+    <span class="n">stat</span> <span class="o">=</span> <span class="s1">&#39;proportion&#39;</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/ms_distribution.pdf&#39;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../basic_usage_files/basic_usage_12_0.png" /></p>
+<h1 id="running-federated-imputation">Running Federated Imputation</h1>
+<h2 id="basic-usage_1">Basic Usage</h2>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<span class="kn">from</span> <span class="nn">fedimpute.execution_environment</span> <span class="kn">import</span> <span class="n">FedImputeEnv</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedmice&#39;</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">setup_from_scenario_builder</span><span class="p">(</span><span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">show_env_info</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
+<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">clients</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">server</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">workflow</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mEnvironment</span><span class="w"> </span><span class="n">setup</span><span class="w"> </span><span class="n">complete</span><span class="p">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="o">============================================================</span>
+<span class="n">Environment</span><span class="w"> </span><span class="n">Information</span><span class="o">:</span>
+<span class="o">============================================================</span>
+<span class="nl">Workflow</span><span class="p">:</span><span class="w"> </span><span class="n">ICE</span><span class="w"> </span><span class="p">(</span><span class="n">Imputation</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="n">Chain</span><span class="w"> </span><span class="n">Equation</span><span class="p">)</span>
+<span class="nl">Clients</span><span class="p">:</span>
+<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="nl">Server</span><span class="p">:</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="o">============================================================</span>
+
+
+
+
+<span class="n">ICE</span><span class="w"> </span><span class="n">Iterations</span><span class="o">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">8</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+</code></pre></div>
+
+<h2 id="monitoring-imputation-progress">Monitoring Imputation Progress</h2>
+<div class="highlight"><pre><span></span><code><span class="n">env</span><span class="o">.</span><span class="n">tracker</span><span class="o">.</span><span class="n">visualize_imputation_process</span><span class="p">()</span>
+</code></pre></div>
+<p><img alt="png" src="../basic_usage_files/basic_usage_17_0.png" /></p>
+<h1 id="evaluation">Evaluation</h1>
+<h3 id="imputation-quality">Imputation Quality</h3>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+
+<span class="n">X_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">)</span>
+<span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">)</span>
+<span class="n">X_train_masks</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_mask&#39;</span><span class="p">)</span>
+
+<span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
+<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_imp_quality</span><span class="p">(</span>
+    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
+    <span class="n">X_train_origins</span> <span class="o">=</span> <span class="n">X_trains</span><span class="p">,</span>
+    <span class="n">X_train_masks</span> <span class="o">=</span> <span class="n">X_train_masks</span><span class="p">,</span>
+    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rmse&#39;</span><span class="p">,</span> <span class="s1">&#39;nrmse&#39;</span><span class="p">,</span> <span class="s1">&#39;sliced-ws&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">evaluator</span><span class="o">.</span><span class="n">show_imp_results</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
+<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
+<span class="o">================================================</span>
+<span class="n">Imputation</span><span class="w"> </span><span class="n">Quality</span>
+<span class="o">================================================</span>
+<span class="w">               </span><span class="n">rmse</span><span class="w">       </span><span class="n">nrmse</span><span class="w">      </span><span class="n">sliced</span><span class="o">-</span><span class="n">ws</span>
+<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">-----------</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="w">     </span><span class="mf">0.172</span><span class="w">       </span><span class="mf">0.480</span><span class="w">        </span><span class="mf">0.076</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="w">     </span><span class="mf">0.184</span><span class="w">       </span><span class="mf">0.534</span><span class="w">        </span><span class="mf">0.090</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="w">     </span><span class="mf">0.120</span><span class="w">       </span><span class="mf">0.332</span><span class="w">        </span><span class="mf">0.047</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">4</span><span class="w">     </span><span class="mf">0.128</span><span class="w">       </span><span class="mf">0.359</span><span class="w">        </span><span class="mf">0.058</span>
+<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
+<span class="w"> </span><span class="n">Average</span><span class="w">      </span><span class="mf">0.151</span><span class="w">       </span><span class="mf">0.426</span><span class="w">        </span><span class="mf">0.068</span>
+<span class="w">   </span><span class="n">Std</span><span class="w">        </span><span class="mf">0.028</span><span class="w">       </span><span class="mf">0.083</span><span class="w">        </span><span class="mf">0.016</span>
+<span class="o">================================================</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="n">X_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">)</span>
+<span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">)</span>
+
+<span class="n">evaluator</span><span class="o">.</span><span class="n">tsne_visualization</span><span class="p">(</span>
+    <span class="n">X_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
+    <span class="n">X_origins</span> <span class="o">=</span> <span class="n">X_trains</span><span class="p">,</span>
+    <span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="nv">Evaluating</span><span class="w"> </span><span class="nv">TSNE</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span>...
+<span class="nv">Evaluating</span><span class="w"> </span><span class="nv">TSNE</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span>...
+<span class="nv">Evaluating</span><span class="w"> </span><span class="nv">TSNE</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span>...
+<span class="nv">Evaluating</span><span class="w"> </span><span class="nv">TSNE</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span>...
+</code></pre></div>
+
+<p><img alt="png" src="../basic_usage_files/basic_usage_21_1.png" /></p>
+<h3 id="local-prediction">Local Prediction</h3>
+<div class="highlight"><pre><span></span><code><span class="n">X_trains</span><span class="p">,</span> <span class="n">y_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_tests</span><span class="p">,</span> <span class="n">y_tests</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">)</span>
+<span class="n">data_config</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
+
+<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_local_pred</span><span class="p">(</span>
+    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
+    <span class="n">X_train_origins</span> <span class="o">=</span> <span class="n">X_trains</span><span class="p">,</span>
+    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
+    <span class="n">X_tests</span> <span class="o">=</span> <span class="n">X_tests</span><span class="p">,</span>
+    <span class="n">y_tests</span> <span class="o">=</span> <span class="n">y_tests</span><span class="p">,</span>
+    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span><span class="p">,</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;nn&#39;</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span>
+<span class="n">evaluator</span><span class="o">.</span><span class="n">show_local_pred_results</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">Clients</span><span class="o">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="sr">/4 [00:00&lt;?, ?it/s</span><span class="o">]</span>
+
+
+<span class="err"></span><span class="o">[</span><span class="mi">1</span><span class="n">mEarly</span><span class="w"> </span><span class="n">stopping</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="mi">593</span><span class="err"></span><span class="o">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="o">[</span><span class="mi">1</span><span class="n">mEarly</span><span class="w"> </span><span class="n">stopping</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="mi">287</span><span class="err"></span><span class="o">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="o">[</span><span class="mi">1</span><span class="n">mEarly</span><span class="w"> </span><span class="n">stopping</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="mi">583</span><span class="err"></span><span class="o">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="o">[</span><span class="mi">1</span><span class="n">mEarly</span><span class="w"> </span><span class="n">stopping</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="mi">360</span><span class="err"></span><span class="o">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="o">==========================================================</span>
+<span class="n">Downstream</span><span class="w"> </span><span class="n">Prediction</span><span class="w"> </span><span class="o">(</span><span class="n">Local</span><span class="o">)</span>
+<span class="o">==========================================================</span>
+<span class="w">             </span><span class="n">accuracy</span><span class="w">       </span><span class="n">f1</span><span class="w">         </span><span class="n">auc</span><span class="w">         </span><span class="n">prc</span>
+<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="w">     </span><span class="mf">0.788</span><span class="w">       </span><span class="mf">0.636</span><span class="w">       </span><span class="mf">0.861</span><span class="w">       </span><span class="mf">0.741</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="w">     </span><span class="mf">0.894</span><span class="w">       </span><span class="mf">0.824</span><span class="w">       </span><span class="mf">0.953</span><span class="w">       </span><span class="mf">0.935</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="w">     </span><span class="mf">0.929</span><span class="w">       </span><span class="mf">0.895</span><span class="w">       </span><span class="mf">0.976</span><span class="w">       </span><span class="mf">0.969</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">4</span><span class="w">     </span><span class="mf">0.752</span><span class="w">       </span><span class="mf">0.481</span><span class="w">       </span><span class="mf">0.854</span><span class="w">       </span><span class="mf">0.760</span>
+<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
+<span class="w"> </span><span class="n">Average</span><span class="w">      </span><span class="mf">0.841</span><span class="w">       </span><span class="mf">0.709</span><span class="w">       </span><span class="mf">0.911</span><span class="w">       </span><span class="mf">0.851</span>
+<span class="w">   </span><span class="n">Std</span><span class="w">        </span><span class="mf">0.073</span><span class="w">       </span><span class="mf">0.162</span><span class="w">       </span><span class="mf">0.054</span><span class="w">       </span><span class="mf">0.102</span>
+<span class="o">==========================================================</span>
+</code></pre></div>
+
+<h3 id="federated-prediction">Federated Prediction</h3>
+<div class="highlight"><pre><span></span><code><span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">)</span>
+<span class="n">X_trains</span><span class="p">,</span> <span class="n">y_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">X_tests</span><span class="p">,</span> <span class="n">y_tests</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">X_global_test</span><span class="p">,</span> <span class="n">y_global_test</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+    <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;global_test&#39;</span><span class="p">,</span> <span class="n">include_y</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">data_config</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
+
+<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_fed_pred</span><span class="p">(</span>
+    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
+    <span class="n">X_train_origins</span> <span class="o">=</span> <span class="n">X_trains</span><span class="p">,</span>
+    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
+    <span class="n">X_tests</span> <span class="o">=</span> <span class="n">X_tests</span><span class="p">,</span>
+    <span class="n">y_tests</span> <span class="o">=</span> <span class="n">y_tests</span><span class="p">,</span>
+    <span class="n">X_test_global</span> <span class="o">=</span> <span class="n">X_global_test</span><span class="p">,</span>
+    <span class="n">y_test_global</span> <span class="o">=</span> <span class="n">y_global_test</span><span class="p">,</span>
+    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span><span class="p">,</span>
+    <span class="n">train_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;global_epoch&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="s1">&#39;local_epoch&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">&#39;fine_tune_epoch&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">seed</span><span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span>
+
+<span class="n">evaluator</span><span class="o">.</span><span class="n">show_fed_pred_results</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="nx">Global</span><span class="w"> </span><span class="nx">Epoch</span><span class="o">:</span><span class="w">   </span><span class="mf">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mf">0</span><span class="o">/</span><span class="mf">100</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="cp">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6716053117724026</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5709273157750859</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.48411076998009406</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4436344894416192</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.43356676005265293</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4266376635607551</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">60</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4221082873204175</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">65</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">70</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.40617619396424764</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">71</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">74</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">80</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.3788260501973769</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">81</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">100</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">121</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">125</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="o">===============================================================</span>
+<span class="nx">Downstream</span> <span class="nx">Prediction</span> <span class="p">(</span><span class="nx">Fed</span><span class="p">)</span>
+<span class="o">===============================================================</span>
+ <span class="nx">Personalized</span>    <span class="nx">accuracy</span>       <span class="nx">f1</span>         <span class="nx">auc</span>         <span class="nx">prc</span>
+<span class="o">--------------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
+   <span class="nx">Client</span> <span class="mi">1</span>       <span class="mf">0.885</span>       <span class="mf">0.831</span>       <span class="mf">0.958</span>       <span class="mf">0.900</span>
+   <span class="nx">Client</span> <span class="mi">2</span>       <span class="mf">0.920</span>       <span class="mf">0.883</span>       <span class="mf">0.982</span>       <span class="mf">0.956</span>
+   <span class="nx">Client</span> <span class="mi">3</span>       <span class="mf">0.885</span>       <span class="mf">0.835</span>       <span class="mf">0.975</span>       <span class="mf">0.951</span>
+   <span class="nx">Client</span> <span class="mi">4</span>       <span class="mf">0.867</span>       <span class="mf">0.819</span>       <span class="mf">0.973</span>       <span class="mf">0.961</span>
+  <span class="o">----------</span>    <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
+    <span class="k">Global</span>        <span class="mf">0.906</span>       <span class="mf">0.862</span>       <span class="mf">0.969</span>       <span class="mf">0.941</span>
+<span class="o">===============================================================</span>
+</code></pre></div>
+
+<h3 id="all-in-one">All In One</h3>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+
+<span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
+<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_all</span><span class="p">(</span>
+    <span class="n">env</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_local&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">evaluator</span><span class="o">.</span><span class="n">show_results_all</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="err"></span><span class="p">[</span><span class="mf">1</span><span class="nx">mEvaluating</span><span class="w"> </span><span class="nx">imputation</span><span class="w"> </span><span class="nx">quality</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mf">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mf">1</span><span class="nx">mImputation</span><span class="w"> </span><span class="nx">quality</span><span class="w"> </span><span class="nx">evaluation</span><span class="w"> </span><span class="nx">completed</span><span class="p">.</span><span class="err"></span><span class="p">[</span><span class="mf">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mf">1</span><span class="nx">mEvaluating</span><span class="w"> </span><span class="nx">downstream</span><span class="w"> </span><span class="nx">prediction</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mf">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Clients</span><span class="o">:</span><span class="w">   </span><span class="mf">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mf">0</span><span class="o">/</span><span class="mf">4</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="cp">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">593</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">287</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">583</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">360</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mDownstream</span> <span class="nx">prediction</span> <span class="nx">evaluation</span> <span class="nx">completed</span><span class="o">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEvaluating</span> <span class="nx">federated</span> <span class="nx">downstream</span> <span class="nx">prediction</span><span class="o">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">100</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6716053117724026</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5709273157750859</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.48411076998009406</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4436344894416192</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.43356676005265293</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4266376635607551</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">60</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4221082873204175</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">65</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">70</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.40617619396424764</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">71</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">74</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">80</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.3788260501973769</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">81</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">100</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">121</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">125</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mFederated</span> <span class="nx">downstream</span> <span class="nx">prediction</span> <span class="nx">evaluation</span> <span class="nx">completed</span><span class="o">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEvaluation</span> <span class="nx">completed</span><span class="o">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+</code></pre></div>
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead tr th {
+        text-align: left;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="3" halign="left">imp_quality</th>
+      <th colspan="4" halign="left">pred_downstream_local</th>
+      <th colspan="8" halign="left">pred_downstream_fed</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>rmse</th>
+      <th>nrmse</th>
+      <th>sliced-ws</th>
+      <th>accuracy</th>
+      <th>f1</th>
+      <th>auc</th>
+      <th>prc</th>
+      <th>personalized_accuracy</th>
+      <th>personalized_f1</th>
+      <th>personalized_auc</th>
+      <th>personalized_prc</th>
+      <th>global_accuracy</th>
+      <th>global_f1</th>
+      <th>global_auc</th>
+      <th>global_prc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.172028</td>
+      <td>0.479522</td>
+      <td>0.075509</td>
+      <td>0.787611</td>
+      <td>0.636364</td>
+      <td>0.860953</td>
+      <td>0.741470</td>
+      <td>0.884956</td>
+      <td>0.831169</td>
+      <td>0.958037</td>
+      <td>0.900117</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.184269</td>
+      <td>0.533933</td>
+      <td>0.090226</td>
+      <td>0.893805</td>
+      <td>0.823529</td>
+      <td>0.952703</td>
+      <td>0.934722</td>
+      <td>0.920354</td>
+      <td>0.883117</td>
+      <td>0.981508</td>
+      <td>0.956229</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.119754</td>
+      <td>0.331969</td>
+      <td>0.047390</td>
+      <td>0.929204</td>
+      <td>0.894737</td>
+      <td>0.975818</td>
+      <td>0.969489</td>
+      <td>0.884956</td>
+      <td>0.835443</td>
+      <td>0.975462</td>
+      <td>0.951035</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.128211</td>
+      <td>0.359113</td>
+      <td>0.057849</td>
+      <td>0.752212</td>
+      <td>0.481481</td>
+      <td>0.854196</td>
+      <td>0.760059</td>
+      <td>0.867257</td>
+      <td>0.819277</td>
+      <td>0.972617</td>
+      <td>0.961279</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="export-evaluation-results-in-different-format">Export Evaluation Results in Different Format</h3>
+<div class="highlight"><pre><span></span><code><span class="n">evaluator</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;dataframe&#39;</span><span class="p">)</span>
+</code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead tr th {
+        text-align: left;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="3" halign="left">imp_quality</th>
+      <th colspan="4" halign="left">pred_downstream_local</th>
+      <th colspan="8" halign="left">pred_downstream_fed</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>rmse</th>
+      <th>nrmse</th>
+      <th>sliced-ws</th>
+      <th>accuracy</th>
+      <th>f1</th>
+      <th>auc</th>
+      <th>prc</th>
+      <th>personalized_accuracy</th>
+      <th>personalized_f1</th>
+      <th>personalized_auc</th>
+      <th>personalized_prc</th>
+      <th>global_accuracy</th>
+      <th>global_f1</th>
+      <th>global_auc</th>
+      <th>global_prc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.172028</td>
+      <td>0.479522</td>
+      <td>0.075509</td>
+      <td>0.787611</td>
+      <td>0.636364</td>
+      <td>0.860953</td>
+      <td>0.741470</td>
+      <td>0.884956</td>
+      <td>0.831169</td>
+      <td>0.958037</td>
+      <td>0.900117</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.184269</td>
+      <td>0.533933</td>
+      <td>0.090226</td>
+      <td>0.893805</td>
+      <td>0.823529</td>
+      <td>0.952703</td>
+      <td>0.934722</td>
+      <td>0.920354</td>
+      <td>0.883117</td>
+      <td>0.981508</td>
+      <td>0.956229</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.119754</td>
+      <td>0.331969</td>
+      <td>0.047390</td>
+      <td>0.929204</td>
+      <td>0.894737</td>
+      <td>0.975818</td>
+      <td>0.969489</td>
+      <td>0.884956</td>
+      <td>0.835443</td>
+      <td>0.975462</td>
+      <td>0.951035</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.128211</td>
+      <td>0.359113</td>
+      <td>0.057849</td>
+      <td>0.752212</td>
+      <td>0.481481</td>
+      <td>0.854196</td>
+      <td>0.760059</td>
+      <td>0.867257</td>
+      <td>0.819277</td>
+      <td>0.972617</td>
+      <td>0.961279</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="highlight"><pre><span></span><code><span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;dict-dataframe&#39;</span><span class="p">)</span>
+<span class="n">ret</span><span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">]</span>
+</code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>rmse</th>
+      <th>nrmse</th>
+      <th>sliced-ws</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.172028</td>
+      <td>0.479522</td>
+      <td>0.075509</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.184269</td>
+      <td>0.533933</td>
+      <td>0.090226</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.119754</td>
+      <td>0.331969</td>
+      <td>0.047390</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.128211</td>
+      <td>0.359113</td>
+      <td>0.057849</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="highlight"><pre><span></span><code><span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;dict-dataframe&#39;</span><span class="p">)</span>
+<span class="n">ret</span><span class="p">[</span><span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">]</span>
+</code></pre></div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>personalized_accuracy</th>
+      <th>personalized_f1</th>
+      <th>personalized_auc</th>
+      <th>personalized_prc</th>
+      <th>global_accuracy</th>
+      <th>global_f1</th>
+      <th>global_auc</th>
+      <th>global_prc</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.884956</td>
+      <td>0.831169</td>
+      <td>0.958037</td>
+      <td>0.900117</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.920354</td>
+      <td>0.883117</td>
+      <td>0.981508</td>
+      <td>0.956229</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.884956</td>
+      <td>0.835443</td>
+      <td>0.975462</td>
+      <td>0.951035</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.867257</td>
+      <td>0.819277</td>
+      <td>0.972617</td>
+      <td>0.961279</td>
+      <td>0.906</td>
+      <td>0.86217</td>
+      <td>0.968807</td>
+      <td>0.94098</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h1 id="benchmarking-pipeline">Benchmarking Pipeline</h1>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<span class="kn">from</span> <span class="nn">fedimpute.pipeline</span> <span class="kn">import</span> <span class="n">FedImputePipeline</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">FedImputePipeline</span><span class="p">()</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="s1">&#39;test_pipeline&#39;</span><span class="p">,</span>
+    <span class="n">fed_imp_configs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;em&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;fedem&#39;</span><span class="p">],</span> <span class="p">{},</span> <span class="p">[{},</span> <span class="p">{}]),</span>
+        <span class="p">(</span><span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;fedmice&#39;</span><span class="p">],</span> <span class="p">{},</span> <span class="p">[{},</span> <span class="p">{}]),</span>
+        <span class="p">(</span><span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;fedavg&#39;</span><span class="p">],</span> <span class="p">{},</span> <span class="p">[{},</span> <span class="p">{}]),</span>
+    <span class="p">],</span>
+    <span class="n">persist_data</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span><span class="o">.</span><span class="n">pipeline_setup_summary</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
+<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
+<span class="o">==============================================================</span>
+<span class="n">Experiment</span><span class="w"> </span><span class="n">ID</span><span class="o">:</span><span class="w"> </span><span class="n">test_pipeline</span>
+<span class="o">==============================================================</span>
+<span class="nl">Description</span><span class="p">:</span><span class="w"> </span><span class="n">test</span>
+<span class="n">Persist</span><span class="w"> </span><span class="n">Data</span><span class="o">:</span><span class="w"> </span><span class="n">False</span>
+<span class="nl">Evaluation</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">&#39;</span><span class="n">imp_quality</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">local_pred</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">fed_pred</span><span class="err">&#39;</span><span class="p">]</span>
+<span class="nl">Seed</span><span class="p">:</span><span class="w"> </span><span class="mi">100330201</span>
+<span class="o">--------------------------------------------------------------</span>
+<span class="w">    </span><span class="n">Imputer</span><span class="w">    </span><span class="n">Fed</span><span class="w"> </span><span class="n">Strategy</span><span class="w">    </span><span class="n">Imp</span><span class="w"> </span><span class="n">Params</span><span class="w">    </span><span class="n">Strategy</span><span class="w"> </span><span class="n">Params</span>
+<span class="o">--</span><span class="w">  </span><span class="o">---------</span><span class="w">  </span><span class="o">--------------</span><span class="w">  </span><span class="o">------------</span><span class="w">  </span><span class="o">-----------------</span>
+<span class="w"> </span><span class="mi">0</span><span class="w">  </span><span class="n">em</span><span class="w">         </span><span class="n">local</span><span class="w">           </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">1</span><span class="w">  </span><span class="n">em</span><span class="w">         </span><span class="n">fedem</span><span class="w">           </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">2</span><span class="w">  </span><span class="n">mice</span><span class="w">       </span><span class="n">local</span><span class="w">           </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">3</span><span class="w">  </span><span class="n">mice</span><span class="w">       </span><span class="n">fedmice</span><span class="w">         </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">4</span><span class="w">  </span><span class="n">gain</span><span class="w">       </span><span class="n">local</span><span class="w">           </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="w"> </span><span class="mi">5</span><span class="w">  </span><span class="n">gain</span><span class="w">       </span><span class="n">fedavg</span><span class="w">          </span><span class="p">{}</span><span class="w">            </span><span class="p">{}</span>
+<span class="o">==============================================================</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">run_pipeline</span><span class="p">(</span>
+    <span class="n">simulator</span><span class="p">,</span> <span class="n">repeats</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="o">----------------------------------------------------------------------------------------------------</span>
+<span class="nx">Running</span><span class="w"> </span><span class="nx">experiment</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">6</span>
+<span class="nx">Imputer</span><span class="o">:</span><span class="w"> </span><span class="nx">em</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">Fed</span><span class="w"> </span><span class="nx">Strategy</span><span class="o">:</span><span class="w"> </span><span class="nx">local</span><span class="w"> </span><span class="o">|</span><span class="nx">Imp</span><span class="w"> </span><span class="nx">Params</span><span class="o">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">Strategy</span><span class="w"> </span><span class="nx">Params</span><span class="o">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="err"></span><span class="p">[</span><span class="mf">1</span><span class="nx">mImputation</span><span class="w"> </span><span class="nx">Start</span><span class="w"> </span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mf">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mf">1</span><span class="nx">mInitial</span><span class="o">:</span><span class="w"> </span><span class="nx">rmse</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.2602</span><span class="w"> </span><span class="nx">ws</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mf">0.1349</span><span class="err"></span><span class="p">[</span><span class="mf">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Clients</span><span class="o">:</span><span class="w">   </span><span class="mf">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mf">0</span><span class="o">/</span><span class="mf">4</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="cp">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="nx">EM</span> <span class="nx">converged</span> <span class="nx">after</span> <span class="mi">3</span> <span class="nx">iterations</span><span class="o">.</span>
+<span class="nx">EM</span> <span class="nx">converged</span> <span class="nx">after</span> <span class="mi">2</span> <span class="nx">iterations</span><span class="o">.</span>
+<span class="nx">EM</span> <span class="nx">converged</span> <span class="nx">after</span> <span class="mi">3</span> <span class="nx">iterations</span><span class="o">.</span>
+<span class="nx">EM</span> <span class="nx">converged</span> <span class="nx">after</span> <span class="mi">4</span> <span class="nx">iterations</span><span class="o">.</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mFinal</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2505</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1289</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mRunning</span> <span class="nb">time</span><span class="o">:</span> <span class="mf">2.6570</span> <span class="nx">seconds</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Clients</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">4</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">428</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">309</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">576</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">243</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">100</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6852318048477173</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6026552538661396</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5766739832127796</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5591664016246796</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5472374050056232</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5470328948953572</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">58</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">60</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5348919396306954</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">70</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5332270299687104</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">71</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">72</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">80</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5302949845790863</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">88</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">188</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">197</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">151</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="o">----------------------------------------------------------------------------------------------------</span>
+<span class="nx">Running</span> <span class="nx">experiment</span><span class="o">:</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">6</span>
+<span class="nx">Imputer</span><span class="o">:</span> <span class="nx">em</span> <span class="o">|</span> <span class="nx">Fed</span> <span class="nx">Strategy</span><span class="o">:</span> <span class="nx">fedem</span> <span class="o">|</span><span class="nx">Imp</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span> <span class="o">|</span> <span class="nx">Strategy</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mImputation</span> <span class="nx">Start</span> <span class="o">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mInitial</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1832</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0911</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Iterations</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">100</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1561</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0746</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">1</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1513</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0695</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">2</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1490</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0670</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">3</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1477</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0656</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">4</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1470</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0648</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">5</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1465</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0642</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">6</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1462</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0639</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">7</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1462</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0638</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mAll</span> <span class="nx">clients</span> <span class="nx">converged</span><span class="p">,</span> <span class="nx">iteration</span> <span class="mi">8</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mFinal</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1462</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0638</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mRunning</span> <span class="nb">time</span><span class="o">:</span> <span class="mf">10.0379</span> <span class="nx">seconds</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Clients</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">4</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">596</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">540</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">635</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">342</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">100</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6680521088487962</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5459251565968289</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.49220619745114275</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4334482230684336</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4074271807775778</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.40386741827515993</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">56</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">60</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.39442776698692167</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">61</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">61</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">70</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.3848865417873158</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">73</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">137</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">77</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">52</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="o">----------------------------------------------------------------------------------------------------</span>
+<span class="nx">Running</span> <span class="nx">experiment</span><span class="o">:</span> <span class="mi">3</span> <span class="o">/</span> <span class="mi">6</span>
+<span class="nx">Imputer</span><span class="o">:</span> <span class="nx">mice</span> <span class="o">|</span> <span class="nx">Fed</span> <span class="nx">Strategy</span><span class="o">:</span> <span class="nx">local</span> <span class="o">|</span><span class="nx">Imp</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span> <span class="o">|</span> <span class="nx">Strategy</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mImputation</span> <span class="nx">Start</span> <span class="o">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mInitial</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2602</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1349</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">ICE</span> <span class="nx">Iterations</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">20</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2499</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1279</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">1</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2433</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1230</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">2</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2388</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1194</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">3</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2381</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1184</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">4</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2373</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1176</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">5</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2368</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1170</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">6</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2363</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1165</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">7</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2359</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1161</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">8</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2357</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1160</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">9</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2356</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1159</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mAll</span> <span class="nx">clients</span> <span class="nx">converged</span><span class="p">,</span> <span class="nx">iteration</span> <span class="mi">9</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mFinal</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2356</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1159</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mRunning</span> <span class="nb">time</span><span class="o">:</span> <span class="mf">6.4386</span> <span class="nx">seconds</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Clients</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">4</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">494</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">243</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">518</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">162</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">100</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6858881212332669</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5965307898381177</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5716207185212303</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.558542685911936</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5497896000742912</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5480287592200672</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">58</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">60</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5366446118728788</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">70</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5367836806119657</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">72</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">80</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.529742247041534</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">89</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">90</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5179214705439175</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">90</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">127</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="o">----------------------------------------------------------------------------------------------------</span>
+<span class="nx">Running</span> <span class="nx">experiment</span><span class="o">:</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">6</span>
+<span class="nx">Imputer</span><span class="o">:</span> <span class="nx">mice</span> <span class="o">|</span> <span class="nx">Fed</span> <span class="nx">Strategy</span><span class="o">:</span> <span class="nx">fedmice</span> <span class="o">|</span><span class="nx">Imp</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span> <span class="o">|</span> <span class="nx">Strategy</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mImputation</span> <span class="nx">Start</span> <span class="o">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mInitial</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1832</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0911</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">ICE</span> <span class="nx">Iterations</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">20</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1520</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0699</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">1</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1502</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0679</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">2</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1500</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0675</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">3</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1500</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0674</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">4</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1502</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0674</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">5</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1502</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0675</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">6</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1502</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0674</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Feature_idx</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">8</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">7</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1511</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0677</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mAll</span> <span class="nx">clients</span> <span class="nx">converged</span><span class="p">,</span> <span class="nx">iteration</span> <span class="mi">7</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mFinal</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.1511</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.0677</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mRunning</span> <span class="nb">time</span><span class="o">:</span> <span class="mf">5.3013</span> <span class="nx">seconds</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Clients</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">4</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">651</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">425</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">509</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">378</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">100</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6697010529391907</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5561447463491384</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4944189243456897</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4401443280717906</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.41360662526944103</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4085833233068971</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">56</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">60</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.3923953058672886</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">61</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">70</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.3683767879710478</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">72</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">78</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">134</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">116</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">68</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="o">----------------------------------------------------------------------------------------------------</span>
+<span class="nx">Running</span> <span class="nx">experiment</span><span class="o">:</span> <span class="mi">5</span> <span class="o">/</span> <span class="mi">6</span>
+<span class="nx">Imputer</span><span class="o">:</span> <span class="nx">gain</span> <span class="o">|</span> <span class="nx">Fed</span> <span class="nx">Strategy</span><span class="o">:</span> <span class="nx">local</span> <span class="o">|</span><span class="nx">Imp</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span> <span class="o">|</span> <span class="nx">Strategy</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mImputation</span> <span class="nx">Start</span> <span class="o">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mInitial</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.5227</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.2964</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">300</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.9227</span> <span class="p">(</span><span class="mf">0.030994</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.7765</span> <span class="p">(</span><span class="mf">0.024621</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.7120</span> <span class="p">(</span><span class="mf">0.036262</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.6754</span> <span class="p">(</span><span class="mf">0.041985</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.6509</span> <span class="p">(</span><span class="mf">0.043503</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.6347</span> <span class="p">(</span><span class="mf">0.043024</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.6233</span> <span class="p">(</span><span class="mf">0.041136</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.6156</span> <span class="p">(</span><span class="mf">0.040225</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.6076</span> <span class="p">(</span><span class="mf">0.039028</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.6043</span> <span class="p">(</span><span class="mf">0.037397</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.6023</span> <span class="p">(</span><span class="mf">0.037439</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.6000</span> <span class="p">(</span><span class="mf">0.037890</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mAll</span> <span class="nx">clients</span> <span class="nx">have</span> <span class="nx">converged</span><span class="o">.</span> <span class="nx">Stopping</span> <span class="nx">training</span> <span class="nx">at</span> <span class="mf">114.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mstart</span> <span class="nx">fine</span> <span class="nx">tuning</span> <span class="o">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Fine</span> <span class="nx">Tuning</span> <span class="nx">Epoch</span><span class="o">:</span> <span class="mi">0</span><span class="nx">it</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mFinal</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2599</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1208</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mRunning</span> <span class="nb">time</span><span class="o">:</span> <span class="mf">99.3960</span> <span class="nx">seconds</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Clients</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">4</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">680</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">365</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">377</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">638</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">100</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6730961957398583</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5978400663417929</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5800157938809956</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5666844884262365</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5555288638262188</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5373793121646433</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">60</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5218750028049244</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">70</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.50243169200771</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">80</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.487292159567861</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">90</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4765385183341363</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">80</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">187</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">148</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="o">----------------------------------------------------------------------------------------------------</span>
+<span class="nx">Running</span> <span class="nx">experiment</span><span class="o">:</span> <span class="mi">6</span> <span class="o">/</span> <span class="mi">6</span>
+<span class="nx">Imputer</span><span class="o">:</span> <span class="nx">gain</span> <span class="o">|</span> <span class="nx">Fed</span> <span class="nx">Strategy</span><span class="o">:</span> <span class="nx">fedavg</span> <span class="o">|</span><span class="nx">Imp</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span> <span class="o">|</span> <span class="nx">Strategy</span> <span class="nx">Params</span><span class="o">:</span> <span class="p">{}</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mImputation</span> <span class="nx">Start</span> <span class="o">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mInitial</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.5227</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.2964</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">300</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.9227</span> <span class="p">(</span><span class="mf">0.030994</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.7917</span> <span class="p">(</span><span class="mf">0.072330</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.7753</span> <span class="p">(</span><span class="mf">0.067716</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.7615</span> <span class="p">(</span><span class="mf">0.063676</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.7482</span> <span class="p">(</span><span class="mf">0.060218</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.7412</span> <span class="p">(</span><span class="mf">0.056916</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.7409</span> <span class="p">(</span><span class="mf">0.056230</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">m</span>
+<span class="nx">Loss</span><span class="o">:</span> <span class="mf">0.7415</span> <span class="p">(</span><span class="mf">0.056552</span><span class="p">)</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mAll</span> <span class="nx">clients</span> <span class="nx">have</span> <span class="nx">converged</span><span class="o">.</span> <span class="nx">Stopping</span> <span class="nx">training</span> <span class="nx">at</span> <span class="mf">74.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mstart</span> <span class="nx">fine</span> <span class="nx">tuning</span> <span class="o">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Fine</span> <span class="nx">Tuning</span> <span class="nx">Epoch</span><span class="o">:</span> <span class="mi">0</span><span class="nx">it</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mFinal</span><span class="o">:</span> <span class="nx">rmse</span> <span class="o">-</span> <span class="mf">0.2408</span> <span class="nx">ws</span> <span class="o">-</span> <span class="mf">0.1066</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mRunning</span> <span class="nb">time</span><span class="o">:</span> <span class="mf">71.4822</span> <span class="nx">seconds</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="nx">Clients</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">4</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">523</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">763</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">332</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">463</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+
+
+
+<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">100</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6607095686828389</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5904788664158652</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">15</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5443049821199156</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5404780197377299</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">39</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.507057719370898</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5046060856650857</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">57</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">59</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">plot_pipeline_results</span><span class="p">(</span>
+    <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;fed_pred_personalized&#39;</span><span class="p">,</span>
+    <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../basic_usage_files/basic_usage_35_0.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">data</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">show_pipeline_results</span><span class="p">(</span>
+    <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;dataframe&#39;</span><span class="p">,</span>  
+    <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span>
+    <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;rmse&#39;</span><span class="p">,</span>
+    <span class="n">show_round_variation</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span>
+<span class="n">data</span>
+</code></pre></div>
+<style type="text/css">
+#T_98914 th {
+  text-align: center;
+}
+</style>
+<table id="T_98914">
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_98914_level0_col0" class="col_heading level0 col0" colspan="2">em</th>
+      <th id="T_98914_level0_col2" class="col_heading level0 col2" colspan="2">gain</th>
+      <th id="T_98914_level0_col4" class="col_heading level0 col4" colspan="2">mice</th>
+    </tr>
+    <tr>
+      <th class="blank level1" >&nbsp;</th>
+      <th id="T_98914_level1_col0" class="col_heading level1 col0" >fedem</th>
+      <th id="T_98914_level1_col1" class="col_heading level1 col1" >local</th>
+      <th id="T_98914_level1_col2" class="col_heading level1 col2" >fedavg</th>
+      <th id="T_98914_level1_col3" class="col_heading level1 col3" >local</th>
+      <th id="T_98914_level1_col4" class="col_heading level1 col4" >fedmice</th>
+      <th id="T_98914_level1_col5" class="col_heading level1 col5" >local</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_98914_level0_row0" class="row_heading level0 row0" >Client 0</th>
+      <td id="T_98914_row0_col0" class="data row0 col0" >0.161 (0.00)</td>
+      <td id="T_98914_row0_col1" class="data row0 col1" >0.257 (0.00)</td>
+      <td id="T_98914_row0_col2" class="data row0 col2" >0.227 (0.00)</td>
+      <td id="T_98914_row0_col3" class="data row0 col3" >0.253 (0.00)</td>
+      <td id="T_98914_row0_col4" class="data row0 col4" >0.172 (0.00)</td>
+      <td id="T_98914_row0_col5" class="data row0 col5" >0.255 (0.00)</td>
+    </tr>
+    <tr>
+      <th id="T_98914_level0_row1" class="row_heading level0 row1" >Client 1</th>
+      <td id="T_98914_row1_col0" class="data row1 col0" >0.162 (0.00)</td>
+      <td id="T_98914_row1_col1" class="data row1 col1" >0.269 (0.00)</td>
+      <td id="T_98914_row1_col2" class="data row1 col2" >0.210 (0.00)</td>
+      <td id="T_98914_row1_col3" class="data row1 col3" >0.257 (0.00)</td>
+      <td id="T_98914_row1_col4" class="data row1 col4" >0.184 (0.00)</td>
+      <td id="T_98914_row1_col5" class="data row1 col5" >0.246 (0.00)</td>
+    </tr>
+    <tr>
+      <th id="T_98914_level0_row2" class="row_heading level0 row2" >Client 2</th>
+      <td id="T_98914_row2_col0" class="data row2 col0" >0.128 (0.00)</td>
+      <td id="T_98914_row2_col1" class="data row2 col1" >0.204 (0.00)</td>
+      <td id="T_98914_row2_col2" class="data row2 col2" >0.267 (0.00)</td>
+      <td id="T_98914_row2_col3" class="data row2 col3" >0.254 (0.00)</td>
+      <td id="T_98914_row2_col4" class="data row2 col4" >0.120 (0.00)</td>
+      <td id="T_98914_row2_col5" class="data row2 col5" >0.190 (0.00)</td>
+    </tr>
+    <tr>
+      <th id="T_98914_level0_row3" class="row_heading level0 row3" >Client 3</th>
+      <td id="T_98914_row3_col0" class="data row3 col0" >0.134 (0.00)</td>
+      <td id="T_98914_row3_col1" class="data row3 col1" >0.272 (0.00)</td>
+      <td id="T_98914_row3_col2" class="data row3 col2" >0.259 (0.00)</td>
+      <td id="T_98914_row3_col3" class="data row3 col3" >0.275 (0.00)</td>
+      <td id="T_98914_row3_col4" class="data row3 col4" >0.128 (0.00)</td>
+      <td id="T_98914_row3_col5" class="data row3 col5" >0.251 (0.00)</td>
+    </tr>
+  </tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../user-guide/pipeline/" class="btn btn-neutral float-left" title="Pipeline API"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../benchmark/" class="btn btn-neutral float-right" title="Benchmarking Pipeline Demo">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../user-guide/pipeline/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../benchmark/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -54,32 +54,47 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../data_prep/">Data Preparation</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../scenario_simulation/">Federated Missing Data Scenario Simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../scenario_simulation/">Distributed Missing Data Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../fed_imp/">Federated Imputation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../fed_imp/">Distributed Imputation</a>
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Evaluation</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#supported-evaluation-metrics">Supported Evaluation Metrics</a>
+    <li class="toctree-l2"><a class="reference internal" href="#supported-evaluation">Supported Evaluation</a>
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#imputation-quality">Imputation Quality</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#downstream-prediction">Downstream Prediction</a>
+    <li class="toctree-l3"><a class="reference internal" href="#imputation-quality-via-tsne-visualization">Imputation Quality via tSNE visualization</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#variance-metrics-measure-the-variance-of-imputationa-and-prediction-outcomes">Variance Metrics (Measure the variance of imputationa and prediction outcomes)</a>
+    <li class="toctree-l3"><a class="reference internal" href="#local-prediction">Local Prediction</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#federated-prediction">Federated Prediction</a>
     </li>
         </ul>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#save-evaluation-results">Save Evaluation Results</a>
+    </li>
     </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline/">Pipeline API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/basic_usage/">Basic Usage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/benchmark/">Benchmarking Pipeline Demo</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/real_scenario/">Real World Distributed Imputation</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">FedImpute Execution Environment</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">Imputation Execution Environment</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../api/imputation_models/">Imputation Models</a>
                   </li>
@@ -113,27 +128,38 @@
 The evaluation can be categorized into the following aspects:</p>
 <ul>
 <li><strong>Imputation Quality</strong>: Evaluate the quality of imputed data.</li>
-<li><strong>Downstream Prediction</strong>: Evaluate the performance of downstream prediction tasks using imputed data (supports both local or federated prediction).</li>
+<li><strong>Local Prediction</strong>: Evaluate the performance based on downstream local prediction tasks using imputed data.</li>
+<li><strong>Federated Prediction</strong>: Evaluate the performance based on downstream federated prediction task using imputed data.</li>
 </ul>
 <h2 id="basic-usage">Basic Usage</h2>
 <p>The <code>Evaluator</code> class is the <code>evaluation</code> module's main class, use its <code>evaluation()</code> function to perform evaluation.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
 
 <span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_local&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">])</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_results</span><span class="p">()</span>
+<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_all</span><span class="p">(</span>
+    <span class="n">env</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_local&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">evaluator</span><span class="o">.</span><span class="n">show_results_all</span><span class="p">()</span>
 </code></pre></div>
-<p>The <code>Evaluator.evaluate()</code> method is used to evaluate the imputation outcomes. It takes the <code>FedImpEnv</code> object (see <a href="../fed_imp/">Federated Imputaton</a> and a list of evaluation aspects as input.
+<p>The <code>Evaluator.evaluate_all()</code> method is used to evaluate the imputation outcomes. It takes the <code>FedImpEnv</code> object (see <a href="../fed_imp/">Federated Imputaton</a> and a list of evaluation aspects as input.
 The evaluation aspects can be one or more of the following:</p>
 <ul>
 <li><code>imp_quality</code>: Evaluate the quality of imputed data.</li>
 <li><code>pred_downstream_local</code>: Evaluate the performance of downstream prediction tasks using imputed data in a local setting.</li>
 <li><code>pred_downstream_fed</code>: Evaluate the performance of downstream prediction tasks using imputed data in a federated setting.</li>
 </ul>
-<p>The <code>Evaluator.show_results()</code> method is used to display the evaluation results. It prints the evaluation results for each evaluation aspect.</p>
-<h2 id="supported-evaluation-metrics">Supported Evaluation Metrics</h2>
+<p>The <code>Evaluator.show_results_all()</code> method is used to display the evaluation results. It prints the evaluation results for each evaluation aspect.</p>
+<h2 id="supported-evaluation">Supported Evaluation</h2>
 <p>The following evaluation metrics are supported for each evaluation aspect:</p>
 <h3 id="imputation-quality">Imputation Quality</h3>
+<p>User can use the specific <code>evaluate_imputation_quality()</code> method in <code>evaluation.Evaluator</code> class provides functionalities to evaluate the quality of imputed data across clients comprehensively. It has several parameters: </p>
+<ul>
+<li><code>X_train_imps</code>: lists of client-specific imputed datasets</li>
+<li><code>X_train_origins</code>: list of client-specific original complete datasets</li>
+<li><code>X_train_masks</code>: list of client-specific missing value masks</li>
+<li><code>metrics</code>: to denote the list of metrics for evaluation.</li>
+</ul>
+<p><strong>Metrics:</strong></p>
 <ul>
 <li><strong>Root Mean Squared Error (RMSE) <code>rmse</code></strong>: RMSE is calculated by taking the square root of the mean of </li>
 <li>
@@ -153,48 +179,112 @@ of the imputed data and the original data for each client.
 A smaller Wasserstein distance indicates a higher similarity between the imputed and original data distributions. </p>
 </li>
 </ul>
-<h3 id="downstream-prediction">Downstream Prediction</h3>
-<p>After missing data are imputed, 
-the downstream task prediction can be performed on imputed data. 
-During the data partition stage, we retain a local test dataset for each client and a global test dataset for global data. 
-These test datasets can be used to evaluate downstream prediction models trained on clients' local imputed datasets to measure 
-the goodness of imputation and how it influences the prediction.<br />
-We contains three built-in local downstream prediction models (Linear regression <code>linear</code>, Random Forest <code>tree</code>, and two-layer neural network <code>nn</code>) 
-and various metrics such as accuracy <code>accu</code>, AUROC <code>auroc</code>, f1 score <code>f1</code> for evaluation of classification tasks, and 
-mean square error <code>mse</code>, r2 score <code>r2</code>, mean square log error <code>msle</code>, mean abusolute error <code>mae</code> for 
-evaluation of regression tasks. Fedimpute also supports federated downstream task evaluation for a 
-two-layer neural network with FedAvg <code>fedavg</code> as federated learning strategies. By assessing the performance of the downstream tasks, we can gain insights into how different imputation methods impact the overall effectiveness of the learning process in the presence of missing data.</p>
-<h3 id="variance-metrics-measure-the-variance-of-imputationa-and-prediction-outcomes">Variance Metrics (Measure the variance of imputationa and prediction outcomes)</h3>
+<p>User can use <code>show_imp_results()</code> to get the formatted results of evaluation.</p>
+<div class="highlight"><pre><span></span><code>from fedimpute.evaluation import Evaluator
+
+X_trains = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train&#39;)
+X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
+X_train_masks = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_mask&#39;)
+
+evaluator = Evaluator()
+ret = evaluator.evaluate_imp_quality(
+    X_train_imps = X_train_imps,
+    X_train_origins = X_trains,
+    X_train_masks = X_train_masks,
+    metrics = [&#39;rmse&#39;, &#39;nrmse&#39;, &#39;sliced-ws&#39;]
+)
+evaluator.show_imp_results()
+</code></pre></div>
+<h3 id="imputation-quality-via-tsne-visualization">Imputation Quality via tSNE visualization</h3>
+<p><code>Evaluator</code> class also provides a method called <code>tsne_visualization()</code> to give the visualized comparison of similarity between the imputed data and the original data (ground-truth data). It visualizes the t-Distributed Stochastic Neighbor Embedding (t-SNE) of imputed data and original data so that the user can visually assess the effectiveness of the imputation outcome. tsne_visualization() takes parameters including client’s imputation data (<code>X_imp</code>) and original data (ground-truth data) (<code>X_origin</code>) and a random seed (<code>seed</code>) used for calculating t-SNE embedding.</p>
+<div class="highlight"><pre><span></span><code>X_trains = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train&#39;)
+X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
+
+evaluator.tsne_visualization(
+    X_imps = X_train_imps,
+    X_origins = X_trains,
+    seed = 0
+)
+</code></pre></div>
+<h3 id="local-prediction">Local Prediction</h3>
+<p>After missing data are imputed,  the downstream task prediction can be performed on imputed data.  During the data partition stage, we retain a local test dataset for each client and a global test dataset for global data.  These test datasets can be used to evaluate downstream prediction models trained on clients' local imputed datasets to measure  the goodness of imputation and how it influences the prediction.  </p>
+<p>The <code>evaluate_local_pred()</code> method in the evaluation.Evaluator class provides functionality for evaluation via local prediction tasks. It accepts several parameters: </p>
 <ul>
-<li>
-<p><strong>Variance <code>variance</code></strong>: Variance is a statistical measure that quantifies the spread of 
-a set of values around their mean. We calculate the variance of each 
-client's imputation quality metric value. </p>
-</li>
-<li>
-<p><strong>Jain Index <code>jain-index</code></strong>:The Jain index, 
-also known as the Jain fairness index, is a metric used to evaluate the fairness or 
-equality of resource allocation in distributed systems. We adopt this metric to assess the equality of imputation 
-quality across clients. The Jain index ranges from $ 1/N $
-to $1$, where $1$ is the number of clients. A value of $1$ indicates perfect equality, 
-meaning that all clients have the same imputation quality, while a value of $1/N$ </p>
-</li>
-<li>
-<p>represents the worst-case scenario, where one client dominates the imputation performance. </p>
-</li>
-<li>
-<p><strong>Entropy <code>entropy</code> </strong>: We utilize entropy 
-to capture the distributional variation of imputation quality across clients.
-We compute the entropy of this distribution using the standard formula: $-\sum(p_i * log(p_i))$, where $p_i$ is the normalized imputation 
-quality metric value for client $i$. A higher entropy value indicates a more </p>
-</li>
+<li><code>X_train_imps, y_train</code>: lists of client-specific imputed training datasets and targets</li>
+<li><code>X_tests, y_tests</code>: lists of client-specific local test datasets and targets</li>
+<li><code>model</code>: a model specification parameter. The method currently implements three built-in downstream prediction models: linear models
+('lr'), random forests ('rf'), and two-layer neural networks ('nn'). </li>
 </ul>
+<p>The method trains prediction models for each client using the imputed training data and evaluates performance on the corresponding test data. For classification tasks, the evaluation metrics include accuracy, F1-score, Area Under the Receiver Operating Characteristic Curve (AUROC), and Area Under
+the Precision-Recall Curve (AUPRC). Mean squared error and R2 score are computed for regression tasks.</p>
+<p><code>show_local_pred_results()</code> will give a formatted result summary for the evaluation.</p>
+<div class="highlight"><pre><span></span><code>X_trains, y_trains = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train&#39;, include_y=True)
+X_tests, y_tests = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;test&#39;, include_y=True)
+X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
+data_config = env.get_data(data_type = &#39;config&#39;)
+
+ret = evaluator.evaluate_local_pred(
+    X_train_imps = X_train_imps,
+    X_train_origins = X_trains,
+    y_trains = y_trains,
+    X_tests = X_tests,
+    y_tests = y_tests,
+    data_config = data_config,
+    model = &#39;nn&#39;,
+    seed= 0
+)
+evaluator.show_local_pred_results()
+</code></pre></div>
+<h3 id="federated-prediction">Federated Prediction</h3>
+<p>We implement federated prediction functionality by evalute_fed_pred() method. The current implementation supports federated prediction using a two-layer neural network with Federated Averaging (FedAvg) as the federated learning strategy. We will include more federated models in the future. Similarly, it uses accuracy, F1-Score, AUROC, AUPRC for classification tasks, and mean square error, R2 score for regression tasks. </p>
+<p>It accepts multiple parameters: </p>
+<ul>
+<li><code>X_train_imps, y_trains</code>: lists of client-specific imputed training data and targets</li>
+<li><code>X_tests, y_tests</code>: lists of client-specific local test data and targets</li>
+<li><code>X_test_global, y_test_global</code>: global test data </li>
+</ul>
+<p>The method returns a Dict containing evaluation results. Users can utilize the <code>show_fed_pred_result()</code> method
+in the evaluation.Evaluator class to print a formatted output of the evaluation results.</p>
+<div class="highlight"><pre><span></span><code>X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
+X_trains, y_trains = env.get_data(
+    client_ids=&#39;all&#39;, data_type = &#39;train&#39;, include_y=True
+)
+X_tests, y_tests = env.get_data(
+    client_ids=&#39;all&#39;, data_type = &#39;test&#39;, include_y=True
+)
+X_global_test, y_global_test = env.get_data(
+    data_type = &#39;global_test&#39;, include_y = True
+)
+data_config = env.get_data(data_type = &#39;config&#39;)
+
+ret = evaluator.evaluate_fed_pred(
+    X_train_imps = X_train_imps,
+    X_train_origins = X_trains,
+    y_trains = y_trains,
+    X_tests = X_tests,
+    y_tests = y_tests,
+    X_test_global = X_global_test,
+    y_test_global = y_global_test,
+    data_config = data_config,
+    train_params = {
+        &#39;global_epoch&#39;: 100,
+        &#39;local_epoch&#39;: 10,
+        &#39;fine_tune_epoch&#39;: 200,
+    },
+    seed= 0
+)
+
+evaluator.show_fed_pred_results()
+</code></pre></div>
+<h2 id="save-evaluation-results">Save Evaluation Results</h2>
+<p>The evaluation module provides convenient interfaces for presenting and exporting the results. All evaluation functions return results in a dictionary format, which can be formatted into readable tables through dedicated display functions, including <code>show_imp_results()</code>,
+<code>show_local_pred_results()</code>, <code>show_fed_pred_results()</code> for each evaluation aspects. For further analysis and reporting, the <code>export_results()</code> method supports exporting results to different formats, including <code>pandas.DataFrame</code> and structured dictionaries.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../fed_imp/" class="btn btn-neutral float-left" title="Federated Imputation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../../api/simulation/" class="btn btn-neutral float-right" title="Scenario simulation">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../fed_imp/" class="btn btn-neutral float-left" title="Distributed Imputation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../pipeline/" class="btn btn-neutral float-right" title="Pipeline API">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -220,7 +310,7 @@ quality metric value for client $i$. A higher entropy value indicates a more </p
       <span><a href="../fed_imp/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../../api/simulation/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../pipeline/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

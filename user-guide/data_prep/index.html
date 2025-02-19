@@ -74,18 +74,29 @@
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../scenario_simulation/">Federated Missing Data Scenario Simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../scenario_simulation/">Distributed Missing Data Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../fed_imp/">Federated Imputation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../fed_imp/">Distributed Imputation</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../evaluation/">Evaluation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../pipeline/">Pipeline API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/basic_usage/">Basic Usage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/benchmark/">Benchmarking Pipeline Demo</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/real_scenario/">Real World Distributed Imputation</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario simulation</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario Builder</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">FedImpute Execution Environment</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">Imputation Execution Environment</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../api/imputation_models/">Imputation Models</a>
                   </li>
@@ -118,7 +129,7 @@
 <p>The first step for using FedImpute is to prepare the data. </p>
 <h2 id="input-data-format-and-preprocessing">Input Data Format and Preprocessing</h2>
 <p>The data should be tabular data in the form of a <strong>numpy array</strong> (<code>&lt;np.ndarray&gt;</code>) or <strong>List of numpy arrays</strong> for those <strong><em>naturally partitioned federated data</em></strong>, where each row represents an observation and each column represents a feature. 
-It will be the input to the simulation process, where it will be partitioned into subset as local dataset for each party and the missing data will be introduced.</p>
+It will be the input to the simulation process, where it will be partitioned into subset as local dataset for each party and the missing data will be introduced. Currently, FedImpute only supports the numerical typed data, for categorical data, you need to one-hot encode them into binary features.</p>
 <h3 id="required-preprocessing-steps">Required Preprocessing Steps</h3>
 <p>There are some basic <strong>preprocessing steps</strong> that you need to follow before using FedImpute, 
 The final dataset should be in the form of a numpy array with the columns ordered as follows format: </p>
@@ -172,8 +183,6 @@ The example of the <code>data_config</code> dictionary is as follows:</p>
 <div class="highlight"><pre><span></span><code><span class="n">data_config</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="s1">&#39;house_price&#39;</span><span class="p">,</span>
     <span class="s1">&#39;task_type&#39;</span><span class="p">:</span> <span class="s1">&#39;classification&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;clf_type&#39;</span><span class="p">:</span> <span class="s1">&#39;binary&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;num_cols&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
     <span class="s1">&#39;natural_partition&#39;</span><span class="p">:</span> <span class="kc">False</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -181,15 +190,14 @@ The example of the <code>data_config</code> dictionary is as follows:</p>
 <ul>
 <li><code>target</code>: The target variable name. </li>
 <li><code>task_type</code>: The task type of the target variable. It can be either <code>classification</code> or <code>regression</code>.</li>
-<li><code>clf_type</code>: The classification type of the target variable. It can be either <code>binary</code> or <code>multi-class</code> for classification task. And set it to <code>None</code> for the regression task.</li>
-<li><code>num_cols</code>: The number of columns which are numerical (continous variable). </li>
+<li><code>natural_partition</code>: Whether the data is naturally partitioned into different parties. If it is, set it to <code>True</code>. Otherwise, set it to <code>False</code>.</li>
 </ul>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
         <a href="../../get_started/" class="btn btn-neutral float-left" title="Install & Basic Usage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../scenario_simulation/" class="btn btn-neutral float-right" title="Federated Missing Data Scenario Simulation">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../scenario_simulation/" class="btn btn-neutral float-right" title="Distributed Missing Data Scenario Builder">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>

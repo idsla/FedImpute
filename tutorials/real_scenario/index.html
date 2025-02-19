@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Real World Distributed Imputation - FedImpute</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkdocstrings.css" rel="stylesheet" />
+        <link href="../../css/custom.css" rel="stylesheet" />
+        <link href="../../css/mkapi.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Real World Distributed Imputation";
+        var mkdocs_page_input_path = "tutorials\\real_scenario.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> FedImpute
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Quick Start</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../overview/">Overview of FedImpute</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../get_started/">Install & Basic Usage</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/data_prep/">Data Preparation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/scenario_simulation/">Distributed Missing Data Scenario Builder</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/fed_imp/">Distributed Imputation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/evaluation/">Evaluation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../user-guide/pipeline/">Pipeline API</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorial</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../basic_usage/">Basic Usage</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../benchmark/">Benchmarking Pipeline Demo</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Real World Distributed Imputation</a>
+    <ul class="current">
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/simulation/">Scenario Builder</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/fed_impute/">Imputation Execution Environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/imputation_models/">Imputation Models</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">FedImpute</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Tutorial</li>
+      <li class="breadcrumb-item active">Real World Distributed Imputation</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">tabulate</span>
+</code></pre></div>
+<h1 id="load-data">Load Data</h1>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+
+<span class="kn">from</span> <span class="nn">fedimpute.data_prep</span> <span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span><span class="p">,</span> <span class="n">column_check</span>
+<span class="kn">from</span> <span class="nn">fedimpute.scenario</span> <span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+<span class="n">data</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;fed_heart_disease&quot;</span><span class="p">)</span>
+<span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
+<span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_real_scenario</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code>==================================================================
+Scenario Summary
+==================================================================
+Total clients: 4
+Global Test Data: (94, 21)
+Missing Mechanism Category: MCAR
+Clients Data Summary:
+     Train     Test      Miss     MS Ratio    MS Feature    Seed
+--  --------  -------  --------  ----------  ------------  ------
+C1  (244,21)  (28,21)  (244,20)     0.00         0/20       6077
+C2  (237,21)  (27,21)  (237,20)     0.04         4/20       577
+C3  (99,21)   (11,21)  (99,20)      0.01         3/20       7231
+C4  (162,21)  (18,21)  (162,20)     0.07         5/20       5504
+==================================================================
+</code></pre></div>
+
+<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_pattern</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/real_pattern_train.png&#39;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../real_scenario_files/real_scenario_3_0.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_pattern</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/real_pattern_test.png&#39;</span>
+<span class="p">)</span>
+</code></pre></div>
+<p><img alt="png" src="../real_scenario_files/real_scenario_4_0.png" /></p>
+<h1 id="running-federated-imputation">Running Federated Imputation</h1>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<span class="kn">from</span> <span class="nn">fedimpute.execution_environment</span> <span class="kn">import</span> <span class="n">FedImputeEnv</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedmice&#39;</span><span class="p">,</span> <span class="n">workflow_params</span> <span class="o">=</span> <span class="p">{})</span>
+<span class="n">env</span><span class="o">.</span><span class="n">setup_from_scenario_builder</span><span class="p">(</span><span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">env</span><span class="o">.</span><span class="n">show_env_info</span><span class="p">()</span>
+<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
+<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">clients</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">server</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">workflow</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mEnvironment</span><span class="w"> </span><span class="n">setup</span><span class="w"> </span><span class="n">complete</span><span class="p">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="o">============================================================</span>
+<span class="n">Environment</span><span class="w"> </span><span class="n">Information</span><span class="o">:</span>
+<span class="o">============================================================</span>
+<span class="nl">Workflow</span><span class="p">:</span><span class="w"> </span><span class="n">ICE</span><span class="w"> </span><span class="p">(</span><span class="n">Imputation</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="n">Chain</span><span class="w"> </span><span class="n">Equation</span><span class="p">)</span>
+<span class="nl">Clients</span><span class="p">:</span>
+<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="nl">Server</span><span class="p">:</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
+<span class="o">============================================================</span>
+
+<span class="err"></span><span class="p">[</span><span class="mi">32</span><span class="n">m</span><span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mImputation</span><span class="w"> </span><span class="n">Start</span><span class="w"> </span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+
+
+
+<span class="n">ICE</span><span class="w"> </span><span class="n">Iterations</span><span class="o">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+
+<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">32</span><span class="n">m</span><span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mFinished</span><span class="p">.</span><span class="w"> </span><span class="n">Running</span><span class="w"> </span><span class="n">time</span><span class="o">:</span><span class="w"> </span><span class="mf">1.0724</span><span class="w"> </span><span class="n">seconds</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+</code></pre></div>
+
+<h1 id="evaluation">Evaluation</h1>
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
+<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+
+<span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
+
+<span class="n">X_trains</span><span class="p">,</span> <span class="n">y_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_tests</span><span class="p">,</span> <span class="n">y_tests</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">)</span>
+<span class="n">X_test_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test_imp&#39;</span><span class="p">)</span>
+<span class="n">data_config</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
+
+<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_local_pred</span><span class="p">(</span>
+    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
+    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
+    <span class="n">X_tests</span> <span class="o">=</span> <span class="n">X_test_imps</span><span class="p">,</span>
+    <span class="n">y_tests</span> <span class="o">=</span> <span class="n">y_tests</span><span class="p">,</span>
+    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span><span class="p">,</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;nn&#39;</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span>
+<span class="n">evaluator</span><span class="o">.</span><span class="n">show_local_pred_results</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
+<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
+
+
+
+<span class="nl">Clients</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">4</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mEarly</span><span class="w"> </span><span class="n">stopping</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="mi">316</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mEarly</span><span class="w"> </span><span class="n">stopping</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="mi">324</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mEarly</span><span class="w"> </span><span class="n">stopping</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="mi">249</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mEarly</span><span class="w"> </span><span class="n">stopping</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="n">epoch</span><span class="w"> </span><span class="mi">288</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
+<span class="o">==========================================================</span>
+<span class="n">Downstream</span><span class="w"> </span><span class="n">Prediction</span><span class="w"> </span><span class="p">(</span><span class="n">Local</span><span class="p">)</span>
+<span class="o">==========================================================</span>
+<span class="w">             </span><span class="n">accuracy</span><span class="w">       </span><span class="n">f1</span><span class="w">         </span><span class="n">auc</span><span class="w">         </span><span class="n">prc</span>
+<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="w">     </span><span class="mf">0.607</span><span class="w">       </span><span class="mf">0.645</span><span class="w">       </span><span class="mf">0.708</span><span class="w">       </span><span class="mf">0.742</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="w">     </span><span class="mf">0.852</span><span class="w">       </span><span class="mf">0.778</span><span class="w">       </span><span class="mf">0.953</span><span class="w">       </span><span class="mf">0.933</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="w">     </span><span class="mf">0.909</span><span class="w">       </span><span class="mf">0.952</span><span class="w">       </span><span class="mf">0.100</span><span class="w">       </span><span class="mf">0.848</span>
+<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">4</span><span class="w">     </span><span class="mf">0.722</span><span class="w">       </span><span class="mf">0.828</span><span class="w">       </span><span class="mf">0.631</span><span class="w">       </span><span class="mf">0.799</span>
+<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
+<span class="w"> </span><span class="n">Average</span><span class="w">      </span><span class="mf">0.773</span><span class="w">       </span><span class="mf">0.801</span><span class="w">       </span><span class="mf">0.598</span><span class="w">       </span><span class="mf">0.831</span>
+<span class="w">   </span><span class="n">Std</span><span class="w">        </span><span class="mf">0.117</span><span class="w">       </span><span class="mf">0.110</span><span class="w">       </span><span class="mf">0.311</span><span class="w">       </span><span class="mf">0.070</span>
+<span class="o">==========================================================</span>
+</code></pre></div>
+
+<h3 id="federated-prediction">Federated Prediction</h3>
+<div class="highlight"><pre><span></span><code><span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">)</span>
+<span class="n">X_test_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test_imp&#39;</span><span class="p">)</span>
+<span class="n">X_global_test_imp</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;global_test_imp&#39;</span><span class="p">)</span>
+
+<span class="n">_</span> <span class="p">,</span> <span class="n">y_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">_</span> <span class="p">,</span> <span class="n">y_tests</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">y_global_test</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span>
+    <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;global_test&#39;</span><span class="p">,</span> <span class="n">include_y</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">data_config</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
+
+<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_fed_pred</span><span class="p">(</span>
+    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
+    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
+    <span class="n">X_tests</span> <span class="o">=</span> <span class="n">X_test_imps</span><span class="p">,</span>
+    <span class="n">y_tests</span> <span class="o">=</span> <span class="n">y_tests</span><span class="p">,</span>
+    <span class="n">X_test_global</span> <span class="o">=</span> <span class="n">X_global_test_imp</span><span class="p">,</span>
+    <span class="n">y_test_global</span> <span class="o">=</span> <span class="n">y_global_test</span><span class="p">,</span>
+    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span><span class="p">,</span>
+    <span class="n">train_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;global_epoch&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="s1">&#39;local_epoch&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s1">&#39;fine_tune_epoch&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">seed</span><span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span>
+
+<span class="n">evaluator</span><span class="o">.</span><span class="n">show_fed_pred_results</span><span class="p">()</span>
+</code></pre></div>
+<div class="codehilite"><pre><span></span><code><span class="nx">Global</span><span class="w"> </span><span class="nx">Epoch</span><span class="o">:</span><span class="w">   </span><span class="mf">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mf">0</span><span class="o">/</span><span class="mf">100</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="cp">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+
+
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6512317483623822</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5921915372212728</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">11</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.544242156876458</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5479222436745962</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">30</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5100965698560079</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">49</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.48613545298576355</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">51</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">72</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+<span class="o">===============================================================</span>
+<span class="nx">Downstream</span> <span class="nx">Prediction</span> <span class="p">(</span><span class="nx">Fed</span><span class="p">)</span>
+<span class="o">===============================================================</span>
+ <span class="nx">Personalized</span>    <span class="nx">accuracy</span>       <span class="nx">f1</span>         <span class="nx">auc</span>         <span class="nx">prc</span>
+<span class="o">--------------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
+   <span class="nx">Client</span> <span class="mi">1</span>       <span class="mf">0.679</span>       <span class="mf">0.710</span>       <span class="mf">0.815</span>       <span class="mf">0.838</span>
+   <span class="nx">Client</span> <span class="mi">2</span>       <span class="mf">0.852</span>       <span class="mf">0.778</span>       <span class="mf">0.976</span>       <span class="mf">0.962</span>
+   <span class="nx">Client</span> <span class="mi">3</span>       <span class="mf">0.909</span>       <span class="mf">0.952</span>       <span class="mf">0.700</span>       <span class="mf">0.970</span>
+   <span class="nx">Client</span> <span class="mi">4</span>       <span class="mf">0.833</span>       <span class="mf">0.897</span>       <span class="mf">0.523</span>       <span class="mf">0.716</span>
+  <span class="o">----------</span>    <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
+    <span class="k">Global</span>        <span class="mf">0.798</span>       <span class="mf">0.812</span>       <span class="mf">0.873</span>       <span class="mf">0.860</span>
+<span class="o">===============================================================</span>
+</code></pre></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../benchmark/" class="btn btn-neutral float-left" title="Benchmarking Pipeline Demo"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../api/simulation/" class="btn btn-neutral float-right" title="Scenario Builder">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../benchmark/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../api/simulation/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
