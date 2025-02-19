@@ -1,8 +1,7 @@
-from typing import List, Tuple
-from collections import OrderedDict
+from typing import List, Tuple, Union, OrderedDict
 import numpy as np
 
-from ...fed_strategy.fed_strategy_server.strategy_base import StrategyBaseServer
+from ...fed_strategy.fed_strategy_server.strategy_base import NNStrategyBaseServer
 from ..utils import get_parameters, convert_params_format
 
 def fedavg(
@@ -36,13 +35,14 @@ def fedavg(
         return averaged_model_state_dict
 
 
-class FedAvgStrategyServer(StrategyBaseServer):
+class FedAvgStrategyServer(NNStrategyBaseServer):
 
     def __init__(self, fine_tune_epochs: int = 0, weight_option: str = 'sample_size'):
         super().__init__('fedavg', 'fedavg', fine_tune_epochs)
         self.global_model = None
         self.initial_impute = 'fedavg'
         self.weight_option = weight_option
+        self.global_model_params_dict: OrderedDict = None
 
     def aggregate_parameters(
             self, local_model_parameters: List[dict], fit_res: List[dict], params: dict, *args, **kwargs
@@ -65,6 +65,9 @@ class FedAvgStrategyServer(StrategyBaseServer):
         # copy parameters for each client
         agg_model_parameters = [aggregated_model_dict for _ in range(len(local_model_parameters))]
         agg_res = {}
+        
+        # update global model parameters
+        self.global_model_params_dict = aggregated_model_dict
 
         return agg_model_parameters, agg_res
 
@@ -89,3 +92,6 @@ class FedAvgStrategyServer(StrategyBaseServer):
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return convert_params_format(self.global_model_params_dict, output_type='state_dict')

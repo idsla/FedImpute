@@ -2,12 +2,12 @@
 
 # Simulator
 
-::: fedimpute.simulator.simulator.Simulator
+::: fedimpute.scenario.scenario_builder.ScenarioBuilder
 
-# Core Simulation Function
+# Build Simulated Scenario Function
 
-::: fedimpute.simulator.simulator.Simulator.simulate_scenario
+::: fedimpute.scenario.scenario_builder.ScenarioBuilder.create_simulated_scenario
 
-# Lite Simulation Function
+# Build from Real Federated Scenario Function
 
-::: fedimpute.simulator.simulator.Simulator.simulate_scenario_lite
+::: fedimpute.scenario.scenario_builder.ScenarioBuilder.create_real_scenario

@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from functools import reduce
-
+import loguru
 from sklearn.impute import SimpleImputer
 
 from ..base.ice_imputer import ICEImputerMixin
@@ -52,6 +52,7 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
         self.miss = None
         self.obs = None
         self.model_persistable = True
+        self.fit_res_history = []
 
     def initialize(
             self, X: np.array, missing_mask: np.array, data_utils: dict, params: dict, seed: int
@@ -120,15 +121,22 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
                 mu_new, sigma_new, X_new = self._em(X, self.miss, self.obs, self.mu, self.sigma)
 
                 if self._converged(self.mu, self.sigma, mu_new, sigma_new, convergence_threshold):
-                    print(f"EM converged after {iteration} iterations.")
+                    loguru.logger.debug(f"EM converged after {iteration} iterations.")
                     converged = True
                     break
 
                 self.mu, self.sigma = mu_new, sigma_new
             except BaseException as e:
-                print(f"EM step failed. {e}")
+                loguru.logger.error(f"EM step failed. {e}")
                 converged = True
                 break
+        
+        self.fit_res_history.append({
+            'mu': self.mu,
+            'sigma': self.sigma,
+            'sample_size': X.shape[0],
+            'converged': converged
+        })
 
         return {
             'sample_size': X.shape[0],
@@ -244,3 +252,7 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
                 np.linalg.norm(Mu - Mu_new) < convergence_threshold
                 and np.linalg.norm(Sigma - Sigma_new, ord=2) < convergence_threshold
         )
+        
+    def get_fit_res(self, params: dict) -> dict:
+        
+        return self.fit_res_history[-1]

@@ -1,14 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import List, OrderedDict, Tuple
+from typing import List, OrderedDict, Tuple, Union
 import torch
 
 
-class StrategyBaseServer(ABC):
+class NNStrategyBaseServer(ABC):
 
     def __init__(self, name: str, initial_impute: str, fine_tune_epochs: int = 0):
-        self.name = name
-        self.initial_impute = initial_impute
-        self.fine_tune_epochs = fine_tune_epochs
+        
+        # basic parameters
+        self.name: str = name
+        self.initial_impute: str = initial_impute
+        self.fine_tune_epochs: int = fine_tune_epochs
 
     @abstractmethod
     def initialization(self, global_model: torch.nn.Module, params: dict):
@@ -16,8 +18,8 @@ class StrategyBaseServer(ABC):
 
     @abstractmethod
     def aggregate_parameters(
-            self, local_models: List[torch.nn.Module], fit_res: List[dict], params: dict, *args, **kwargs
-    ) -> Tuple[List[torch.nn.Module], dict]:
+            self, local_model_parameters: List[dict], fit_res: List[dict], params: dict, *args, **kwargs
+    ) -> Tuple[List[dict], dict]:
         """
         Aggregate local models
         :param local_model_parameters: List of local model parameters
@@ -37,3 +39,7 @@ class StrategyBaseServer(ABC):
     @abstractmethod
     def update_instruction(self, params: dict) -> dict:
         return {'update_model': True}
+    
+    @abstractmethod
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        pass

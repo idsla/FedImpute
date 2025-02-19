@@ -28,7 +28,7 @@ class WorkflowEM(BaseWorkflow):
             evaluation_interval: int = 1,
             save_model_interval: int = 10
     ):
-        super(WorkflowEM, self).__init__()
+        super().__init__('EM (Expectation Maximization)')
         self.max_iterations = max_iterations
         self.convergence_thres = convergence_thres
         self.local_epoch = local_epoch
@@ -56,7 +56,7 @@ class WorkflowEM(BaseWorkflow):
 
         ############################################################################################################
         # Initial Imputation and evaluation
-        clients = initial_imputation(server.fed_strategy.initial_impute, clients)
+        clients, server = initial_imputation(clients, server)
         self.eval_and_track(
             evaluator, tracker, clients, phase='initial', central_client=server.fed_strategy.name == 'central'
         )
@@ -73,6 +73,7 @@ class WorkflowEM(BaseWorkflow):
 
         # central and local training
         if server.fed_strategy.name == 'central' or server.fed_strategy.name == 'local':
+            # client local training
             fit_instruction = server.fed_strategy.fit_instruction([{} for _ in range(len(clients))])
             local_models, clients_fit_res = [], []
             for client_id in trange(len(clients), desc='Clients', colour='green'):
@@ -85,13 +86,17 @@ class WorkflowEM(BaseWorkflow):
                 local_models.append(model_parameter)
                 clients_fit_res.append(fit_res)
 
+            # server aggregation
             global_models, agg_res = server.fed_strategy.aggregate_parameters(
                 local_model_parameters=local_models, fit_res=clients_fit_res, params={}
             )
 
+            # client update and local imputation
             for global_model, client in zip(global_models, clients):
                 client.update_local_imp_model(global_model, params={})
                 client.local_imputation(params={})
+
+            server.local_imputation(params={})
 
         # Federated Training
         else:
@@ -139,6 +144,7 @@ class WorkflowEM(BaseWorkflow):
                     local_model_parameters=local_models, fit_res=clients_fit_res, params={}
                 )
 
+                # client update and local imputation
                 for global_model, client in zip(global_models, clients):
                     if clients_converged_signs[client.client_id]:
                         continue
@@ -147,12 +153,26 @@ class WorkflowEM(BaseWorkflow):
                     if iteration % save_model_interval == 0:
                         client.save_imp_model(version=f'{iteration}')
 
+                # server local imputation
+                server.local_imputation(params={})
+
                 ########################################################################################################
                 # Impute and Evaluation
-                if iteration % evaluation_interval == 0:
-                    self.eval_and_track(
-                        evaluator, tracker, clients, phase='round', epoch=iteration, central_client=False
-                    )
+                other_infos = {
+                    'mu_norm': {
+                        client_id: np.linalg.norm(local_models[client_id]['mu']) 
+                        for client_id in range(len(clients))
+                    },
+                    'sigma_norm': {
+                        client_id: np.linalg.norm(local_models[client_id]['sigma']) 
+                        for client_id in range(len(clients))
+                    }
+                }
+                
+                self.eval_and_track(
+                    evaluator, tracker, clients, phase='round', epoch=iteration, central_client=False,
+                    other_infos=other_infos, eval = ((iteration % evaluation_interval) == 0)
+                )
 
         ########################################################################################################
         # Final Evaluation and Tracking
@@ -181,7 +201,7 @@ class WorkflowEM(BaseWorkflow):
 
         ############################################################################################################
         # Initial Imputation and evaluation
-        clients = initial_imputation(server.fed_strategy.initial_impute, clients)
+        clients, server = initial_imputation(clients, server)
         clients_data = [(client.X_train_imp, client.X_train, client.X_train_mask) for client in clients]
         self.eval_and_track_parallel(
             evaluator, tracker, clients_data, phase='initial', central_client=server.fed_strategy.name == 'central'
@@ -242,6 +262,10 @@ class WorkflowEM(BaseWorkflow):
             # Save Clients Model
             for pipe in client_pipes:
                 pipe[0].send(("save_model", None))
+                
+            # Server local imputation
+            main_pipe.send(("local_impute", {}))
+            server.X_test_imp, server.X_test, server.X_test_mask = main_pipe.recv()
 
             # Terminate processes and update clients and server
             for pipe, client in zip(client_pipes, clients):
@@ -252,9 +276,13 @@ class WorkflowEM(BaseWorkflow):
                 client.X_train_mask = new_client.X_train_mask
                 client.imputer = new_client.imputer
                 client.fed_strategy = new_client.fed_strategy
+            
             main_pipe.send("terminate")
             new_server = main_pipe.recv()
             server.fed_strategy = new_server.fed_strategy
+            server.X_test_imp = new_server.X_test_imp
+            server.X_test = new_server.X_test
+            server.X_test_mask = new_server.X_test_mask
 
             # Join processes
             for p in client_processes + [server_process]:
@@ -332,15 +360,31 @@ class WorkflowEM(BaseWorkflow):
 
                 # Receive client imputation results and Evaluate
                 clients_data = [pipe[0].recv() for pipe in client_pipes]
-                if iteration % evaluation_interval == 0:
-                    self.eval_and_track_parallel(
-                        evaluator, tracker, clients_data, phase='round', epoch=iteration, central_client=False
-                    )
+                
+                other_infos = {
+                    'mu_norm': {
+                        client_id: np.linalg.norm(local_models[client_id]['mu']) 
+                        for client_id in range(len(clients))
+                    },
+                    'sigma_norm': {
+                        client_id: np.linalg.norm(local_models[client_id]['sigma']) 
+                        for client_id in range(len(clients))
+                    }
+                }
+                    
+                self.eval_and_track(
+                    evaluator, tracker, clients, phase='round', epoch=iteration, central_client=False,
+                    other_infos=other_infos, eval = ((iteration % evaluation_interval) == 0)
+                )
 
                 # Save model
                 if iteration % save_model_interval == 0:
                     for pipe in client_pipes:
                         pipe[0].send(("save_model", f'{iteration}'))
+                
+                # Server local imputation
+                main_pipe.send(("local_impute", {}))
+                server.X_test_imp, server.X_test, server.X_test_mask = main_pipe.recv()
 
             ############################################################################################################
             # Terminate processes and update clients and server and collect environment
@@ -355,9 +399,14 @@ class WorkflowEM(BaseWorkflow):
                 client.X_train_mask = new_client.X_train_mask
                 client.imputer = new_client.imputer
                 client.fed_strategy = new_client.fed_strategy
+            
             main_pipe.send("terminate")
             new_server = main_pipe.recv()
             server.fed_strategy = new_server.fed_strategy
+            server.X_test_imp = new_server.X_test_imp
+            server.X_test = new_server.X_test
+            server.X_test_mask = new_server.X_test_mask
+
 
             # Join processes
             for p in client_processes + [server_process]:
@@ -387,7 +436,7 @@ class WorkflowEM(BaseWorkflow):
                     np.linalg.norm(mu - mu_new) < tolerance
                     and np.linalg.norm(sigma - sigma_new, ord=2) < tolerance
             )
-            loguru.logger.debug(f"{np.linalg.norm(mu - mu_new)} {np.linalg.norm(sigma - sigma_new, ord=2)}")
+            loguru.logger.debug(f"{np.linalg.norm(mu - mu_new)} {np.linalg.norm(sigma - sigma_new, ord=2)}, {converged}")
             clients_converged.append(converged)
 
         return clients_converged

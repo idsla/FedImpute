@@ -32,6 +32,7 @@ class SimpleImputer(BaseMLImputer):
         self.model_type = 'numpy'
         self.model_persistable = True
         self.name = 'simple'
+        self.fit_res_history = []
 
     def get_imp_model_params(self, params: dict) -> OrderedDict:
 
@@ -55,6 +56,12 @@ class SimpleImputer(BaseMLImputer):
             self.mean_params = np.nanmean(X_ms, axis=0)
         else:
             raise ValueError(f"Strategy {self.strategy} not supported")
+        
+        self.fit_res_history.append({
+            'sample_size': X.shape[0],
+            'mean_params': self.mean_params,
+            'loss': 0
+        })
 
         return {'loss': 0, 'sample_size': X.shape[0]}
 
@@ -68,3 +75,6 @@ class SimpleImputer(BaseMLImputer):
             X[column_mask, i] = self.mean_params[i]
 
         return X
+    
+    def get_fit_res(self, params: dict) -> dict:
+        return self.fit_res_history[-1]

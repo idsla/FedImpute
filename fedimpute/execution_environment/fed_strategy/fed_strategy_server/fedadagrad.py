@@ -1,12 +1,12 @@
-from typing import List, Tuple, Optional, Dict, Union
+from typing import List, Tuple, Optional, Dict, Union, OrderedDict
 import numpy as np
 import torch
 
 from .fedavg import fedavg
 from ..utils import get_parameters
-from .strategy_base import StrategyBaseServer
+from .strategy_base import NNStrategyBaseServer
 
-class FedAdagradStrategyServer(StrategyBaseServer):
+class FedAdagradStrategyServer(NNStrategyBaseServer):
 
     def __init__(
             self, eta=0.1, eta_l=0.1, beta_1=0.9, beta_2=0.99, tau=1e-9, weight_option='sample_size'
@@ -84,6 +84,9 @@ class FedAdagradStrategyServer(StrategyBaseServer):
         # copy parameters for each client
         agg_model_parameters = [new_global_model_dict for _ in range(len(local_model_parameters))]
         agg_res = {}
+        
+        # update global model parameters
+        self.global_model_params_dict = new_global_model_dict
 
         return agg_model_parameters, agg_res
 
@@ -97,3 +100,6 @@ class FedAdagradStrategyServer(StrategyBaseServer):
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return get_parameters(self.global_model, trainable_only=True, return_type='state_dict')

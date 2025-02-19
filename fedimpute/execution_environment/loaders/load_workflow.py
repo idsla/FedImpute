@@ -21,8 +21,8 @@ def load_workflow(
         return WorkflowEM(**workflow_params)
     elif workflow_name == 'ice':
         return WorkflowICE(**workflow_params)
-    elif workflow_name == 'icegrad':
-        return WorkflowICEGrad(**workflow_params)
+    # elif workflow_name == 'icegrad':
+    #     return WorkflowICEGrad(**workflow_params)
     elif workflow_name == 'jm':
         return WorkflowJM(**workflow_params)
     else:

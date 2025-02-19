@@ -38,3 +38,11 @@
 ### MIWAE
 ::: fedimpute.execution_environment.imputation.imputers.miwae_imputer.MIWAEImputer
 
+### NOTMIWAE
+::: fedimpute.execution_environment.imputation.imputers.notmiwae_imputer.NotMIWAEImputer
+
+### GNR
+::: fedimpute.execution_environment.imputation.imputers.gnr_imputer.GNRImputer
+
+
+

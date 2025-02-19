@@ -62,6 +62,9 @@ def server_process_func(server: Server, client_pipes: List[mp.Pipe], server_pipe
                 fit_rest_list.append(fit_res)
             global_models, agg_res = server.fed_strategy.aggregate_parameters(params_list, fit_rest_list, {})
             server_pipe.send((global_models, agg_res))
+        elif command == "local_impute":
+            server.local_imputation(params={})
+            server_pipe.send((server.X_test_imp, server.X_test, server.X_test_mask))
         elif command == "terminate":
             server_pipe.send(server)
             break

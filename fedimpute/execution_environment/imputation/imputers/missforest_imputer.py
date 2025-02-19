@@ -57,6 +57,7 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         self.model_type = 'sklearn'
         self.model_persistable = False
         self.name = 'missforest'
+        self.fit_res_history = {}
 
     def initialize(
             self, X: np.array, missing_mask: np.array, data_utils: dict, params: dict, seed: int
@@ -107,7 +108,7 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         if 'estimators_' not in imp_model.__dict__:
             return OrderedDict({"estimators": []})
         else:
-            return OrderedDict({"estimators": imp_model.estimators_})
+            return OrderedDict({"estimators": imp_model.estimators_})  #TODO: Need consistent type for all ICE workflows and imputers
 
     def fit(self, X: np.array, y: np.array, missing_mask: np.array, params: dict) -> dict:
 
@@ -124,9 +125,19 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         # fit linear imputation models
         estimator = self.imp_models[feature_idx]
         estimator.fit(X_train, y_train)
+        y_pred = estimator.predict(X_train)
+        loss = np.mean((y_pred - y_train) ** 2)
+        
+        if feature_idx not in self.fit_res_history:
+            self.fit_res_history[feature_idx] = []
+            
+        self.fit_res_history[feature_idx].append({
+            'loss': loss,
+            'sample_size': X_train.shape[0]
+        })
 
         return {
-            'loss': {},
+            'loss': loss,
             'sample_size': X_train.shape[0]
         }
 
@@ -165,3 +176,11 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
     def load_model(self, model_path: str, version: str) -> None:
 
         pass
+
+    def get_fit_res(self, params: dict) -> dict:
+            try:
+                feature_idx = params['feature_idx']
+            except KeyError:
+                raise ValueError("Feature index not found in params")
+            
+            return self.fit_res_history[feature_idx][-1]

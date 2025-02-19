@@ -3,6 +3,11 @@ from typing import Tuple, Union, List
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
+from tabulate import tabulate
+import requests
+import zipfile
+import io
+import os
 
 
 def one_hot_encoding(
@@ -61,3 +66,56 @@ def ordering_features(
 
     return data
 
+
+def display_data(data: pd.DataFrame):
+    print(
+        tabulate(
+            data.head(), 
+            headers='keys', 
+            showindex=False, 
+            tablefmt="psql", 
+            numalign="center", 
+            stralign="center",
+            floatfmt=".4f"
+        )
+    )
+    
+    
+def download_data(url: str, data_save_dir: str):
+    
+    data_dir = os.path.join('.', 'data', data_save_dir)
+   
+    try:
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
+
+        zipfile_name = url.split('/')[-1]
+        zipfile_path = os.path.join(data_dir, zipfile_name)
+        
+        # check if the zip file exists, if not, download it
+        if not os.path.exists(zipfile_path):
+            # download data and unzip to download_dir
+            response = requests.get(url)
+            
+            with open(zipfile_path, 'wb') as f:
+                f.write(response.content)
+        
+        # unzip the zip file
+        with open(zipfile_path, 'rb') as f:
+            zip_content = io.BytesIO(f.read())
+            
+            # unzip the zip file
+            with zipfile.ZipFile(zip_content) as zip_ref:
+                zip_ref.extractall(data_dir)
+        # return True if the download is successful
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+def column_check(raw_data: pd.DataFrame):
+    for col in raw_data.columns:
+        if raw_data[col].nunique() < 20:
+            print(f"{col} ({raw_data[col].dtype}) => {raw_data[col].nunique()} ({raw_data[col].value_counts().to_dict()})")
+        else:
+            print(f"{col} ({raw_data[col].dtype}) => {raw_data[col].nunique()}")

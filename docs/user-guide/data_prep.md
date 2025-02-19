@@ -5,7 +5,7 @@ The first step for using FedImpute is to prepare the data.
 ## Input Data Format and Preprocessing
 
 The data should be tabular data in the form of a **numpy array** (`<np.ndarray>`) or **List of numpy arrays** for those ***naturally partitioned federated data***, where each row represents an observation and each column represents a feature. 
-It will be the input to the simulation process, where it will be partitioned into subset as local dataset for each party and the missing data will be introduced.
+It will be the input to the simulation process, where it will be partitioned into subset as local dataset for each party and the missing data will be introduced. Currently, FedImpute only supports the numerical typed data, for categorical data, you need to one-hot encode them into binary features.
 
 ### Required Preprocessing Steps
 
@@ -80,8 +80,6 @@ The example of the `data_config` dictionary is as follows:
 data_config = {
     'target': 'house_price',
     'task_type': 'classification',
-    'clf_type': 'binary',
-    'num_cols': 10,
     'natural_partition': False
 }
 ```
@@ -90,5 +88,4 @@ The `data_config` dictionary should contain the following keys:
 
 - `target`: The target variable name. 
 - `task_type`: The task type of the target variable. It can be either `classification` or `regression`.
-- `clf_type`: The classification type of the target variable. It can be either `binary` or `multi-class` for classification task. And set it to `None` for the regression task.
-- `num_cols`: The number of columns which are numerical (continous variable). 
+- `natural_partition`: Whether the data is naturally partitioned into different parties. If it is, set it to `True`. Otherwise, set it to `False`.

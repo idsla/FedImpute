@@ -1,6 +1,9 @@
 .venv
 .idea
+.logs/
 __pycache__
 fedimp/
 site/
 dist/
+plots/
+data/

@@ -70,3 +70,13 @@ def show_missing_information(clients):
 		plt.tight_layout()
 		plt.title(name)
 		plt.show()
+  
+
+MECH_NAME_MAPPING = {
+    'mcar': 'MCAR',
+    'mar_quantile': 'MAR (Quantile)',
+    'mar_logit': 'MAR (Logit)',
+    'mnar_quantile': 'MNAR (Quantile)',
+    'mnar_logit': 'MNAR (Logit)',
+    'mnar_sm_logit': 'MNAR (Self Masking Logit)'
+}

@@ -39,7 +39,7 @@ class WorkflowJM(BaseWorkflow):
                 "back_steps": 1
             },
     ):
-        super(WorkflowJM, self).__init__()
+        super().__init__('JM (Joint Modeling)')
         self.tracker = None
         self.initial_zero_impute = initial_zero_impute
         self.global_epoch = global_epoch
@@ -61,9 +61,10 @@ class WorkflowJM(BaseWorkflow):
 
         # clients = initial_imputation(server.fed_strategy.strategy_params['initial_impute'], clients)
         if self.initial_zero_impute:
-            clients = initial_imputation('zero', clients)
+            server.fed_strategy.initial_impute = 'zero'
+            clients, server = initial_imputation(clients, server)
         else:
-            clients = initial_imputation(server.fed_strategy.initial_impute, clients)
+            clients, server = initial_imputation(clients, server)
         if server.fed_strategy.name != 'local':
             update_clip_threshold(clients)
 
@@ -134,11 +135,18 @@ class WorkflowJM(BaseWorkflow):
                 client.update_local_imp_model(global_model, params={})
                 if epoch % save_model_interval == 0:
                     client.save_imp_model(version=f'{epoch}')
+            
+            # Server local imputation
+            server.local_imputation(params={})
 
             #############################################################################################
             # Early Stopping, Loss, Evaluation
-            if epoch % log_interval == 0:
-                self.logging_loss(clients_fit_res)
+            log_loss = (epoch % log_interval) == 0
+            loss_info = self.track_loss(clients_fit_res, log_loss)
+            self.eval_and_track(
+                evaluator, tracker, clients, phase='round', epoch=epoch, log_eval=False,
+                central_client=server.fed_strategy.name == 'central', other_infos=loss_info, eval = False
+            )
 
             if use_early_stopping:
                 self.early_stopping_step(
@@ -191,8 +199,12 @@ class WorkflowJM(BaseWorkflow):
 
             ####################################################################################################
             # Early Stopping and Logging and Evaluation
-            if epoch % log_interval == 0:
-                self.logging_loss(clients_fit_res)
+            log_loss = (epoch % log_interval) == 0
+            loss_info = self.track_loss(clients_fit_res, log_loss)
+            self.eval_and_track(
+                evaluator, tracker, clients, phase='round', epoch=epoch, log_eval=False,
+                central_client=server.fed_strategy.name == 'central', other_infos=loss_info, eval = False
+            )
 
             if epoch % save_model_interval == 0:
                 for client in clients:
@@ -201,6 +213,7 @@ class WorkflowJM(BaseWorkflow):
             if epoch > 0 and epoch % imp_interval == 0:
                 for client in clients:
                     client.local_imputation(params={})
+                
                 self.eval_and_track(
                     evaluator, tracker, clients, phase='round', epoch=epoch + global_model_epochs,
                     central_client=server.fed_strategy.name == 'central'
@@ -236,9 +249,11 @@ class WorkflowJM(BaseWorkflow):
 
         # clients = initial_imputation(server.fed_strategy.strategy_params['initial_impute'], clients)
         if self.initial_zero_impute:
-            clients = initial_imputation('zero', clients)
+            server.fed_strategy.initial_impute = 'zero'
+            clients, server = initial_imputation(clients, server)
         else:
-            clients = initial_imputation(server.fed_strategy.initial_impute, clients)
+            clients, server = initial_imputation(clients, server)
+        
         if server.fed_strategy.name != 'local':
             update_clip_threshold(clients)
 
@@ -307,8 +322,14 @@ class WorkflowJM(BaseWorkflow):
             ret = [pipe[0].recv() for pipe in client_pipes]
             local_models = [item[0] for item in ret]
             fit_res_list = [item[1] for item in ret]
-            if epoch % log_interval == 0:  # Loss logging
-                self.logging_loss(fit_res_list)
+            
+            # Loss tracking
+            log_loss = (epoch % log_interval) == 0
+            loss_info = self.track_loss(clients_fit_res, log_loss)
+            self.eval_and_track(
+                evaluator, tracker, clients, phase='round', epoch=epoch, log_eval=False,
+                central_client=server.fed_strategy.name == 'central', other_infos=loss_info, eval = False
+            )
 
             # server aggregation
             main_pipe.send("aggregate")
@@ -321,6 +342,10 @@ class WorkflowJM(BaseWorkflow):
                 if early_stopping_mode == 'local' and (all_clients_converged_sign[client_id]):
                     continue
                 pipe[0].send(("update_only", {'global_model_params': global_model, 'params': {}}))
+                
+            # Server local imputation
+            main_pipe.send(("local_impute", {}))
+            server.X_test_imp, server.X_test, server.X_test_mask = main_pipe.recv()
 
             # Early Stopping and Logging and Evaluation
             if use_early_stopping:
@@ -374,8 +399,12 @@ class WorkflowJM(BaseWorkflow):
             clients_fit_res = [pipe[0].recv() for pipe in client_pipes]
 
             # Early Stopping and Logging and Evaluation
-            if epoch % log_interval == 0:
-                self.logging_loss(clients_fit_res)
+            log_loss = (epoch % log_interval) == 0
+            loss_info = self.track_loss(clients_fit_res, log_loss)
+            self.eval_and_track(
+                evaluator, tracker, clients, phase='round', epoch=epoch, log_eval=False,
+                central_client=server.fed_strategy.name == 'central', other_infos=loss_info, eval = False
+            )
 
             if epoch % save_model_interval == 0:
                 for pipe in client_pipes:
@@ -420,6 +449,9 @@ class WorkflowJM(BaseWorkflow):
         main_pipe.send("terminate")
         new_server = main_pipe.recv()
         server.fed_strategy = new_server.fed_strategy
+        server.X_test_imp = new_server.X_test_imp
+        server.X_test = new_server.X_test
+        server.X_test_mask = new_server.X_test_mask
 
         # Join processes
         for p in client_processes + [server_process]:
@@ -486,6 +518,25 @@ class WorkflowJM(BaseWorkflow):
             loguru.logger.info("\nLoss: {:.2f} ({:2f})".format(0, 0))
         else:
             loguru.logger.info("\nLoss: {:.4f} ({:4f})".format(losses.mean(), losses.std()))
+            
+    @staticmethod
+    def track_loss(clients_fit_res: List, log: bool = False):
+        """
+        Track and log the loss of the clients
+        """
+        losses = np.array([client_fit_res['loss'] for client_fit_res in clients_fit_res if 'loss' in client_fit_res])
+        if len(losses) == 0:
+            loss_mean, loss_std = 0, 0
+        else:
+            loss_mean, loss_std = losses.mean(), losses.std()
+        
+        if log:
+            loguru.logger.info("\nLoss: {:.2f} ({:2f})".format(loss_mean, loss_std))
+            
+        return {
+            'loss': {client_idx: client_fit_res['loss'] if 'loss' in client_fit_res else 0 
+                     for client_idx, client_fit_res in enumerate(clients_fit_res)}
+        }
 
     @staticmethod
     def pseudo_imp_eval(clients, evaluator: Evaluator):

@@ -1,13 +1,13 @@
-from typing import List, Tuple, Optional, Dict, Union
+from typing import List, Tuple, Optional, Dict, Union, OrderedDict
 import numpy as np
 import torch
 
 from .fedavg import fedavg
 from ..utils import get_parameters
-from .strategy_base import StrategyBaseServer
+from .strategy_base import NNStrategyBaseServer
 
 
-class FedAdamStrategyServer(StrategyBaseServer):
+class FedAdamStrategyServer(NNStrategyBaseServer):
 
     def __init__(
             self, eta = 0.1, eta_l = 0.1, beta_1 = 0.9, beta_2 = 0.99, tau = 1e-9, weight_option='sample_size'
@@ -97,3 +97,6 @@ class FedAdamStrategyServer(StrategyBaseServer):
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return get_parameters(self.global_model, trainable_only=True, return_type='state_dict')

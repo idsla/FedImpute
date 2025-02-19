@@ -1,8 +1,8 @@
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, OrderedDict
 from copy import deepcopy
-from collections import OrderedDict
 import numpy as np
 
+# TODO: base class for all strategies for consistent APIs
 
 class CentralStrategyServer:
 
@@ -10,6 +10,7 @@ class CentralStrategyServer:
         self.initial_impute = 'central'
         self.name = 'central'
         self.fine_tune_epochs = 0
+        self.global_model_params_dict = None
 
     def aggregate_parameters(
             self, local_model_parameters: List[OrderedDict], fit_res: List[dict], params: dict, *args, **kwargs
@@ -28,6 +29,9 @@ class CentralStrategyServer:
 
         agg_model_parameters = [deepcopy(central_model_params) for _ in range(len(local_model_parameters))]
         agg_res = {}
+        
+        # update global model parameters
+        self.global_model_params_dict = central_model_params
 
         return agg_model_parameters, agg_res
 
@@ -43,6 +47,9 @@ class CentralStrategyServer:
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return self.global_model_params_dict
 
 
 class LocalStrategyServer:
@@ -74,12 +81,15 @@ class LocalStrategyServer:
 
     def update_instruction(self, params: dict) -> dict:
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return None
 
 
 class SimpleAvgStrategyServer:
 
     def __init__(self):
-        self.name = 'fedavg'
+        self.name = 'simple_avg'
         self.initial_impute = 'fedavg'
         self.fine_tune_epochs = 0
 
@@ -112,6 +122,9 @@ class SimpleAvgStrategyServer:
         # copy parameters for each client
         agg_model_parameters = [deepcopy(averaged_model_state_dict) for _ in range(len(local_model_parameters))]
         agg_res = {}
+        
+        # update global model parameters
+        self.global_model_params_dict = averaged_model_state_dict
 
         return agg_model_parameters, agg_res
 
@@ -122,6 +135,31 @@ class SimpleAvgStrategyServer:
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return self.global_model_params_dict
+    
+
+class FedMICEStrategyServer(SimpleAvgStrategyServer):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fedmice'
+        self.initial_impute = 'fedavg'
+        
+class FedEMStrategyServer(SimpleAvgStrategyServer):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fedem'
+        self.initial_impute = 'fedavg'
+        
+class FedMeanStrategyServer(SimpleAvgStrategyServer):
+
+    def __init__(self):
+        super().__init__()
+        self.name = 'fedmean'
+        self.initial_impute = 'fedavg'
 
 
 class FedTreeStrategyServer:
@@ -130,6 +168,7 @@ class FedTreeStrategyServer:
         self.name = 'fedtree'
         self.initial_impute = 'fedavg'
         self.fine_tune_epochs = 0
+        self.global_model_params_dict = None
 
     def aggregate_parameters(
             self, local_model_parameters: List[OrderedDict], fit_res: List[dict], params: dict, *args, **kwargs
@@ -161,6 +200,9 @@ class FedTreeStrategyServer:
         # copy parameters for each client
         agg_model_parameters = [deepcopy(global_params) for _ in range(len(local_model_parameters))]
         agg_res = {}
+        
+        # update global model parameters
+        self.global_model_params_dict = global_params
 
         return agg_model_parameters, agg_res
 
@@ -171,3 +213,6 @@ class FedTreeStrategyServer:
     def update_instruction(self, params: dict) -> dict:
 
         return {}
+    
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        return self.global_model_params_dict

@@ -85,15 +85,17 @@ def generate_missing_mech(mm_mech: str, num_clients: int, num_cols: int, seed: i
         'mcar': 'mcar',
         'marq': 'mar_quantile',
         'marqst': 'mar_quantile_strict',
-        'marsig': 'mar_sigmoid',
-        'marsigst': 'mar_sigmoid_strict',
+        'marlogit': 'mar_logit',
+        'marlogitst': 'mar_logit_strict',
         'mnarq': 'mnar_quantile',
         'mnarqst': 'mnar_quantile_strict',
-        'mnarsig': 'mnar_sigmoid',
-        'mnarsigst': 'mnar_sigmoid_strict'
+        'mnarlogit': 'mnar_logit',
+        'mnarlogitst': 'mnar_logit_strict',
+        'mnarsmlogit': 'mnar_sm_logit',
+        'mnarsmlogitst': 'mnar_sm_logit_strict'
     }
 
-    if mm_mech not in {'mcar', 'marq', 'marqst', 'marsig', 'marsigst', 'mnarq', 'mnarqst', 'mnarsig', 'mnarsigst'}:
+    if mm_mech not in MECH_MAPPING:
         raise ValueError(f'{mm_mech} not supported.')
     else:
         mm_mech = MECH_MAPPING[mm_mech]

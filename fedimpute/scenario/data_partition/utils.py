@@ -87,7 +87,7 @@ def calculate_data_partition_stats(
                 statistic[client].append((int(i), int(sum((data[:, -1] == i).tolist()))))
 
         for client in range(num_clients):
-            loguru.logger.info(
+            loguru.logger.debug(
                 f"Client {client}\t Size of data: {len(datas[client])}\t Labels: ",
                 np.unique(datas[client][:, -1])
             )
@@ -217,14 +217,17 @@ def generate_local_test_data(
             )
 
         # split train and retain
-        if not regression:
-            train_data, backup_data = train_test_split(
-                data, test_size=local_backup_size, random_state=seeds[idx], stratify=data[:, -1]
-            )
+        if local_backup_size > 0:
+            if not regression:
+                train_data, backup_data = train_test_split(
+                    data, test_size=local_backup_size, random_state=seeds[idx], stratify=data[:, -1]
+                )
+            else:
+                train_data, backup_data = train_test_split(
+                    data, test_size=local_backup_size, random_state=seeds[idx]
+                )
         else:
-            train_data, backup_data = train_test_split(
-                data, test_size=local_backup_size, random_state=seeds[idx]
-            )
+            train_data, backup_data = train_data, None
 
         train_datas.append(train_data)
         backup_datas.append(backup_data)
@@ -253,3 +256,34 @@ def generate_global_test_data(
     test_data = np.concatenate([X_test, y_test], axis=1)
 
     return train_data, test_data
+
+
+def generate_global_test_from_federated_data(
+    data_list: List[np.ndarray], data_config: dict, test_size: float = 0.2, seed: int = 42
+) -> Tuple[List[np.ndarray], np.ndarray]:
+    """
+    Split data into train and test set from federated data
+    """
+
+    task_type = data_config['task_type']
+    train_data_list = []
+    test_data_list = []
+    for data in data_list:
+        X = data[:, :-1]
+        y = data[:, -1].reshape(-1, 1)
+        if task_type == 'classification':
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=test_size, random_state=seed, stratify=y
+            )
+        else:
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=seed)
+
+        train_data = np.concatenate([X_train, y_train], axis=1)
+        test_data = np.concatenate([X_test, y_test], axis=1)
+        
+        train_data_list.append(train_data)
+        test_data_list.append(test_data)
+    
+    test_data = np.concatenate(test_data_list, axis=0)
+
+    return train_data_list, test_data
