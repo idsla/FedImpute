@@ -1,5 +1,5 @@
 
-# Executing Federated Imputation Algorithms
+# Executing Distributed Imputation Algorithms
 
 The `FedImputeEnv` class is the `execution_environment` module's main class. 
 It is used to configure the federated imputation environment and execute federated imputation algorithms.
@@ -15,10 +15,11 @@ Finally, use the `run_fed_imputation` method to execute the federated imputation
 ```python
 from fedimpute.execution_environment import FedImputeEnv
 
-env = FedImputeEnv()
-env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
-env.setup_from_simulator(simulator = simulator, verbose=1)
-env.run_fed_imputation(run_type='sequential')
+env = FedImputeEnv(debug_mode=False)
+env.configuration(imputer = 'mice', fed_strategy='fedmice')
+env.setup_from_scenario_builder(scenario_builder = scenario_builder, verbose=1)
+env.show_env_info()
+env.run_fed_imputation()
 ```
 
 Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior first
@@ -122,6 +123,16 @@ After setting up the environment, we can execute the federated imputation algori
 ```python
 env.run_fed_imputation(run_type='squential')
 ```
+
+## Monitoring Imputation Process
+
+We provide the Tensorboard utilty so that user can monitoring the imputation progress in real time. By using tensorboard, user need to run the following command in the terminal:
+
+```{bash}
+tensorboard --logdir .logs
+```
+
+We also provide another API `env.tracker.visualize_imputation_process()` it will show the line chart of imputation process measured by imputation quality or loss, it can only be run after imputation finished unlike tensorboard utility.
 
 ## Miscellaneous
 

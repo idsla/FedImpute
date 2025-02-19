@@ -8,10 +8,16 @@ nav:
       - 'Distributed Missing Data Scenario Builder': 'user-guide/scenario_simulation.md'
       - 'Distributed Imputation': 'user-guide/fed_imp.md'
       - 'Evaluation': 'user-guide/evaluation.md'
+      - 'Pipeline API': 'user-guide/pipeline.md'
+  - 'Tutorial':
+      - 'Basic Usage': 'tutorials/basic_usage.md'
+      - 'Benchmarking Pipeline Demo': 'tutorials/benchmark.md'
+      - 'Real World Distributed Imputation': 'tutorials/real_scenario.md' 
   - 'API Reference':
       - 'Scenario Builder': 'api/simulation.md'
       - 'Imputation Execution Environment': 'api/fed_impute.md'
       - 'Imputation Models': 'api/imputation_models.md'
+  #- Notebook page: basic_usage.ipynb
   # Contributing
   # Release Log
 plugins:

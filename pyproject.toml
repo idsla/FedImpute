@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fedimpute"
-version = "0.0.5"
+version = "0.1.0"
 description = "fedimpute is a benchmarking tool for federated imputation"
 authors = ["Sitao Min (idlsa Rutgers University) <sitaomin1994@gmail.com>"]
 license = "GPL GNU v3.0"
@@ -45,6 +45,7 @@ python-markdown-math = "^0.8"
 mkautodoc = "^0.2.0"
 mkapi = "^2.1.0"
 ipykernel = "^6.29.5"
+mkdocs-jupyter = "^0.25.1"
 
 [build-system]
 requires = ["poetry-core"]

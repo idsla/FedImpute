@@ -22,7 +22,7 @@ For more information on missing data, refer to the [Missing Data Introduction](h
 
 ### Missing Data Under Distributed Learning Scenario
 
-<img src="../img/hfl.png" width="600" height="130">
+<img src="../img/hfl_new.png" width="600" height="130">
 
 Horizontal distributed data involves a scenario where multiple parties, each with their own datasets. 
 These datasets often have the same feature space but different observations. Usually, a common case of HFL is when the data is distributed across multiple silos,  for example, hospitals, banks, or research institutions. In these scenarios, missing data can be a significant challenge, as for these common application domains such as healthcare, the missing data is very prevalent.

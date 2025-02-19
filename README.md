@@ -11,9 +11,8 @@
 FedImpute is a benchmarking tool for the evaluation of federated imputation algorithms over various missing data scenarios under horizontally partitioned data.
 
 - **Documentation:** [Documentation](https://idsla.github.io/FedImpute/)
-- **Paper:** [FedImpute]()
 - **Source Code:** [Source Code](https://github.com/idsla/FedImpute/)
-- **Benchmarking Analysis:** [FedImputeBench](https://github.com/sitaomin1994/FedImputeBench)
+- **Tutorial:** [Tutorials] (https://github.com/idsla/FedImpute/tutorials/)
 
 ## Installation
 Firstly, install python >= 3.10.0, we have two ways to install
@@ -42,23 +41,6 @@ pip install -r requirements.txt
 ## Basic Usage
 
 **See documentation:** [Documentation](https://idsla.github.io/FedImpute/)
-
-## Supported Data Partition Strategies
-
-- **Natural Partition**: this can be done by reading list of datasets, see "Dataset and Preprocessing" section in documentation
-- **Artifical Partition**
-    - `iid-even`: iid partition with even sample sizes
-    - `iid-dir`： iid parititon with sample sizes following dirichlet distribution
-    - `niid-dir`: non-iid partition based on some columns with dirichlet ditribution
-    - `niid-path`: non-iid partition based on some columns with pathological distribution (shard partition)
-
-## Supported Missing Data Mechanism
-
-- `mcar`: MCAR missing mechanism
-- `mar-homo`: Homogeneous MAR missing mechansim
-- `mar-heter`: Heterogeneous MAR missing mechanism
-- `mnar-homo`: Homogeneours MNAR missing mechanism
-- `mnar-heter`: Heterogenous MNAR missing mechanism
 
 ## Supported Algorithms
 
