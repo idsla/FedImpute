@@ -30,34 +30,34 @@ pip install -r requirements.txt
 ---
 ### Step 1. Prepare Data
 ```python
-import numpy as np
-data = np.random.rand(10000, 10)
-data_config = {
-    'target': 9,
-    'task_type': 'regression',
-    'clf_type': None,
-    'num_cols': 10,
-}
+from fedimpute.data_prep import load_data, display_data
+
+data, data_config = load_data("codrna")
+print("Data Dimensions: ", data.shape)
+print("Data Config:\n", data_config)
+# Structure of data_config: 
+#   {
+#       'target': 'y', 
+#       'task_type': 'classification', 
+#       'natural_partition': False
+#   }
+data.head()
 ```
 
-### Step 2. Simulate Federated Missing Data Scenario
+### Step 2. Build Distributed Missing Data Scenario
 ```python
-from fedimpute.simulator import Simulator
-simulator = Simulator()
+from fedimpute.scenario import ScenarioBuilder
 
-# classifical simulation function
-simulation_results = simulator.simulate_scenario(
-    data, data_config, num_clients = 10, dp_strategy='iid-even', ms_mech_type='mcar', verbose=1
+scenario_builder = ScenarioBuilder()
+scenario_data = scenario_builder.create_simulated_scenario(
+    data, data_config, num_clients = 4, dp_strategy='iid-even', ms_scenario='mnar-heter'
 )
-
-# lite simulation function
-simulation_results = simulator.simulate_scenario_lite(
-    data, data_config, num_clients = 10, dp_strategy='niid-dir@0.1', ms_scenario = 'mar-heter', verbose=1
-)
+scenario_builder.summarize_scenario()
 ```
 
-### Step 3. Execute Federated Imputation Algorithms
+### Step 3. Execute Distributed Imputation Algorithms
 Note that if you use cuda version of torch, remember to set environment variable for cuda deterministic behavior first
+
 ```bash
 # bash (linux)
 export CUBLAS_WORKSPACE_CONFIG=:4096:8
@@ -67,12 +67,12 @@ $Env:CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 
 ```python
 from fedimpute.execution_environment import FedImputeEnv
-env = FedImputeEnv()
-env.reset_env()
-env.configuration(imputer = 'gain', fed_strategy='fedavg', fit_mode = 'fed')
-env.setup_from_simulator(simulator = simulator, verbose=1)
 
-env.run_fed_imputation(run_type = 'sequential')
+env = FedImputeEnv(debug_mode=False)
+env.configuration(imputer = 'mice', fed_strategy='fedmice')
+env.setup_from_scenario_builder(scenario_builder = scenario_builder, verbose=1)
+env.show_env_info()
+env.run_fed_imputation()
 ```
 
 
@@ -81,6 +81,8 @@ env.run_fed_imputation(run_type = 'sequential')
 from fedimpute.evaluation import Evaluator
 
 evaluator = Evaluator()
-evaluator.evaluate(env, ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed'])
-evaluator.show_results()
+ret = evaluator.evaluate_all(
+    env, metrics = ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed']
+)
+evaluator.show_results_all()
 ```

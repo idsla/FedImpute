@@ -10,7 +10,7 @@ from .loaders.load_workflow import load_workflow
 from .utils.evaluator import Evaluator
 from .utils.result_analyzer import ResultAnalyzer
 from .utils.tracker import Tracker
-from fedimpute.scenario import Simulator
+from fedimpute.scenario import ScenarioBuilder
 import gc
 from fedimpute.utils.reproduce_utils import setup_clients_seed
 
@@ -37,7 +37,7 @@ class FedImputeEnv:
         self.seed = None
 
         # other components
-        self.simulator = None
+        self.scenario_builder = None
         self.evaluator = None
         self.tracker = None
         self.result_analyzer = None
@@ -185,20 +185,20 @@ class FedImputeEnv:
         if verbose > 0:
             loguru.logger.info(f"Environment setup complete.")
 
-    def setup_from_simulator(
+    def setup_from_scenario_builder(
         self, 
-        simulator: Simulator, 
+        scenario_builder: ScenarioBuilder, 
         verbose: int = 0
     ):
         rng = np.random.default_rng(self.seed)
-        clients_seeds = setup_clients_seed(len(simulator.clients_train_data), rng)
+        clients_seeds = setup_clients_seed(len(scenario_builder.clients_train_data), rng)
         
         self.setup_from_data(
-            simulator.clients_train_data, 
-            simulator.clients_test_data, 
-            simulator.clients_train_data_ms,
-            simulator.global_test, 
-            simulator.data_config, 
+            scenario_builder.clients_train_data, 
+            scenario_builder.clients_test_data, 
+            scenario_builder.clients_train_data_ms,
+            scenario_builder.global_test, 
+            scenario_builder.data_config, 
             verbose
         )
 
@@ -260,7 +260,7 @@ class FedImputeEnv:
         self.data_config = {}
 
         # other components
-        self.simulator = None
+        self.scenario_builder = None
         self.evaluator = None
         self.tracker = None
         self.result_analyzer = None
@@ -276,7 +276,8 @@ class FedImputeEnv:
                 client_ids = list(range(len(self.clients)))
             else:
                 raise ValueError(f"Invalid client ids: {client_ids}")
-                    
+
+        # original data
         if data_type == 'train':
             if include_y:
                 return (
@@ -301,6 +302,7 @@ class FedImputeEnv:
                 )
             else:
                 return self.server.X_test
+        # imputed data
         elif data_type == 'train_imp':
             if include_y:
                 raise ValueError("Not y for train_imp data, please set include_y to False")
@@ -325,6 +327,19 @@ class FedImputeEnv:
             if include_y:
                 raise ValueError("Not y for test_mask data, please set include_y to False")
             return [self.clients[client_id].X_test_mask for client_id in client_ids]
+        # individual data
+        elif data_type == 'X_train':
+            return [self.clients[client_id].X_train for client_id in client_ids]
+        elif data_type == 'y_train':
+            return [self.clients[client_id].y_train for client_id in client_ids]
+        elif data_type == 'X_test':
+            return [self.clients[client_id].X_test for client_id in client_ids]
+        elif data_type == 'y_test':
+            return [self.clients[client_id].y_test for client_id in client_ids]
+        elif data_type == 'X_global_test':
+            return self.server.X_test
+        elif data_type == 'y_global_test':
+            return self.server.y_test
         elif data_type == 'config':
             return self.server.data_config
         else:

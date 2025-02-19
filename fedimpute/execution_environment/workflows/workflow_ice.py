@@ -24,9 +24,9 @@ class WorkflowICE(BaseWorkflow):
             evaluation_interval: int = 1,
             early_stopping: bool = True,
             tolerance: float = 0.001,
-            tolerance_patience: int = 3,
-            increase_patience: int = 3,
-            window_size: int = 3,
+            tolerance_patience: int = 5,
+            increase_patience: int = 5,
+            window_size: int = 5,
             log_interval: int = 1,
             save_model_interval: int = 5
     ):
@@ -124,7 +124,7 @@ class WorkflowICE(BaseWorkflow):
                             break
                     # if no ground truth, use parameter norm to check convergence
                     else:
-                        early_stopping_metric_value = other_infos[0][self.early_stopping_metric]
+                        early_stopping_metric_value = other_infos[self.early_stopping_metric][0]
                         early_stopping.update(early_stopping_metric_value)
                         if early_stopping.check_convergence():
                             loguru.logger.info(f"Central client converged, iteration {epoch}")
@@ -210,7 +210,7 @@ class WorkflowICE(BaseWorkflow):
                     # if no ground truth, use parameter norm to check convergence
                     else:
                         for client_idx in range(len(clients)):
-                            early_stoppings_metric_value = other_infos[client_idx][self.early_stopping_metric]
+                            early_stoppings_metric_value = other_infos[self.early_stopping_metric][client_idx]
                             early_stoppings[client_idx].update(early_stoppings_metric_value)
                             if early_stoppings[client_idx].check_convergence():
                                 all_clients_converged[client_idx] = True

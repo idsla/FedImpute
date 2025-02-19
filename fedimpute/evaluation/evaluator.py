@@ -21,6 +21,7 @@ from .twonn import TwoNNRegressor, TwoNNClassifier
 from .pred_model_metrics import task_eval
 from ..utils.reproduce_utils import set_seed
 from ..utils.nn_utils import EarlyStopping
+from ..utils.logger import setup_logger
 from typing import TYPE_CHECKING
 from typing import Tuple
 if TYPE_CHECKING:
@@ -67,7 +68,7 @@ class Evaluator:
         seed: int = 0,
         verbose: int = 1
     ):
-
+        
         if metrics is None:
             metrics = ['imp_quality', 'local_pred', 'fed_pred']
 
@@ -83,7 +84,8 @@ class Evaluator:
         X_test_imps = env.get_data(client_ids='all', data_type = 'test_imp')
         X_train_masks = env.get_data(client_ids='all', data_type = 'train_mask')
         X_test_masks = env.get_data(client_ids='all', data_type = 'test_mask')
-        X_global_test_imp, y_global_test = env.get_data(data_type = 'global_test_imp', include_y = True)
+        X_global_test_imp = env.get_data(data_type = 'global_test_imp')
+        y_global_test = env.get_data(data_type = 'y_global_test')
         data_config = env.get_data(data_type = 'config')
 
         if 'imp_quality' in metrics:
@@ -91,7 +93,7 @@ class Evaluator:
                 loguru.logger.info("Evaluating imputation quality...")
             ret = self.evaluate_imp_quality(
                 X_train_imps=X_train_imps, X_train_origins=X_train_origins,
-                X_train_masks=X_train_masks, seed=seed
+                X_train_masks=X_train_masks, seed=seed, verbose = verbose
             )
             
             results['imp_quality'] = ret['imp_quality']
@@ -104,7 +106,7 @@ class Evaluator:
                 loguru.logger.info("Evaluating downstream prediction...")
             ret = self.evaluate_local_pred(
                 X_train_imps=X_train_imps, y_trains=y_trains, X_tests=X_test_imps, y_tests=y_tests, 
-                data_config=data_config, model = 'nn', seed = seed
+                data_config=data_config, model = 'nn', seed = seed, verbose = verbose
             )
             results['local_pred'] = ret['local_pred']
             results['local_pred_fairness'] = ret['local_pred_fairness']
@@ -117,7 +119,7 @@ class Evaluator:
             ret = self.evaluate_fed_pred(
                 X_train_imps=X_train_imps, y_trains=y_trains, X_tests=X_test_imps, y_tests=y_tests, 
                 X_test_global=X_global_test_imp, y_test_global=y_global_test, 
-                data_config=data_config, seed=seed
+                data_config=data_config, seed=seed, verbose = verbose
             )
             results['fed_pred'] = ret['fed_pred']
             if verbose >= 1:
@@ -152,8 +154,10 @@ class Evaluator:
         X_train_origins: List[np.ndarray], 
         X_train_masks: List[np.ndarray],
         metrics=None, 
-        seed: int = 0
+        seed: int = 0,
+        verbose: int = 0
     ):
+        setup_logger(verbose)
 
         # imputation quality
         if metrics is None:
@@ -334,9 +338,9 @@ class Evaluator:
         model_params=None, 
         pred_fairness_metrics=None,
         seed: int = 0,
-        verbose: int = 1
+        verbose: int = 0
     ):
-
+        setup_logger(verbose)
         if data_config['task_type'] == 'classification':
             y_train_total = np.concatenate(y_trains)
             y_test_total = np.concatenate(y_tests)
@@ -440,9 +444,10 @@ class Evaluator:
         model_params: dict = None, 
         train_params: dict = None, 
         seed: int = 0,
-        verbose: int = 1
+        verbose: int = 0
     ):
-        
+        setup_logger(verbose)
+
         if data_config['task_type'] == 'classification':
             y_train_total = np.concatenate(y_trains)
             y_test_total = np.concatenate(y_tests)

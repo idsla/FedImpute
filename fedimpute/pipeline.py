@@ -13,7 +13,7 @@ from matplotlib.patches import Patch
 import seaborn as sns
 import numpy as np
 
-from fedimpute.scenario.simulator import Simulator
+from fedimpute.scenario.scenario_builder import ScenarioBuilder
 from fedimpute.evaluation.evaluator import Evaluator
 from fedimpute.execution_environment.env_fedimp import FedImputeEnv
 
@@ -40,7 +40,7 @@ class FedImputePipeline:
         # pipeline components
         self.experiment_id: Union[str, None] = None
         self.experiment_description: Union[str, None] = None
-        self.scenario_simulator: Union[Simulator, None] = None
+        self.scenario_builder: Union[ScenarioBuilder, None] = None
         self.fed_imp_configs: List[Dict[str, Union[str, dict]]] = None
         
         # pipeline results
@@ -159,7 +159,7 @@ class FedImputePipeline:
     
     def run_pipeline(
         self, 
-        scenario_simulator: Simulator,
+        scenario_builder: ScenarioBuilder,
         repeats: int = 5,
         seed: int = 100330201,
         verbose: int = 0
@@ -169,7 +169,7 @@ class FedImputePipeline:
         """
         self.repeats = repeats
         self.seed = seed
-        self.scenario_simulator = scenario_simulator
+        self.scenario_builder = scenario_builder
         
         # Decompose the fed_imp_configs
         for idx, setting in enumerate(self.fed_imp_configs):
@@ -195,7 +195,7 @@ class FedImputePipeline:
                     fed_strategy_params=strategy_params,
                     seed=seed
                 )
-                env.setup_from_simulator(simulator = scenario_simulator, verbose=0)
+                env.setup_from_scenario_builder(scenario_builder = scenario_builder, verbose=0)
                 env.run_fed_imputation()
                 end_time = timeit.default_timer()
                 imputation_time = end_time - start_time
@@ -344,6 +344,7 @@ class FedImputePipeline:
         metric_aspect: str,
         plot_type: str = 'bar',
         plot_params: dict = None,
+        save_path: str = None,
     ):
         """
         Plot the pipeline comparison results.
@@ -474,7 +475,7 @@ class FedImputePipeline:
             ################################################################################################################
             # legend
             legend_elements = [
-                Patch(facecolor=color, edgecolor='black', label=strat) 
+                Patch(facecolor=color, edgecolor='white', label=strat) 
                 for strat, color in strategy_colors.items()
             ]
             plt.legend(
@@ -483,6 +484,8 @@ class FedImputePipeline:
                 prop={'weight': 'bold', 'size': font_size - 2}  # Bold labels  
             )
             plt.subplots_adjust(wspace=0.1, hspace=0.3)
+            if save_path is not None:
+                plt.savefig(save_path, bbox_inches='tight', transparent=True, dpi=300)
             plt.show()
             
         elif plot_type == 'line':

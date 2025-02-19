@@ -83,11 +83,11 @@ class Tracker:
         
         if imp_quality is not None:
             for key, value in imp_quality.items():
-                self.writer.add_scalars(key, {f"client_{k}": v for k, v in value.items()}, round_num)
+                self.writer.add_scalars(f'imp_quality/{key}', {f"client_{k}": v for k, v in value.items()}, round_num)
         
         if other_info is not None:
             for key, value in other_info.items():
-                self.writer.add_scalars(key, {f"client_{k}": v for k, v in value.items()}, round_num)
+                self.writer.add_scalars(f'other_info/{key}', {f"client_{k}": v for k, v in value.items()}, round_num)
 
         # if self.track_misc and other_info is not None:
         #     self.misc.append(other_info)

@@ -56,19 +56,24 @@ Federated Imputation Algorithms:
 
 |     Method     |     Type      |       Fed Strategy       |  Imputer (code)  | Workflow  | Reference                                                                                                                                                                                   |
 |:--------------:|:-------------:|:------------------------:|:----------------:|:----------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|    Fed-Mean    |    Non-NN     |            -             |    `fed_mean`    | `simple`  | -                                                                                                                                                                                           |
-|     Fed-EM     |    Non-NN     |            -             |     `fed_em`     | `em`      | [EM](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_EM.py), [FedEM](https://arxiv.org/abs/2108.10252)                                     |
-|    Fed-ICE     |    Non-NN     |            -             |    `fed_ice`     | `ice`     | [FedICE](https://pubmed.ncbi.nlm.nih.gov/33122624/)                                                                                                                                         |
-| Fed-MissForest |    Non-NN     |            -             | `fed_missforest` | `ice`     | [MissForest](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_missforest.py), [Fed Randomforest](https://pubmed.ncbi.nlm.nih.gov/35139148/) |
-|     MIWAE      |      NN       | `fedavg`, `fedprox`,...  |     `miwae`      | `jm`      | [MIWAE](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_miwae.py)                                                                          |
-|      GAIN      |      NN       | `fedavg`, `fedprox`, ... |      `gain`      | `jm`      | [GAIN](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_gain.py)                                                                            |
-|     Not-MIWAE      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`, ...     |     `notmiwae`      | `jm` | [Not-MIWAE](https://arxiv.org/abs/2006.12871)
-|     GNR      |      NN       |     `fedavg`, `fedprox`, `fedavg_ft`, ...    |     `gnr`      | `jm` | [GNR](https://dl.acm.org/doi/abs/10.1145/3583780.3614835?casa_token=o8dv16sHJcMAAAAA:aAIvug_7cp9oUJSB7ZfTvzUksPyuP6Jbcl3TlHsvXXGEwIe4AbQuHCTlxXZtjDKlymfO30n2o-E9iw)
+|    Mean    |    Non-NN     |          `local`, `fedmean`             |    `mean`    | `MEAN`  | -                                                                                                                                                                                           |
+|     EM     |    Non-NN     |         `local`, `fedem`             |     `em`     | `EM`      | [EM](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_EM.py), [FedEM](https://arxiv.org/abs/2108.10252)                                     |
+|    MICE     |    Non-NN     |            `local`, `fedmice`             |    `mice`     | `ICE`     | [FedICE](https://pubmed.ncbi.nlm.nih.gov/33122624/)                                                                                                                                         |
+| MissForest |    Non-NN     |            `local`, `fedtree`                    | `missforest` | `ICE`     | [MissForest](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_missforest.py), [Fed Randomforest](https://pubmed.ncbi.nlm.nih.gov/35139148/) |
+|     MIWAE      |      NN       |    `local`, `fedavg`, ...    |     `miwae`      | `JM`      | [MIWAE](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_miwae.py)                                                                          |
+|      GAIN      |      NN       | `local`, `fedavg`, ... |      `gain`      | `JM`      | [GAIN](https://github.com/vanderschaarlab/hyperimpute/blob/main/src/hyperimpute/plugins/imputers/plugin_gain.py)                                                                            |
+|     Not-MIWAE      |      NN       |     `local`, `fedavg`, ...     |     `notmiwae`      | `JM` | [Not-MIWAE](https://arxiv.org/abs/2006.12871)
+|     GNR      |      NN       |     `local`, `fedavg`, ...    |     `gnr`      | `JM` | [GNR](https://dl.acm.org/doi/abs/10.1145/3583780.3614835?casa_token=o8dv16sHJcMAAAAA:aAIvug_7cp9oUJSB7ZfTvzUksPyuP6Jbcl3TlHsvXXGEwIe4AbQuHCTlxXZtjDKlymfO30n2o-E9iw)
 
 Federated Strategies:
 
 |   Method   |      Type       | Fed_strategy(code) | Reference      |
 |:----------:|:---------------:|:------------------:|:---------------|
+|   Local   |    non-federated    |      `local`      | -     |
+|   FedMean   |    traditional    |      `fedmean`      | -     |
+|   FedEM   |    traditional    |      `fedem`      | [FedEM]()     |
+|   FedMICE   |    traditional    |      `fedmice`      | [FedMICE]()     |
+|   FedTree   |    traditional    |      `fedtree`      | [FedTree]()     |
 |   FedAvg   |    global FL    |      `fedavg`      | [FedAvg](https://arxiv.org/pdf/1602.05629)     |
 |  FedProx   |    global FL    |     `fedprox`      | [FedProx](https://arxiv.org/pdf/1812.06127)    |
 |  Scaffold  |    global FL    |     `scaffold`     | [Scaffold](https://arxiv.org/pdf/1910.06378)   |

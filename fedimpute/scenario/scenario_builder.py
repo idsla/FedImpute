@@ -17,10 +17,10 @@ from fedimpute.scenario.utils import DistanceComputation
 from fedimpute.scenario.missing_simulate.utils import MECH_NAME_MAPPING
 
 
-class Simulator:
+class ScenarioBuilder:
 
     """
-    Simulator class for simulating or constructing missing data scenarios in federated learning environment
+    ScenarioBuilder class for simulating or constructing missing data scenarios in federated learning environment
 
     Attributes:
         data (np.ndarray): data to be used for simulation
@@ -109,9 +109,10 @@ class Simulator:
         dp_global_test_size: float = 0.1,
         dp_local_backup_size: float = 0.05,
         dp_reg_bins: int = 50,
-        ms_mech_type: str = 'mcar',
+        ms_scenario: str = None,
         ms_cols: Union[str, List[int]] = 'all',
         obs_cols: Union[str, List[int]] = 'random',
+        ms_mech_type: str = 'mcar',
         ms_global_mechanism: bool = False,
         ms_mr_dist_clients: str = 'randu',
         ms_mf_dist_clients: str = 'identity',  # TODO
@@ -168,7 +169,72 @@ class Simulator:
         Returns:
             dict: dictionary of clients training data, test data, training data with missing values, global test data
         """
+        
+        ################################################################################################
+        # Predefined Scenarios
+        if ms_scenario is not None:
+            if verbose > 0:
+                print(
+                    "Warining: Using Predefined Scenarios, paremeters set by" \
+                    "'ms_mech_type', 'ms_global_mechanism', 'ms_mr_dist_clients', 'ms_mm_dist_clients', " \
+                    "'ms_mm_beta_option', 'ms_mm_obs'."
+                )
+            
+            ms_mech_type = 'mcar'
+            ms_global_mechanism = False
+            ms_mr_dist_clients = 'randu-int'
+            ms_mm_dist_clients = 'identity'
+            ms_mm_beta_option = None
+            ms_mm_obs = False
 
+            if ms_scenario == 'mcar':
+                ms_mech_type = 'mcar'
+                ms_global_mechanism = False
+                ms_mr_dist_clients = 'randu'
+
+            elif ms_scenario == 'mar-homo':
+                ms_mech_type = 'mar_logit'
+                ms_global_mechanism = True
+                ms_mr_dist_clients = 'randu'
+                ms_mm_beta_option = 'fixed'
+                ms_mm_obs = True
+
+            elif ms_scenario == 'mar-heter':
+                ms_mech_type = 'mar_logit'
+                ms_global_mechanism = False
+                ms_mr_dist_clients = 'randu'
+                ms_mm_dist_clients = 'random'
+                ms_mm_beta_option = 'randu'
+                ms_mm_obs = True
+
+            elif ms_scenario == 'mnar-homo':
+                ms_mech_type = 'mnar_sm_logit'
+                ms_global_mechanism = True
+                ms_mr_dist_clients = 'randu'
+                ms_mm_beta_option = 'self'
+
+            elif ms_scenario == 'mnar-heter':
+                ms_mech_type = 'mnar_sm_logit'
+                ms_global_mechanism = False
+                ms_mr_dist_clients = 'randu'
+                ms_mm_beta_option = 'self'
+                ms_mm_dist_clients = 'random'
+
+            elif ms_scenario == 'mnar2-homo':
+                ms_mech_type = 'mar_logit'
+                ms_global_mechanism = True
+                ms_mr_dist_clients = 'randu'
+                ms_mm_beta_option = 'randu'
+                ms_mm_obs = False
+
+            elif ms_scenario == 'mnar2-heter':
+                ms_mech_type = 'mar_logit'
+                ms_global_mechanism = False
+                ms_mr_dist_clients = 'randu'
+                ms_mm_beta_option = 'randu'
+                ms_mm_obs = False
+                ms_mm_dist_clients = 'random'
+        
         ################################################################################################
         # set parameters
         ################################################################################################
@@ -182,6 +248,7 @@ class Simulator:
         self.dp_local_backup_size = dp_local_backup_size
         self.dp_reg_bins = dp_reg_bins
         
+        self.ms_scenario = ms_scenario
         self.ms_mech_type = ms_mech_type
         self.ms_cols = ms_cols
         self.obs_cols = obs_cols
@@ -223,6 +290,7 @@ class Simulator:
 
         if verbose > 0:
             print("Data partitioning...")
+        
         ################################################################################################
         # Data Partition
         ##################################################################################################
@@ -299,7 +367,7 @@ class Simulator:
                 global_seed=global_seed,
             )
         )
-
+        
         # ========================================================================================
         # simulate missing data
         if 'num_cols' not in data_config:
@@ -401,12 +469,13 @@ class Simulator:
         data_config: Dict, 
         num_clients: int,
         dp_strategy: str = 'iid-even',
-        ms_scenario: str = 'mcar',
-        dp_split_cols: Union[str, int] = 'target',
-        ms_cols: Union[str, List[int]] = 'all',
-        obs_cols: Union[str, List[int]] = 'random',
         dp_min_samples: Union[float, int] = 50,
         dp_max_samples: Union[float, int] = 8000,
+        dp_split_cols: Union[str, int] = 'target',
+
+        ms_scenario: str = 'mcar',
+        ms_cols: Union[str, List[int]] = 'all',
+        obs_cols: Union[str, List[int]] = 'random',
         ms_mr_lower: float = 0.3,
         ms_mr_upper: float = 0.7,
         seed: int = 100330201,
@@ -682,7 +751,8 @@ class Simulator:
         client_ids: List[int],
         dpi: int = 300,
         fontsize: int = 18,
-        data_type: str = 'train'
+        data_type: str = 'train',
+        save_path: str = None
     ):
         n_rows = ceil(len(client_ids) / 4)
         n_cols = 4
@@ -752,6 +822,10 @@ class Simulator:
         )
         
         #plt.tight_layout(rect=[0, 0, 0.95, 1])  # Adjust layout to make room for legend
+        
+        if save_path is not None:
+            plt.savefig(save_path, bbox_inches='tight', transparent=True, dpi=dpi)
+
         plt.show()
         
     def visualize_missing_distribution(
@@ -763,7 +837,8 @@ class Simulator:
         bins: int = 30,
         stat: str = 'density',
         kde: bool = False,
-        data_type: str = 'train'
+        data_type: str = 'train',
+        save_path: str = None
     ):
         if data_type == 'train':
             client_datas = [self.clients_train_data[client_id] for client_id in client_ids]
@@ -778,7 +853,7 @@ class Simulator:
         
         n_features = len(feature_ids)
         n_clients = len(client_ids)
-        n_cols = 4
+        n_cols = 5
         n_rows = ceil(n_features / n_cols)*n_clients
         
         #colors = ['#2196F3', '#FF5722']  # Material
@@ -786,6 +861,7 @@ class Simulator:
         #colors = ['#2C699A', '#BA2C2C']  # Professional
         #colors = ['lightgrey', 'black']
         colors = ['tab:orange', 'tab:blue']  # Material
+        #colors = ['#1f77b4', '#dc1e3d']
 
         missing_color = colors[0]
         observed_color = colors[1]
@@ -817,9 +893,12 @@ class Simulator:
                         'Observed': observed_color
                     },
                     line_kws = {
-                        'linewidth': 2
+                        'linewidth': 2,
+                        'alpha': 1.0
                     },
-                    alpha = 0.6
+                    #linewidth = 0.2,
+                    edgecolor = 'white',
+                    alpha = 0.75
                 )
                 axes[row, col].set_title(f'Feature {j+1}', fontsize=fontsize, fontweight='bold')
                 if col == 0:
@@ -830,8 +909,8 @@ class Simulator:
                 axes[row, col].set_xlabel('')
         
         legend_elements = [
-            plt.Rectangle((0,0),1,1, facecolor=observed_color, edgecolor='black', label='Observed'),
-            plt.Rectangle((0,0),1,1, facecolor=missing_color, edgecolor='black', label='Missing')
+            plt.Rectangle((0,0),1,1, facecolor=observed_color, edgecolor='white', label='Observed', alpha=0.75),
+            plt.Rectangle((0,0),1,1, facecolor=missing_color, edgecolor='white', label='Missing', alpha=0.75)
         ]
         
         fig.legend(
@@ -842,7 +921,9 @@ class Simulator:
             frameon=False,
             prop={'size': fontsize, 'weight': 'bold'},  # Use prop dictionary for font properties
         )
-            
+        
+        if save_path is not None:
+            plt.savefig(save_path, bbox_inches='tight', transparent=True, dpi=dpi)
             
         plt.show()
 
@@ -854,8 +935,10 @@ class Simulator:
         dpi: int = 300,
         fontsize: int = 18,
         title: bool = True,
-        data_type: str = 'train'
-    ):
+        data_type: str = 'train',
+        save_path: str = None
+    ):  
+        
         DISTANCE_METHOD_NAME = {
             'swd': 'Sliced Wasserstein Distance',
             'correlation': 'Correlation Distance',
@@ -881,5 +964,9 @@ class Simulator:
         ax.set_yticklabels(ax.get_yticklabels(), rotation=0, fontsize = fontsize-3, fontweight='bold')
         if title:
             ax.set_title(f'{DISTANCE_METHOD_NAME[distance_method]}', fontsize=fontsize, fontweight='bold')
+        
+        if save_path is not None:
+            plt.savefig(save_path, bbox_inches='tight', transparent=True, dpi=dpi)
+        
         plt.show()
         
