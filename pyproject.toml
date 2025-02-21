@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fedimpute"
-version = "0.1.0"
+version = "0.2.0"
 description = "fedimpute is a benchmarking tool for federated imputation"
 authors = ["Sitao Min (idlsa Rutgers University) <sitaomin1994@gmail.com>"]
 license = "GPL GNU v3.0"
@@ -23,6 +23,7 @@ seaborn = "^0.13.2"
 tensorboard = "^2.18.0"
 openpyxl = "^3.1.5"
 statsmodels = "^0.14.4"
+requests = "^2.32.3"
 
 
 [tool.poetry.group.dev.dependencies]
