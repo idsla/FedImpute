@@ -138,21 +138,6 @@ def load_data(data_name: str):
         #     json.dump(data_config, f)
 
         # df.to_csv('./data/heart_disease/data_clean_binary.csv', index=False)
-        
-        
-    
-    elif data_name == "california":
-        pass
-    elif data_name == 'hhnp':
-        pass
-    elif data_name == 'dvisits':
-        pass
-    elif data_name == 'condon':
-        pass
-    elif data_name == 'school':
-        pass
-    elif data_name == 'vehicle':
-        pass
     else:
         raise ValueError(f"Data {data_name} not found")
     
