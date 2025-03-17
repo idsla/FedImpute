@@ -11,6 +11,7 @@ from fedimpute.data_prep.helper import download_data
 def load_data(data_name: str):
     
     if data_name == "codrna":
+        
         features, labels = fetch_openml(data_id = 351, as_frame='auto', return_X_y = True)
         df_pred = pd.DataFrame.sparse.from_spmatrix(features).sparse.to_dense()
         df_pred.columns = [f"X{i+1}" for i in range(df_pred.shape[1])]

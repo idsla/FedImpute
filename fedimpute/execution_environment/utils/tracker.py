@@ -7,6 +7,8 @@ import seaborn as sns
 import base64
 import pandas as pd
 from torch.utils.tensorboard import SummaryWriter
+import os
+
 class Tracker:
     """
     Tracker class to track the imputation results along iterations
@@ -128,7 +130,8 @@ class Tracker:
         n_cols: int = 5, 
         display: bool = True,
         fontsize: int = 12,
-        dpi: int = 150
+        dpi: int = 150,
+        save_path: str = None
     ):
         
         rounds = self.rounds
@@ -154,7 +157,7 @@ class Tracker:
             n_cols = num_metrics
             
         n_rows = math.ceil(num_metrics / n_cols)
-        sns.set_theme(style = "darkgrid")
+        #sns.set_theme(style = "darkgrid")
         fig, axs = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 3), dpi=dpi, squeeze=False)
         
         for i, metric_name in enumerate(df['metric'].unique()):
@@ -174,6 +177,14 @@ class Tracker:
             ax.set_xlim(x_min, x_max)
         
         plt.tight_layout()
+        
+        if save_path is not None:
+            display = False
+            dir_path = os.path.dirname(save_path)
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            plt.savefig(save_path, dpi=dpi)
+
         if display:
             plt.show()
         else:

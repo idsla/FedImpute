@@ -1,5 +1,6 @@
 import sys
 from typing import Tuple, List, Union, Dict, Any
+import os
 
 import loguru
 import numpy as np
@@ -824,9 +825,13 @@ class ScenarioBuilder:
         #plt.tight_layout(rect=[0, 0, 0.95, 1])  # Adjust layout to make room for legend
         
         if save_path is not None:
+            dir_path = os.path.dirname(save_path)
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
             plt.savefig(save_path, bbox_inches='tight', transparent=True, dpi=dpi)
-
-        plt.show()
+            plt.close()
+        else:
+            plt.show()
         
     def visualize_missing_distribution(
         self, 
@@ -923,9 +928,13 @@ class ScenarioBuilder:
         )
         
         if save_path is not None:
+            dir_path = os.path.dirname(save_path)
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
             plt.savefig(save_path, bbox_inches='tight', transparent=True, dpi=dpi)
-            
-        plt.show()
+            plt.close()
+        else:
+            plt.show()
 
     def visualize_data_heterogeneity(
         self, 
@@ -966,7 +975,11 @@ class ScenarioBuilder:
             ax.set_title(f'{DISTANCE_METHOD_NAME[distance_method]}', fontsize=fontsize, fontweight='bold')
         
         if save_path is not None:
+            dir_path = os.path.dirname(save_path)
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
             plt.savefig(save_path, bbox_inches='tight', transparent=True, dpi=dpi)
-        
-        plt.show()
+            plt.close()
+        else:
+            plt.show()
         

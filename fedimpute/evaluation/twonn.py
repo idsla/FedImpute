@@ -8,6 +8,7 @@ import loguru
 from ..utils.nn_utils import EarlyStopping
 #DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 DEVICE = 'cpu'
+from ..utils.reproduce_utils import set_seed
 
 class TwoLayerNNBase(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -48,6 +49,7 @@ class TwoNNRegressor(nn.Module):
         self.batch_norm = batch_norm
 
     def _build_network(self, input_size):
+        
         self.hidden_size = input_size*2
         if self.batch_norm:
             self.network = nn.Sequential(
@@ -73,6 +75,7 @@ class TwoNNRegressor(nn.Module):
 
     def fit(self, X, y):
 
+        set_seed(0)
         X_tensor = torch.tensor(X, dtype=torch.float32)
         y_tensor = torch.tensor(y, dtype=torch.float32).unsqueeze(1)  # Ensure y_tensor is 2D for MSE Loss
 
@@ -210,7 +213,8 @@ class TwoNNClassifier(nn.Module):
         return self.network(x)
 
     def fit(self, X, y):
-
+        
+        set_seed(0)
         X_tensor = torch.tensor(X, dtype=torch.float32)
         y_tensor = torch.tensor(y, dtype=torch.long)
         class_weight = calculate_class_weights(y)

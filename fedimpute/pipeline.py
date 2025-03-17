@@ -366,6 +366,8 @@ class FedImputePipeline:
         strategy_colors = {
             strat: palette[i] for i, strat in enumerate(all_strategies)
         }
+        
+        strategy_colors['local'] = '#f7931e'
              
         if plot_params is None:
             plot_params = {
@@ -484,9 +486,15 @@ class FedImputePipeline:
                 prop={'weight': 'bold', 'size': font_size - 2}  # Bold labels  
             )
             plt.subplots_adjust(wspace=0.1, hspace=0.3)
+            plt.tight_layout()
             if save_path is not None:
-                plt.savefig(save_path, bbox_inches='tight', transparent=True, dpi=300)
-            plt.show()
+                dir_path = os.path.dirname(save_path)
+                if not os.path.exists(dir_path):
+                    os.makedirs(dir_path)
+                plt.savefig(save_path, bbox_inches='tight', dpi=150)
+                plt.close()
+            else:
+                plt.show()
             
         elif plot_type == 'line':
             pass

@@ -12,7 +12,7 @@ FedImpute is a benchmarking tool for the evaluation of federated imputation algo
 
 - **Documentation:** [Documentation](https://idsla.github.io/FedImpute/)
 - **Source Code:** [Source Code](https://github.com/idsla/FedImpute/)
-- **Tutorial:** [Tutorials] (https://github.com/idsla/FedImpute/tutorials/)
+- **Tutorial:** [Tutorials](https://github.com/idsla/FedImpute/tree/main/tutorials)
 
 ## Installation
 Firstly, install python >= 3.10.0, we have two ways to install
