@@ -32,7 +32,8 @@ class Server:
             global_test: np.ndarray,
             data_config: dict,
             server_config: Dict[str, Union[str, int, float]],
-            seed: int = 21
+            seed: int = 21,
+            columns: List[str] = None
     ):
 
         self.server_config = server_config
@@ -59,6 +60,8 @@ class Server:
 
         if isinstance(self.fed_strategy, NNStrategyBaseServer):
             self.fed_strategy.initialization(self.global_imputer.model, {})
+        
+        self.columns = columns
     
     def initial_impute(self, imp_values: np.ndarray, col_type: str = 'num') -> None:
         """

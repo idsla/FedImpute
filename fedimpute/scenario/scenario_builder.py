@@ -12,7 +12,7 @@ from math import ceil
 from .data_partition import load_data_partition
 from .missing_simulate import add_missing
 from ..utils.reproduce_utils import setup_clients_seed
-from fedimpute.utils.format_utils import dataframe_to_numpy
+from fedimpute.utils.format_utils import dataframe_to_numpy, arrays_to_dataframes
 from fedimpute.scenario.utils import DistanceComputation
 from fedimpute.scenario.missing_simulate.utils import MECH_NAME_MAPPING
 
@@ -47,6 +47,7 @@ class ScenarioBuilder:
         self.global_test: np.ndarray = None
         self.clients_seeds: List[int] = None
         self.stats: dict = None
+        self.data_columns: List[str] = None
 
         # parameters
         self.debug_mode = debug_mode
@@ -272,7 +273,10 @@ class ScenarioBuilder:
         # Main Simulation
         ################################################################################################
         if isinstance(data, pd.DataFrame):
-            data = dataframe_to_numpy(data, data_config)
+            data, columns = dataframe_to_numpy(data, data_config)
+            self.data_columns = columns
+        else:
+            self.data_columns = [f'X_{i}' for i in range(data.shape[1]-1)] + ['y']
 
         if self.debug_mode:
             loguru.logger.remove()
@@ -442,10 +446,10 @@ class ScenarioBuilder:
             clients_train_data_ms.append(client_train_data_ms)
 
         self.stats = stats
-        self.clients_train_data = clients_train_data
-        self.clients_test_data = clients_test_data
-        self.clients_train_data_ms = clients_train_data_ms
-        self.global_test = global_test_data
+        self.clients_train_data = arrays_to_dataframes(clients_train_data, self.data_columns)
+        self.clients_test_data = arrays_to_dataframes(clients_test_data, self.data_columns)
+        self.clients_train_data_ms = arrays_to_dataframes(clients_train_data_ms, self.data_columns, without_target=True)
+        self.global_test = arrays_to_dataframes([global_test_data], self.data_columns)[0]
         self.clients_seeds = client_seeds
         self.data = data
         self.data_config = data_config
@@ -602,9 +606,11 @@ class ScenarioBuilder:
         data_list = []
         for data in datas:
             if isinstance(data, pd.DataFrame):
-                data = dataframe_to_numpy(data, data_config).astype(np.float32)
+                data, columns = dataframe_to_numpy(data, data_config)
+                self.data_columns = columns
             elif isinstance(data, np.ndarray):
                 data = data.astype(np.float32)
+                self.data_columns = [f'X_{i}' for i in range(data.shape[1]-1)] + ['y']
             else:
                 raise ValueError(f"Invalid data type: {type(data)}")
             
@@ -623,10 +629,10 @@ class ScenarioBuilder:
         
         # save results
         self.stats = stats
-        self.clients_train_data = clients_train_data
-        self.clients_test_data = clients_test_data
-        self.clients_train_data_ms = clients_train_data_ms
-        self.global_test = global_test_data
+        self.clients_train_data = arrays_to_dataframes(clients_train_data, self.data_columns)
+        self.clients_test_data = arrays_to_dataframes(clients_test_data, self.data_columns)
+        self.clients_train_data_ms = arrays_to_dataframes(clients_train_data_ms, self.data_columns, without_target=True)
+        self.global_test = arrays_to_dataframes([global_test_data], self.data_columns)[0]
         self.clients_seeds = client_seeds
         self.data = data
         self.data_config = data_config
@@ -695,12 +701,12 @@ class ScenarioBuilder:
             
             # Calculate miss ratio (assuming it's stored in stats or can be calculated)
             miss_ratio = (
-                np.isnan(clients_train_data_ms[i]).sum() / (clients_train_data_ms[i].shape[0] * clients_train_data_ms[i].shape[1])
+                np.isnan(clients_train_data_ms[i].values).sum() / (clients_train_data_ms[i].values.shape[0] * clients_train_data_ms[i].values.shape[1])
             )
             
             # Calculate missing features (assuming it's stored in stats or can be calculated)
             N_cols = clients_train_data_ms[i].shape[1]
-            mask = np.isnan(clients_train_data_ms[i])
+            mask = np.isnan(clients_train_data_ms[i].values)
             mask_cols = mask.sum(axis=0)
             cols_missing = (mask_cols > 0).sum()
             missing_features = f"{cols_missing}/{N_cols}"
@@ -773,9 +779,9 @@ class ScenarioBuilder:
             
             # Get missing pattern for current client
             if data_type == 'train':
-                mask = np.isnan(self.clients_train_data_ms[client_id])
+                mask = np.isnan(self.clients_train_data_ms[client_id].values)
             elif data_type == 'test':
-                mask = np.isnan(self.clients_test_data[client_id])
+                mask = np.isnan(self.clients_test_data[client_id].values)
             else:
                 raise ValueError(f"Invalid data type: {data_type}")
             
@@ -841,11 +847,11 @@ class ScenarioBuilder:
         save_path: str = None
     ):
         if data_type == 'train':
-            client_datas = [self.clients_train_data[client_id] for client_id in client_ids]
-            client_data_ms = [self.clients_train_data_ms[client_id] for client_id in client_ids]
+            client_datas = [self.clients_train_data[client_id].values for client_id in client_ids]
+            client_data_ms = [self.clients_train_data_ms[client_id].values for client_id in client_ids]
         elif data_type == 'test':
-            client_datas = [self.clients_test_data[client_id] for client_id in client_ids]
-            client_data_ms = [self.clients_test_data[client_id] for client_id in client_ids]
+            client_datas = [self.clients_test_data[client_id].values for client_id in client_ids]
+            client_data_ms = [self.clients_test_data[client_id].values for client_id in client_ids]
         else:
             raise ValueError(f"Invalid data type: {data_type}")
         
@@ -945,9 +951,9 @@ class ScenarioBuilder:
         }
         
         if data_type == 'train':
-            clients_data = [self.clients_train_data[client_id] for client_id in client_ids]
+            clients_data = [self.clients_train_data[client_id].values for client_id in client_ids]
         elif data_type == 'test':
-            clients_data = [self.clients_test_data[client_id] for client_id in client_ids]
+            clients_data = [self.clients_test_data[client_id].values for client_id in client_ids]
         else:
             raise ValueError(f"Invalid data type: {data_type}")
         

@@ -13,15 +13,9 @@ import gower
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-
-from .imp_quality_metrics import rmse, sliced_ws
-from sklearn.linear_model import RidgeCV, LogisticRegressionCV, LinearRegression
+from sklearn.linear_model import RidgeCV, LogisticRegressionCV, LinearRegression, LogisticRegression
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-from .twonn import TwoNNRegressor, TwoNNClassifier
-from .pred_model_metrics import task_eval
-from ..utils.reproduce_utils import set_seed
-from ..utils.nn_utils import EarlyStopping
-from ..utils.logger import setup_logger
+from sklearn.neural_network import MLPRegressor, MLPClassifier
 from typing import TYPE_CHECKING
 from typing import Tuple
 if TYPE_CHECKING:
@@ -30,6 +24,25 @@ if TYPE_CHECKING:
 warnings.filterwarnings("ignore")
 from tqdm.auto import trange
 from tabulate import tabulate
+
+from .imp_quality_metrics import rmse, sliced_ws
+from .twonn import TwoNNRegressor, TwoNNClassifier
+from .pred_model_metrics import task_eval
+from ..utils.reproduce_utils import set_seed
+from ..utils.nn_utils import EarlyStopping
+from ..utils.logger import setup_logger
+from .fed_prediction import (
+    eval_fed_pred_torchnn, 
+    eval_fed_pred_sklnn, 
+    eval_fed_pred_lr, 
+    eval_fed_pred_svm, 
+    eval_fed_pred_xgboost, 
+    eval_fed_pred_rf
+)
+from .fed_regression_analysis import (
+    eval_fed_reg_logit, 
+    eval_fed_reg_linear
+)
 
 
 class Evaluator:
@@ -150,14 +163,18 @@ class Evaluator:
                 
     def evaluate_imp_quality(
         self, 
-        X_train_imps: List[np.ndarray], 
-        X_train_origins: List[np.ndarray], 
-        X_train_masks: List[np.ndarray],
+        X_train_imps: List[pd.DataFrame], 
+        X_train_origins: List[pd.DataFrame], 
+        X_train_masks: List[pd.DataFrame],
         metrics=None, 
         seed: int = 0,
         verbose: int = 0
     ):
         setup_logger(verbose)
+
+        X_train_imps = [item.values for item in X_train_imps]
+        X_train_origins = [item.values for item in X_train_origins]
+        X_train_masks = [item.values for item in X_train_masks]
 
         # imputation quality
         if metrics is None:
@@ -238,14 +255,17 @@ class Evaluator:
         
     def tsne_visualization(
         self, 
-        X_imps: List[np.ndarray], 
-        X_origins: List[np.ndarray], 
+        X_imps: List[pd.DataFrame], 
+        X_origins: List[pd.DataFrame], 
         fontsize: int = 20,
         alpha: float = 0.5,
         sampling_size: int = None,
         overall: bool = False,
         seed: int = 0
     ):
+
+        X_imps = [item.values for item in X_imps]
+        X_origins = [item.values for item in X_origins]
 
         color_mapping = {
             'original': 'red',
@@ -327,12 +347,72 @@ class Evaluator:
         plt.subplots_adjust(wspace=0.0)
         plt.show()
 
-    def evaluate_local_pred(
+    def run_local_regression_analysis(
         self, 
-        X_train_imps: List[np.ndarray], 
-        y_trains: List[np.ndarray],
-        X_tests: List[np.ndarray], 
-        y_tests: List[np.ndarray], 
+        X_train_imps: List[pd.DataFrame], 
+        y_trains: List[pd.Series], 
+        data_config: dict,
+        verbose: int = 0
+    ):
+        setup_logger(verbose)
+
+        if data_config['task_type'] == 'regression':
+            import statsmodels.api as sm
+            results = []
+            for X_train_imp, y_train in zip(X_train_imps, y_trains):
+                X_train_imp = sm.add_constant(X_train_imp)  # Add intercept term
+                model = sm.OLS(y_train, X_train_imp)
+                fit = model.fit()
+                results.append(fit)
+        elif data_config['task_type'] == 'classification':
+            import statsmodels.api as sm
+            results = []
+            for X_train_imp, y_train in zip(X_train_imps, y_trains):
+                n_classes = len(np.unique(y_train.values))
+                if n_classes == 2:
+                    X_train_imp = sm.add_constant(X_train_imp)  # Add intercept term
+                    model = sm.Logit(y_train, X_train_imp)
+                    fit = model.fit(disp=0)  # Suppress convergence messages
+                    results.append(fit)
+                elif n_classes > 2:
+                    X_train_imp = sm.add_constant(X_train_imp)  # Add intercept term
+                    model = sm.Logit(y_train, X_train_imp)
+                    fit = model.fit(disp=0)  # Suppress convergence messages
+                    results.append(fit)
+        else:
+            raise ValueError(f"Invalid task type: {data_config['task_type']}")
+        
+        # save results to class attribute
+        if self.results is None:
+            self.results = {}
+        self.results['local_regression'] = results
+
+    def show_local_regression_results(self, client_idx: int):
+        if self.results is None or len(self.results) == 0:
+            print("Evaluation results is empty. Run evaluation first.")
+            return
+
+        if client_idx is None:
+            client_idx = 0
+
+        if 'local_regression' not in self.results:
+            print("Local regression results are not available. Run run_local_regression_analysis first.")
+            return
+
+        results = self.results['local_regression']
+        result = results[client_idx]
+        title = result.summary().tables[0].title
+        title  = 'Local ' + title + ' (client ' + str(client_idx + 1) + ')'
+        summary = result.summary()
+        summary.tables[0].title = title
+        print(summary)
+
+    def run_local_prediction(
+        self, 
+        X_train_imps: List[pd.DataFrame], 
+        y_trains: List[pd.Series],
+        X_tests: List[pd.DataFrame], 
+        y_tests: List[pd.Series], 
         data_config: dict,
         model: str = 'nn', 
         model_params=None, 
@@ -340,6 +420,11 @@ class Evaluator:
         seed: int = 0,
         verbose: int = 0
     ):
+        X_train_imps = [item.values for item in X_train_imps]
+        X_tests = [item.values for item in X_tests]
+        y_trains = [item.values for item in y_trains]
+        y_tests = [item.values for item in y_tests]
+
         setup_logger(verbose)
         if data_config['task_type'] == 'classification':
             y_train_total = np.concatenate(y_trains)
@@ -356,8 +441,8 @@ class Evaluator:
 
         if pred_fairness_metrics is None:
             pred_fairness_metrics = ['variance', 'jain-index']
-        if model_params is None:
-            model_params = {'weight_decay': 0.0}
+        # if model_params is None:
+        #     model_params = {'weight_decay': 0.0}
 
         pred_performance = self._evaluation_downstream_prediction(
             model, model_params, X_train_imps, y_trains,
@@ -376,7 +461,7 @@ class Evaluator:
             'local_pred_fairness': pred_performance_fairness,
         }
         
-    def show_local_pred_results(self):
+    def show_local_prediction_results(self):
         """
         Example:
         {
@@ -432,21 +517,72 @@ class Evaluator:
         print(tabulate(rows, headers=headers, stralign="center", numalign="center"))
         print('=' * total_width)
 
-    def evaluate_fed_pred(
+    def run_fed_regression_analysis(
         self, 
-        X_train_imps: List[np.ndarray], 
-        y_trains: List[np.ndarray],
-        X_tests: List[np.ndarray], 
-        y_tests: List[np.ndarray], 
-        X_test_global: np.ndarray, 
-        y_test_global: np.ndarray,
+        X_train_imps: List[pd.DataFrame], 
+        y_trains: List[pd.Series],
+        data_config: dict,
+        verbose: int = 0
+    ):
+
+        setup_logger(verbose)
+
+        if data_config['task_type'] == 'regression':
+            result = eval_fed_reg_linear(X_train_imps, y_trains)
+            title = 'Federated Linear Regression Result'
+        elif data_config['task_type'] == 'classification':
+            if len(np.unique(np.concatenate([item.values for item in y_trains], axis=0))) == 2:
+                result = eval_fed_reg_logit(X_train_imps, y_trains)
+                title = 'Federated Logit Regression Result'
+            else:
+                raise NotImplementedError("Multi-class federated logit regression is not implemented yet.")
+        else:
+            raise ValueError(f"Invalid task type: {data_config['task_type']}")
+        
+        if self.results is None:
+            self.results = {}
+        self.results['fed_regression'] = {
+            'result': result,
+            'title': title
+        }
+    
+    def show_fed_regression_results(self):
+        if self.results is None or len(self.results) == 0:
+            print("Evaluation results is empty. Run evaluation first.")
+            return
+        summary = self.results['fed_regression']['result'].summary()
+        summary.tables[0].title = self.results['fed_regression']['title']
+        print(summary)
+
+    def run_fed_prediction(
+        self, 
+        X_train_imps: List[pd.DataFrame], 
+        y_trains: List[pd.Series],
+        X_tests: List[pd.DataFrame], 
+        y_tests: List[pd.Series], 
+        X_test_global: pd.DataFrame, 
+        y_test_global: pd.Series,
         data_config: dict, 
+        model_name: str,
         model_params: dict = None, 
-        train_params: dict = None, 
+        train_params: dict = None,
+        n_rounds: int = 1, 
         seed: int = 0,
         verbose: int = 0
     ):
+        X_train_imps = [item.values for item in X_train_imps]
+        X_tests = [item.values for item in X_tests]
+        y_trains = [item.values for item in y_trains]
+        y_tests = [item.values for item in y_tests]
+        X_test_global = X_test_global.values
+        y_test_global = y_test_global.values
+
         setup_logger(verbose)
+
+        if model_params is None:
+            model_params = {}
+        if train_params is None:
+            train_params = {}
 
         if data_config['task_type'] == 'classification':
             y_train_total = np.concatenate(y_trains)
@@ -459,45 +595,84 @@ class Evaluator:
                 data_config['clf_type'] = 'binary-class'
         else:
             data_config['clf_type'] = None
-        
-        if model_params is None:
-            model_params = {'batch_norm': True}
 
-        if train_params is None:
-            train_params = {
-                'global_epoch': 100,
-                'local_epoch': 10,
-                'fine_tune_epoch': 200,
-                'tol': 0.001,
-                'patience': 10,
-                'batchnorm_avg': True
-            }
-            
-        if 'tol' not in train_params:
-            train_params['tol'] = 0.001
-        if 'patience' not in train_params:
-            train_params['patience'] = 10
-        if 'batchnorm_avg' not in train_params:
-            train_params['batchnorm_avg'] = True
-
-        pred_performance = self._eval_downstream_fed_prediction(
-            model_params, train_params, X_train_imps, y_trains, X_tests, y_tests,
-            X_test_global, y_test_global, data_config, seed, verbose
-        )
+        if model_name == 'torchnn':
+            eval_func = eval_fed_pred_torchnn
+        elif model_name == 'sklnn':
+            eval_func = eval_fed_pred_sklnn
+        elif model_name == 'lr':
+            eval_func = eval_fed_pred_lr
+        elif model_name == 'svm':
+            eval_func = eval_fed_pred_svm
+        elif model_name == 'xgboost':
+            eval_func = eval_fed_pred_xgboost
+        elif model_name == 'rf':
+            eval_func = eval_fed_pred_rf
+        else:
+            raise ValueError(f"Invalid model name: {model_name}")
         
         if self.results is None:
-            self.results = {}
+                self.results = {}
+
+        pred_performances = []
+        for i in range(n_rounds):
+            seed = seed + i
+            pred_performance = eval_func(
+                model_params, train_params, 
+                X_train_imps, y_trains, X_tests, y_tests, X_test_global, y_test_global, 
+                data_config, seed, verbose
+            )
+
+            pred_performances.append(pred_performance)
+
+        # Merge results from multiple rounds
+        merged_results = {
+            'global': {},
+            'personalized': {}
+        }
+            
+        # Get all metrics from the first round
+        global_metrics = pred_performances[0]['global'].keys()
+        personalized_metrics = pred_performances[0]['personalized'].keys()
+            
+        # Average global metrics across rounds
+        for metric in global_metrics:
+            values = [round_result['global'][metric] for round_result in pred_performances]
+            merged_results['global'][metric] = np.mean(values)
+            
+        # Average personalized metrics across rounds
+        for metric in personalized_metrics:
+            
+            num_clients = len(pred_performances[0]['personalized'][metric])
+            client_values = [[] for _ in range(num_clients)]
+            
+            for round_result in pred_performances:
+                for client_idx, client_value in enumerate(round_result['personalized'][metric]):
+                    client_values[client_idx].append(client_value)
+            
+            merged_results['personalized'][metric] = [np.mean(client) for client in client_values]
         
-        self.results['fed_pred'] = pred_performance
+        self.results['fed_pred'] = merged_results
 
         return {
-            'fed_pred': pred_performance,
+            'fed_pred': merged_results,
         }
 
-    def show_fed_pred_results(self):
+    def show_fed_prediction_results(self):
         
         """
         Example:
+        {
+            'fed_pred': {
+                'global': {'accuracy': 0.8, 'f1': 0.8, 'auc': 0.8, 'prc': 0.8},
+                'personalized': {
+                    'accuracy': [0.7, 0.7, 0.7],
+                    'f1': [0.6, 0.6, 0.6],
+                    'auc': [0.5, 0.5, 0.5],
+                    'prc': [0.4, 0.4, 0.4]
+                }, 
+            }
+        }
         {
             'fed_pred': {
                 'global': {'accuracy': 0.8, 'f1': 0.8, 'auc': 0.8, 'prc': 0.8},
@@ -510,10 +685,10 @@ class Evaluator:
             }
         }
         """
-        
-        if self.results is None or len(self.results) == 0:
-            print("Evaluation results is empty. Run evaluation first.")
-            return
+
+        if self.results is None or len(self.results) == 0 or 'fed_pred' not in self.results:
+            print("Evaluation federated prediction results is empty. Run evaluation first.")
+            return        
         
         total_width = 63
         print("=" * total_width)
@@ -641,27 +816,48 @@ class Evaluator:
 
         ################################################################################################################
         # Loader classification model
-        if model == 'linear':
+        if model == 'lr':
             if task_type == 'classification':
-                clf = LogisticRegressionCV(
-                    Cs=5, class_weight='balanced', solver='saga', random_state=seed, max_iter=1000, **model_params
+                if model_params is None or len(model_params.keys()) == 0:
+                    model_params = {
+                        'C': 100,
+                        'penalty': 'l2',
+                        'class_weight': 'balanced',
+                        'solver': 'newton-cg',
+                        'max_iter': 1000,
+                        'random_state': seed,
+                    }
+                clf = LogisticRegression(
+                    **model_params
                 )
             else:
-                clf = RidgeCV(alphas=[1], **model_params)
-                # clf = LinearRegression(**model_params)
-        elif model == 'tree':
+                clf = RidgeCV()
+        elif model == 'rf':
             if task_type == 'classification':
                 clf = RandomForestClassifier(
                     n_estimators=100, class_weight='balanced', random_state=seed, **model_params
                 )
             else:
                 clf = RandomForestRegressor(n_estimators=100, random_state=seed, **model_params)
-        elif model == 'nn':
+        elif model == 'torchnn':
             set_seed(seed)
             if task_type == 'classification':
                 clf = TwoNNClassifier(**model_params)
             else:
                 clf = TwoNNRegressor(**model_params)
+        elif model == 'sklnn':
+            if task_type == 'classification':
+                clf = MLPClassifier(
+                    hidden_layer_sizes=(100, 100),
+                    max_iter=1000,
+                    random_state=seed,
+                    **model_params
+                )
+            else:
+                clf = MLPRegressor(
+                    hidden_layer_sizes=(100, 100),
+                    max_iter=1000,
+                    random_state=seed, **model_params)
         else:
             raise ValueError(f"Invalid model: {model}")
 
@@ -963,6 +1159,7 @@ class Evaluator:
         ################################################################################################################
         # Text Table by Tabulate
         elif format == 'text-table':
+            total_width = 63
             ret_str = ""
             ret_str += "=" * total_width + "\n"
             ret_str += "Evaluation Results" + "\n"

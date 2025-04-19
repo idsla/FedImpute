@@ -8,6 +8,7 @@ import loguru
 from ..utils.nn_utils import EarlyStopping
 #DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 DEVICE = 'cpu'
+from ..utils.reproduce_utils import set_seed
 
 class TwoLayerNNBase(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -23,13 +24,28 @@ class TwoLayerNNBase(nn.Module):
     def forward(self, x):
         return self.network(x)
 
+def init_weights(m):
+    if isinstance(m, nn.Linear):
+        nn.init.kaiming_uniform_(m.weight, nonlinearity='relu')
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
 
 class TwoNNRegressor(nn.Module):
     def __init__(
-            self, hidden_size=32, epochs=1000, lr=0.001, batch_size=64, early_stopping_rounds=30,
-            weight_decay=0.00, tol=0.0001, log_interval=10, optimizer='sgd', batch_norm=True
+            self, 
+            hidden_size=32, 
+            epochs=1000, 
+            lr=0.001, 
+            batch_size=64, 
+            early_stopping_rounds=30,
+            weight_decay=0.00, 
+            tol=0.0001, 
+            log_interval=10, 
+            optimizer='sgd', 
+            batch_norm=True,
+            dropout=0.0
     ):
-        super(TwoNNRegressor, self).__init__()
+        super().__init__()
 
         self.hidden_size = hidden_size
         self.epochs = epochs
@@ -46,32 +62,40 @@ class TwoNNRegressor(nn.Module):
         self.criterion = nn.MSELoss()
         self.optimizer = optimizer
         self.batch_norm = batch_norm
+        self.dropout = dropout
 
-    def _build_network(self, input_size):
+    def _build_network(self, input_size, seed = 0):
+        set_seed(seed)
         self.hidden_size = input_size*2
         if self.batch_norm:
             self.network = nn.Sequential(
                 nn.Linear(input_size, self.hidden_size),
                 nn.BatchNorm1d(self.hidden_size),
                 nn.ReLU(),
+                nn.Dropout(self.dropout),
                 nn.Linear(self.hidden_size, self.hidden_size),
                 nn.BatchNorm1d(self.hidden_size),
                 nn.ReLU(),
+                nn.Dropout(self.dropout),
                 nn.Linear(self.hidden_size, 1)
             )
         else:
             self.network = nn.Sequential(
                 nn.Linear(input_size, self.hidden_size),
                 nn.ReLU(),
+                nn.Dropout(self.dropout),
                 nn.Linear(self.hidden_size, self.hidden_size),
                 nn.ReLU(),
+                nn.Dropout(self.dropout),
                 nn.Linear(self.hidden_size, 1)
             )
+        
+        self.network.apply(init_weights)
 
     def forward(self, X):
         return self.network(X)
 
-    def fit(self, X, y):
+    def fit(self, X, y, seed = 0):
 
         X_tensor = torch.tensor(X, dtype=torch.float32)
         y_tensor = torch.tensor(y, dtype=torch.float32).unsqueeze(1)  # Ensure y_tensor is 2D for MSE Loss
@@ -89,7 +113,7 @@ class TwoNNRegressor(nn.Module):
 
         # Build the network on first call to fit
         if self.network is None:
-            self._build_network(input_size=X.shape[1])
+            self._build_network(input_size=X.shape[1], seed = seed)
 
         if self.optimizer == 'adam':
             optimizer = optim.Adam(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
@@ -137,6 +161,29 @@ class TwoNNRegressor(nn.Module):
             'sample_size': len(X),
         }
 
+    def validate(self, X_val, y_val, seed = 0):
+
+        set_seed(seed)
+        self.eval()
+        val_loss_choice = 'rmse'
+        with torch.no_grad():
+            X_val_tensor = torch.tensor(X_val, dtype=torch.float32).to(DEVICE)
+            y_val_tensor = torch.tensor(y_val, dtype=torch.float32).to(DEVICE)
+            outputs = self(X_val_tensor)
+            loss = self.criterion(outputs, y_val_tensor)
+            val_loss = loss.item()
+            
+            if val_loss_choice == 'rmse':
+                # Calculate RMSE
+                rmse = torch.sqrt(torch.mean((outputs - y_val_tensor) ** 2)).item()
+                val_loss = rmse
+            elif val_loss_choice == 'mae':
+                # Calculate MAE
+                mae = torch.mean(torch.abs(outputs - y_val_tensor)).item()
+                val_loss = mae
+
+        return val_loss
+    
     def predict(self, X):
         self.eval()
         with torch.no_grad():
@@ -161,10 +208,20 @@ class TwoNNRegressor(nn.Module):
 
 class TwoNNClassifier(nn.Module):
     def __init__(
-            self, hidden_size=32, epochs=1000, lr=0.001, batch_size=64, early_stopping_rounds=30, weight_decay=0,
-            tol=0.0001, log_interval=10, optimizer='sgd', batch_norm=True
+            self, 
+            hidden_size=32, 
+            epochs=1000, 
+            lr=0.001, 
+            batch_size=64, 
+            early_stopping_rounds=30, 
+            weight_decay=0,
+            tol=0.0001, 
+            log_interval=10, 
+            optimizer='sgd', 
+            batch_norm=True,
+            dropout=0.0
     ):
-        super(TwoNNClassifier, self).__init__()
+        super().__init__()
         self.hidden_size = hidden_size
         self.epochs = epochs
         self.lr = lr
@@ -178,42 +235,50 @@ class TwoNNClassifier(nn.Module):
         self.dataloader = None
         self.optimizer = optimizer
         self.batch_norm = batch_norm
+        self.dropout = dropout
 
-    def _build_network(self, input_size, output_size, class_weight):
+    def _build_network(self, input_size, output_size, class_weight, seed = 0):
         
         if class_weight is None:
             self.criterion = nn.CrossEntropyLoss()
         else:
             self.criterion = nn.CrossEntropyLoss(weight=class_weight)
         
+        set_seed(seed)
         self.hidden_size = input_size*2
         if self.batch_norm:
             self.network = nn.Sequential(
                 nn.Linear(input_size, self.hidden_size),
                 nn.BatchNorm1d(self.hidden_size),
                 nn.ReLU(),
+                nn.Dropout(self.dropout),
                 nn.Linear(self.hidden_size, self.hidden_size),
                 nn.BatchNorm1d(self.hidden_size),
                 nn.ReLU(),
+                nn.Dropout(self.dropout),
                 nn.Linear(self.hidden_size, output_size)
             )
         else:
             self.network = nn.Sequential(
                 nn.Linear(input_size, self.hidden_size),
                 nn.ReLU(),
+                nn.Dropout(self.dropout),
                 nn.Linear(self.hidden_size, self.hidden_size),
                 nn.ReLU(),
+                nn.Dropout(self.dropout),
                 nn.Linear(self.hidden_size, output_size)
             )
+        
+        self.network.apply(init_weights)
 
     def forward(self, x):
         return self.network(x)
 
-    def fit(self, X, y):
+    def fit(self, X, y, seed = 0):
 
         X_tensor = torch.tensor(X, dtype=torch.float32)
         y_tensor = torch.tensor(y, dtype=torch.long)
-        class_weight = calculate_class_weights(y)
+        #class_weight = calculate_class_weights(y)       
 
         # Prepare dataset for DataLoader
         if self.dataset is None:
@@ -229,7 +294,7 @@ class TwoNNClassifier(nn.Module):
         # Determine the number of unique classes to set output size
         if self.network is None:
             unique_classes = np.unique(y)
-            self._build_network(input_size=X.shape[1], output_size=len(unique_classes), class_weight=None)
+            self._build_network(input_size=X.shape[1], output_size=len(unique_classes), class_weight=None, seed = seed)
 
         if self.optimizer == 'adam':
             optimizer = optim.Adam(self.parameters(), lr=self.lr, weight_decay=self.weight_decay)
@@ -276,6 +341,39 @@ class TwoNNClassifier(nn.Module):
             'loss': final_loss,
             'sample_size': len(X),
         }
+    
+    def validate(self, X_val, y_val, seed = 0):
+
+        set_seed(seed)
+        self.eval()
+        val_loss_choice = 'f1'
+        with torch.no_grad():
+            X_val_tensor = torch.tensor(X_val, dtype=torch.float32).to(DEVICE)
+            y_val_tensor = torch.tensor(y_val, dtype=torch.long).to(DEVICE)
+            outputs = self(X_val_tensor)
+            loss = self.criterion(outputs, y_val_tensor)
+            val_loss = loss.item()
+            
+            # Calculate additional validation metrics
+            _, predicted = torch.max(outputs.data, 1)
+            
+            if val_loss_choice == 'f1':
+                # Convert tensors to numpy for sklearn metrics
+                y_true = y_val_tensor.cpu().numpy()
+                y_pred = predicted.cpu().numpy()
+                # Calculate F1 score (macro average)
+                from sklearn.metrics import f1_score
+                f1 = f1_score(y_true, y_pred, average='macro')
+                val_loss = 1 - f1  # Convert to loss (lower is better)
+            
+            elif val_loss_choice == 'accuracy':
+                # Calculate accuracy
+                correct = (predicted == y_val_tensor).sum().item()
+                accuracy = correct / y_val_tensor.size(0)
+                val_loss = 1 - accuracy  # Convert to loss (lower is better)
+
+        self.network.to('cpu')
+        return val_loss
 
     def predict(self, X):
         self.eval()

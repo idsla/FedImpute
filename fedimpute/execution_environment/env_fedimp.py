@@ -4,12 +4,14 @@ import loguru
 import numpy as np
 import sys
 import datetime
+import pandas as pd
 
 from .loaders.load_environment import setup_clients, setup_server
 from .loaders.load_workflow import load_workflow
 from .utils.evaluator import Evaluator
 from .utils.result_analyzer import ResultAnalyzer
 from .utils.tracker import Tracker
+from fedimpute.utils.format_utils import arrays_to_dataframes
 from fedimpute.scenario import ScenarioBuilder
 import gc
 from fedimpute.utils.reproduce_utils import setup_clients_seed
@@ -269,77 +271,91 @@ class FedImputeEnv:
         
     def get_data(
         self, data_type: str, client_ids: Union[List[int], str] = 'all', include_y: bool = False
-    ) -> Union[List[np.ndarray], Tuple[List[np.ndarray], List[np.ndarray]], np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    ) -> Union[
+        List[pd.DataFrame], Tuple[List[pd.DataFrame], List[pd.Series]], pd.DataFrame, Tuple[pd.DataFrame, pd.Series]
+    ]:
         
         if isinstance(client_ids, str):
             if client_ids == 'all':
                 client_ids = list(range(len(self.clients)))
             else:
                 raise ValueError(f"Invalid client ids: {client_ids}")
-
+        columns = self.clients[0].columns
         # original data
         if data_type == 'train':
             if include_y:
                 return (
-                    [self.clients[client_id].X_train for client_id in client_ids],
-                    [self.clients[client_id].y_train for client_id in client_ids]
+                    [pd.DataFrame(self.clients[client_id].X_train, columns=columns[:-1]) for client_id in client_ids],
+                    [pd.Series(self.clients[client_id].y_train, name=columns[-1]) for client_id in client_ids]
                 )
             else:
-                return [self.clients[client_id].X_train for client_id in client_ids]
+                return [pd.DataFrame(self.clients[client_id].X_train, columns=columns[:-1]) for client_id in client_ids]
         elif data_type == 'test':
             if include_y:
                 return (
-                    [self.clients[client_id].X_test for client_id in client_ids],
-                    [self.clients[client_id].y_test for client_id in client_ids]
+                    [pd.DataFrame(self.clients[client_id].X_test, columns=columns[:-1]) for client_id in client_ids],
+                    [pd.Series(self.clients[client_id].y_test, name=columns[-1]) for client_id in client_ids]
                 )
             else:
-                return [self.clients[client_id].X_test for client_id in client_ids]
+                return [pd.DataFrame(self.clients[client_id].X_test, columns=columns[:-1]) for client_id in client_ids]
         elif data_type == 'global_test':
             if include_y:
                 return (
-                    self.server.X_test,
-                    self.server.y_test
+                    pd.DataFrame(self.server.X_test, columns=columns[:-1]),
+                    pd.Series(self.server.y_test, name=columns[-1])
                 )
             else:
-                return self.server.X_test
+                return pd.DataFrame(self.server.X_test, columns=columns[:-1])
         # imputed data
         elif data_type == 'train_imp':
             if include_y:
-                raise ValueError("Not y for train_imp data, please set include_y to False")
-            return [self.clients[client_id].X_train_imp for client_id in client_ids]
+                return (
+                    [pd.DataFrame(self.clients[client_id].X_train_imp, columns=columns[:-1]) for client_id in client_ids],
+                    [pd.Series(self.clients[client_id].y_train, name=columns[-1]) for client_id in client_ids]
+                )
+            else:
+                return [pd.DataFrame(self.clients[client_id].X_train_imp, columns=columns[:-1]) for client_id in client_ids]
         elif data_type == 'test_imp':
             if include_y:
-                raise ValueError("Not y for test_imp data, please set include_y to False")
-            return [self.clients[client_id].X_test_imp for client_id in client_ids]
+                return (
+                    [pd.DataFrame(self.clients[client_id].X_test_imp, columns=columns[:-1]) for client_id in client_ids],
+                    [pd.Series(self.clients[client_id].y_test, name=columns[-1]) for client_id in client_ids]
+                )
+            else:
+                return [pd.DataFrame(self.clients[client_id].X_test_imp, columns=columns[:-1]) for client_id in client_ids]
         elif data_type == 'global_test_imp':
             if include_y:
-                raise ValueError("Not y for global_test_imp data, please set include_y to False")
-            return self.server.X_test_imp
+                return (
+                    pd.DataFrame(self.server.X_test_imp, columns=columns[:-1]),
+                    pd.Series(self.server.y_test, name=columns[-1])
+                )
+            else:
+                return pd.DataFrame(self.server.X_test_imp, columns=columns[:-1])
         elif data_type == 'train_mask':
             if include_y:
                 raise ValueError("Not y for train_mask data, please set include_y to False")
-            return [self.clients[client_id].X_train_mask for client_id in client_ids]
+            return [pd.DataFrame(self.clients[client_id].X_train_mask, columns=columns[:-1]) for client_id in client_ids]
         elif data_type == 'global_test_mask':
             if include_y:
                 raise ValueError("Not y for global_test_mask data, please set include_y to False")
-            return self.server.X_test_mask
+            return pd.DataFrame(self.server.X_test_mask, columns=columns[:-1])
         elif data_type == 'test_mask':
             if include_y:
                 raise ValueError("Not y for test_mask data, please set include_y to False")
-            return [self.clients[client_id].X_test_mask for client_id in client_ids]
+            return [pd.DataFrame(self.clients[client_id].X_test_mask, columns=columns[:-1]) for client_id in client_ids]
         # individual data
         elif data_type == 'X_train':
-            return [self.clients[client_id].X_train for client_id in client_ids]
+            return [pd.DataFrame(self.clients[client_id].X_train, columns=columns[:-1]) for client_id in client_ids]
         elif data_type == 'y_train':
-            return [self.clients[client_id].y_train for client_id in client_ids]
+            return [pd.Series(self.clients[client_id].y_train, name=columns[-1]) for client_id in client_ids]
         elif data_type == 'X_test':
-            return [self.clients[client_id].X_test for client_id in client_ids]
+            return [pd.DataFrame(self.clients[client_id].X_test, columns=columns[:-1]) for client_id in client_ids]
         elif data_type == 'y_test':
-            return [self.clients[client_id].y_test for client_id in client_ids]
+            return [pd.Series(self.clients[client_id].y_test, name=columns[-1]) for client_id in client_ids]
         elif data_type == 'X_global_test':
-            return self.server.X_test
+            return pd.DataFrame(self.server.X_test, columns=columns[:-1])
         elif data_type == 'y_global_test':
-            return self.server.y_test
+            return pd.Series(self.server.y_test, name=columns[-1])
         elif data_type == 'config':
             return self.server.data_config
         else:

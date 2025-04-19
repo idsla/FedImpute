@@ -1,6 +1,6 @@
 import os.path
 from collections import Counter
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 import numpy as np
 from scipy import stats
 import torch
@@ -47,6 +47,7 @@ class Client:
             fed_strategy: str,
             fed_strategy_params: dict,
             client_config: dict,
+            columns: List[str],
             seed=0,
     ) -> None:
 
@@ -85,6 +86,8 @@ class Client:
         self.client_local_dir_path = os.path.join(client_config['local_dir_path'], 'client' + str(client_id))
         if not os.path.exists(self.client_local_dir_path):
             os.makedirs(self.client_local_dir_path)
+
+        self.columns = columns
 
     def initial_impute(self, imp_values: np.ndarray, col_type: str = 'num') -> None:
         """

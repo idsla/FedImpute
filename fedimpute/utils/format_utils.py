@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+from typing import List
 
 def dataframe_to_numpy(data: pd.DataFrame, config: dict) -> np.array:
     """
@@ -16,9 +16,13 @@ def dataframe_to_numpy(data: pd.DataFrame, config: dict) -> np.array:
             print('Warning: Object type column detected. Input data should not contain object or categorical type columns.')
             data[col] = pd.factorize(data[col])[0].astype(int)
     
+    columns = data.columns.tolist()
     data = data[columns].to_numpy()
     
-    return data
+    return data, columns
 
-
+def arrays_to_dataframes(data: List[np.array], columns: List[str], without_target: bool = False) -> List[pd.DataFrame]:
+    if without_target:
+        columns = columns[:-1]
+    return [pd.DataFrame(data[i].copy(), columns=columns) for i in range(len(data))]
 
