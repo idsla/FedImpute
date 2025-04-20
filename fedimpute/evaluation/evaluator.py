@@ -77,7 +77,8 @@ class Evaluator:
     def evaluate_all(
         self, 
         env: 'FedImputeEnv', 
-        metrics: Union[List, None] = None, 
+        metrics: Union[List, None] = None,
+        model: str = 'rf', 
         seed: int = 0,
         verbose: int = 1
     ):
@@ -117,9 +118,9 @@ class Evaluator:
         if 'local_pred' in metrics:
             if verbose >= 1:
                 loguru.logger.info("Evaluating downstream prediction...")
-            ret = self.evaluate_local_pred(
+            ret = self.run_local_prediction(
                 X_train_imps=X_train_imps, y_trains=y_trains, X_tests=X_test_imps, y_tests=y_tests, 
-                data_config=data_config, model = 'nn', seed = seed, verbose = verbose
+                data_config=data_config, model = model, seed = seed, verbose = verbose
             )
             results['local_pred'] = ret['local_pred']
             results['local_pred_fairness'] = ret['local_pred_fairness']
@@ -129,10 +130,10 @@ class Evaluator:
         if 'fed_pred' in metrics:
             if verbose >= 1:
                 loguru.logger.info("Evaluating federated downstream prediction...")
-            ret = self.evaluate_fed_pred(
+            ret = self.run_fed_prediction(
                 X_train_imps=X_train_imps, y_trains=y_trains, X_tests=X_test_imps, y_tests=y_tests, 
                 X_test_global=X_global_test_imp, y_test_global=y_global_test, 
-                data_config=data_config, seed=seed, verbose = verbose
+                data_config=data_config, model_name=model, n_rounds=3, seed=seed, verbose = verbose
             )
             results['fed_pred'] = ret['fed_pred']
             if verbose >= 1:
@@ -833,12 +834,18 @@ class Evaluator:
             else:
                 clf = RidgeCV()
         elif model == 'rf':
+            if model_params is None or len(model_params.keys()) == 0:
+                model_params = {
+                    'n_estimators': 200,
+                    'random_state': seed,
+                    'max_depth': 10,
+                    'min_samples_leaf': 2,
+                    'max_features': None,
+                }
             if task_type == 'classification':
-                clf = RandomForestClassifier(
-                    n_estimators=100, class_weight='balanced', random_state=seed, **model_params
-                )
+                clf = RandomForestClassifier(class_weight='balanced', **model_params)
             else:
-                clf = RandomForestRegressor(n_estimators=100, random_state=seed, **model_params)
+                clf = RandomForestRegressor(**model_params)
         elif model == 'torchnn':
             set_seed(seed)
             if task_type == 'classification':
@@ -1146,7 +1153,7 @@ class Evaluator:
                 num_clients = len(list(self.results['fed_pred']['personalized'].values())[0])
                 for metric_name, metric_values in self.results['fed_pred']['global'].items():
                     col_name = f'global_{metric_name}'
-                    df[col_name] = [metric_values[0]]*num_clients    
+                    df[col_name] = [metric_values]*num_clients    
                 ret['fed_pred_global'] = df
             
             return ret

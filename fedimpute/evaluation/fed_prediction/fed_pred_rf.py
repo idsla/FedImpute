@@ -53,12 +53,12 @@ def eval_fed_pred_rf(
         X_train_merged, y_train_merged, test_size=val_ratio, random_state=seed
     )
     
-    print(X_global_val.shape, y_global_val.shape)
+    #print(X_global_val.shape, y_global_val.shape)
     
     ################################################################################################################
     # Model Parameters
     model_params_default = {
-        'n_estimators': 100,
+        'n_estimators': 200,
         'max_depth': 10,
         'min_samples_leaf': 2,
         'max_features': None,

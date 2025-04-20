@@ -3,7 +3,7 @@ import os
 import json
 import timeit
 import pandas as pd
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Union
 from dataclasses import dataclass
 import timeit
 from tabulate import tabulate
@@ -56,7 +56,7 @@ class FedImputePipeline:
        self,
        id: str = None,
        fed_imp_configs: List[Tuple[str, str, List[str], dict]] = None,
-       evaluation_aspects: List[str] = ['imp_quality', 'local_pred', 'fed_pred'],
+       evaluation_params: dict = None,
        persist_data: bool = False,
        seed: int = 100330201,
        description: str = None,
@@ -65,7 +65,6 @@ class FedImputePipeline:
         if fed_imp_configs is None:
             fed_imp_configs = self.example_config
        
-        self.evaluation_aspects = evaluation_aspects
         if id is not None:
             self.experiment_id = id
         else:
@@ -74,6 +73,14 @@ class FedImputePipeline:
             self.experiment_description = description
         else:
             self.experiment_description = ''
+
+        if evaluation_params is None:
+            evaluation_params = {
+                'metrics': ['imp_quality', 'local_pred', 'fed_pred'],
+                'model': 'rf',
+            }
+        
+        self.evaluation_params = evaluation_params
         
         self.results = []
         self.persist_data = persist_data
@@ -116,7 +123,12 @@ class FedImputePipeline:
             summary_str += '=' * line_width + '\n'
             summary_str += f"Description: {self.experiment_description}\n"
             summary_str += f"Persist Data: {self.persist_data}\n"
-            summary_str += f"Evaluation: {self.evaluation_aspects}\n"
+            if len(self.evaluation_params['metrics']) > 0:
+                summary_str += f"Evaluation:\n"
+                for key, value in self.evaluation_params.items():
+                    summary_str += f"  - {key}: {value}\n"
+            else:
+                summary_str += f"Evaluation: None\n"
             summary_str += f"Seed: {self.seed}\n"
             summary_str += '-' * line_width + '\n'
             
@@ -203,7 +215,7 @@ class FedImputePipeline:
                 # evaluation
                 start_time = timeit.default_timer()
                 evaluator = Evaluator()
-                evaluator.evaluate_all(env, metrics=self.evaluation_aspects, seed=seed, verbose=0)
+                evaluator.evaluate_all(env, seed=seed, verbose=0, **self.evaluation_params)
                 end_time = timeit.default_timer()
                 evaluation_time = end_time - start_time
                 results = evaluator.export_results(
