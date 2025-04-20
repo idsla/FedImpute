@@ -4,7 +4,7 @@ import torch
 from typing import Tuple, Dict
 from .utils import trainable_params
 from ...imputation.base import BaseNNImputer
-from .strategy_base import NNStrategyBaseClient
+from .strategy_base import StrategyBaseClient
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -220,7 +220,7 @@ class FedNova(Optimizer):
             param_group["lr"] = lr
 
 
-class FedNovaStrategyClient(NNStrategyBaseClient):
+class FedNovaStrategyClient(StrategyBaseClient):
 
     def __init__(self, mu: float = 1.0):
 

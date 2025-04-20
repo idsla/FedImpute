@@ -702,7 +702,7 @@ class ScenarioBuilder:
             
             # Calculate miss ratio (assuming it's stored in stats or can be calculated)
             miss_ratio = (
-                np.isnan(clients_train_data_ms[i].values).sum() / (clients_train_data_ms[i].values.shape[0] * clients_train_data_ms[i].values.shape[1])
+                np.isnan(clients_train_data_ms[i].values.astype(np.float32)).sum() / (clients_train_data_ms[i].values.shape[0] * clients_train_data_ms[i].values.shape[1])
             )
             
             # Calculate missing features (assuming it's stored in stats or can be calculated)

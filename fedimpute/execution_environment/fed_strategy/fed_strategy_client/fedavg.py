@@ -1,6 +1,6 @@
 import numpy as np
 
-from ...fed_strategy.fed_strategy_client import NNStrategyBaseClient
+from fedimpute.execution_environment.fed_strategy.fed_strategy_client.strategy_base import StrategyBaseClient
 import torch
 from typing import Tuple
 import gc
@@ -11,9 +11,9 @@ from ..utils import get_parameters, convert_params_format
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-class FedAvgStrategyClient(NNStrategyBaseClient):  # client side fedavg is same as local nn
+class FedAvgStrategyClient(StrategyBaseClient):  # client side fedavg is same as local nn
 
-    def __init__(self, global_initialize=True):
+    def __init__(self, global_initialize=False):
         super().__init__(name='fedavg')
         self.loss = None
         self.initial_aligned = False

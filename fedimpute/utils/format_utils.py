@@ -24,5 +24,5 @@ def dataframe_to_numpy(data: pd.DataFrame, config: dict) -> np.array:
 def arrays_to_dataframes(data: List[np.array], columns: List[str], without_target: bool = False) -> List[pd.DataFrame]:
     if without_target:
         columns = columns[:-1]
-    return [pd.DataFrame(data[i].copy(), columns=columns) for i in range(len(data))]
+    return [pd.DataFrame(data[i].copy(), columns=columns).astype(float) for i in range(len(data))]
 

@@ -1,9 +1,14 @@
 from ..fed_strategy.fed_strategy_client import (
     # NN Strategy Client
-    NNStrategyBaseClient,
+    StrategyBaseClient,
     FedAvgStrategyClient,
     FedproxStrategyClient,
     ScaffoldStrategyClient,
+    LocalNNStrategyClient,
+    CentralNNStrategyClient,
+    FedAdamStrategyClient,
+    FedAdagradStrategyClient,
+    FedYogiStrategyClient,
     # Traditional Strategy Client
     CentralStrategyClient,
     LocalStrategyClient,
@@ -38,7 +43,7 @@ from typing import Union
 
 
 def load_fed_strategy_client(strategy_name: str, strategy_params: dict) -> Union[
-    NNStrategyBaseClient, FedMeanStrategyClient, FedMICEStrategyClient, FedEMStrategyClient, 
+    StrategyBaseClient, FedMeanStrategyClient, FedMICEStrategyClient, FedEMStrategyClient, 
     FedTreeStrategyClient, LocalStrategyClient, CentralStrategyClient
 ]:
 
@@ -59,11 +64,15 @@ def load_fed_strategy_client(strategy_name: str, strategy_params: dict) -> Union
     elif strategy_name == 'fedavg':
         return FedAvgStrategyClient(global_initialize=False)
     elif strategy_name == 'local_nn':
-        return FedAvgStrategyClient(global_initialize=False)  # client side local nn is same as fedavg local training
+        return LocalNNStrategyClient()
     elif strategy_name == 'central_nn':
-        return FedAvgStrategyClient(global_initialize=False)  # client side centralized nn is same as fedavg local training
-    elif strategy_name == 'fedadam' or strategy_name == 'fedadagrad' or strategy_name == 'fedyogi':
-        return FedAvgStrategyClient(global_initialize=True)  # client side fedadam, fedadagrad, fedyogi is same as fedavg local training
+        return CentralNNStrategyClient()
+    elif strategy_name == 'fedadam':
+        return FedAdamStrategyClient()
+    elif strategy_name == 'fedadagrad':
+        return FedAdagradStrategyClient()
+    elif strategy_name == 'fedyogi':
+        return FedYogiStrategyClient()
     elif strategy_name == 'fedprox':
         return FedproxStrategyClient(**strategy_params)
     elif strategy_name == 'scaffold':

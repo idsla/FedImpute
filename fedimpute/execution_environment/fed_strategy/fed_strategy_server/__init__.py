@@ -15,3 +15,7 @@ from .basic_strategy import (
     LocalStrategyServer, CentralStrategyServer, 
     FedMeanStrategyServer, FedMICEStrategyServer, FedEMStrategyServer, FedTreeStrategyServer
 )
+
+# meta strategy
+from .strategy_base import NNStrategyBaseServer
+from .basic_strategy import RawBaseStrategyServer

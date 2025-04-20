@@ -20,13 +20,13 @@ class WorkflowICE(BaseWorkflow):
 
     def __init__(
             self,
-            imp_iterations: int = 20,
+            imp_iterations: int = 40,
             evaluation_interval: int = 1,
             early_stopping: bool = True,
             tolerance: float = 0.001,
             tolerance_patience: int = 5,
-            increase_patience: int = 5,
-            window_size: int = 5,
+            increase_patience: int = 40,
+            window_size: int = 3,
             log_interval: int = 1,
             save_model_interval: int = 5
     ):

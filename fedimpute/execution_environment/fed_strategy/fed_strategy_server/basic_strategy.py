@@ -3,14 +3,38 @@ from copy import deepcopy
 import numpy as np
 
 # TODO: base class for all strategies for consistent APIs
+from abc import ABC, abstractmethod
 
-class CentralStrategyServer:
+class RawBaseStrategyServer(ABC):
+
+    def __init__(self, initial_impute: str, name: str, fine_tune_epochs: int = 0):
+        self.initial_impute = initial_impute
+        self.name = name
+        self.fine_tune_epochs = fine_tune_epochs
+        self.global_model_params_dict = None
+
+    @abstractmethod
+    def aggregate_parameters(
+            self, local_model_parameters: List[OrderedDict], fit_res: List[dict], params: dict, *args, **kwargs
+    ) -> Tuple[List[OrderedDict], dict]:
+        pass
+
+    @abstractmethod
+    def fit_instruction(self, params_list: List[dict]) -> List[dict]:
+        pass
+    
+    @abstractmethod
+    def update_instruction(self, params: dict) -> dict:
+        pass
+
+    @abstractmethod
+    def get_global_model_params(self) -> Union[OrderedDict, None]:
+        pass
+
+class CentralStrategyServer(RawBaseStrategyServer):
 
     def __init__(self):
-        self.initial_impute = 'central'
-        self.name = 'central'
-        self.fine_tune_epochs = 0
-        self.global_model_params_dict = None
+        super().__init__('central', 'central', 0)
 
     def aggregate_parameters(
             self, local_model_parameters: List[OrderedDict], fit_res: List[dict], params: dict, *args, **kwargs
@@ -52,12 +76,10 @@ class CentralStrategyServer:
         return self.global_model_params_dict
 
 
-class LocalStrategyServer:
+class LocalStrategyServer(RawBaseStrategyServer):
 
     def __init__(self):
-        self.name = 'local'
-        self.initial_impute = 'local'
-        self.fine_tune_epochs = 0
+        super().__init__('local', 'local', 0)
 
     def aggregate_parameters(
             self, local_model_parameters: List[OrderedDict], fit_res: List[dict], params: dict, *args, **kwargs
@@ -86,12 +108,10 @@ class LocalStrategyServer:
         return None
 
 
-class SimpleAvgStrategyServer:
+class SimpleAvgStrategyServer(RawBaseStrategyServer):
 
-    def __init__(self):
-        self.name = 'simple_avg'
-        self.initial_impute = 'fedavg'
-        self.fine_tune_epochs = 0
+    def __init__(self, initial_impute: str, name: str, fine_tune_epochs: int = 0):
+        super().__init__(initial_impute, name, fine_tune_epochs)
 
     def aggregate_parameters(
             self, local_model_parameters: List[OrderedDict], fit_res: List[dict], params: dict, *args, **kwargs
@@ -143,32 +163,23 @@ class SimpleAvgStrategyServer:
 class FedMICEStrategyServer(SimpleAvgStrategyServer):
 
     def __init__(self):
-        super().__init__()
-        self.name = 'fedmice'
-        self.initial_impute = 'fedavg'
+        super().__init__('fedavg', 'fedmice', 0)
         
 class FedEMStrategyServer(SimpleAvgStrategyServer):
 
     def __init__(self):
-        super().__init__()
-        self.name = 'fedem'
-        self.initial_impute = 'fedavg'
+        super().__init__('fedavg', 'fedem', 0)
         
 class FedMeanStrategyServer(SimpleAvgStrategyServer):
 
     def __init__(self):
-        super().__init__()
-        self.name = 'fedmean'
-        self.initial_impute = 'fedavg'
+        super().__init__('fedavg', 'fedmean', 0)
 
 
-class FedTreeStrategyServer:
+class FedTreeStrategyServer(RawBaseStrategyServer):
 
     def __init__(self):
-        self.name = 'fedtree'
-        self.initial_impute = 'fedavg'
-        self.fine_tune_epochs = 0
-        self.global_model_params_dict = None
+        super().__init__('fedavg', 'fedtree', 0)
 
     def aggregate_parameters(
             self, local_model_parameters: List[OrderedDict], fit_res: List[dict], params: dict, *args, **kwargs

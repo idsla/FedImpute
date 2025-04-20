@@ -6,7 +6,7 @@ from typing import Tuple
 from ...imputation.base.base_imputer import BaseNNImputer
 
 
-class NNStrategyBaseClient(ABC):
+class StrategyBaseClient(ABC):
 
     def __init__(self, name: str):
         self.name = name

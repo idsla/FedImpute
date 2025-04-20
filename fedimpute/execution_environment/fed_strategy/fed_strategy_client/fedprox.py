@@ -3,13 +3,13 @@ import numpy as np
 import torch
 from typing import Tuple
 from ...imputation.base import BaseNNImputer
-from .strategy_base import NNStrategyBaseClient
+from .strategy_base import StrategyBaseClient
 from ..utils import get_parameters
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-class FedproxStrategyClient(NNStrategyBaseClient):
+class FedproxStrategyClient(StrategyBaseClient):
 
     def __init__(self, mu: float = 1.0):
 

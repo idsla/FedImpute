@@ -3,13 +3,14 @@ from collections import OrderedDict
 from typing import Dict, Union, List, Tuple
 
 from scipy import stats
+from collections import Counter
+import loguru
 
-from fedimpute.execution_environment.loaders.load_imputer import load_imputer
-from fedimpute.execution_environment.utils.tracker import Tracker
-from fedimpute.execution_environment.loaders.load_strategy import load_fed_strategy_server
 import numpy as np
 from fedimpute.execution_environment.fed_strategy.fed_strategy_server.strategy_base import NNStrategyBaseServer
-
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from fedimpute.execution_environment.loaders.register import Register
 
 class Server:
 
@@ -33,7 +34,8 @@ class Server:
             data_config: dict,
             server_config: Dict[str, Union[str, int, float]],
             seed: int = 21,
-            columns: List[str] = None
+            columns: List[str] = None,
+            register: 'Register' = None
     ):
 
         self.server_config = server_config
@@ -49,13 +51,13 @@ class Server:
         self.data_utils = self.calculate_data_utils(data_config)
         
         # imputer
-        self.imputer = load_imputer(imputer_name, imputer_params)
+        self.imputer = register.initialize_imputer(imputer_name, imputer_params)
 
         # initialize server side strategy
-        self.fed_strategy = load_fed_strategy_server(fed_strategy_name, fed_strategy_params)
+        self.fed_strategy = register.initialize_strategy(fed_strategy_name, fed_strategy_params, 'server')
 
         # iniitalize imputer
-        self.global_imputer = load_imputer(imputer_name, imputer_params)
+        self.global_imputer = register.initialize_imputer(imputer_name, imputer_params)
         self.global_imputer.initialize(self.X_test, np.isnan(self.X_test), self.data_utils, {}, self.seed)
 
         if isinstance(self.fed_strategy, NNStrategyBaseServer):

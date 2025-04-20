@@ -4,13 +4,13 @@ import torch
 from typing import Tuple, Union, List, Dict
 
 from ...imputation.base import BaseNNImputer
-from .strategy_base import NNStrategyBaseClient
+from .strategy_base import StrategyBaseClient
 from ..utils import get_parameters, convert_params_format
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-class ScaffoldStrategyClient(NNStrategyBaseClient):
+class ScaffoldStrategyClient(StrategyBaseClient):
 
     def __init__(self):
 

@@ -13,7 +13,6 @@ class BaseMLImputer(metaclass=ABCMeta):
     """
     Abstract class for the non-NN based imputer to be used in the federated imputation environment
     """
-
     def __init__(self):
         pass
 

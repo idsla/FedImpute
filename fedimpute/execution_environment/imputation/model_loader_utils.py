@@ -39,9 +39,13 @@ def load_sklearn_model(estimator_name) -> BaseEstimator:
     elif estimator_name == 'huber':
         return HuberRegressor()
     elif estimator_name == 'ridge_cv':
-        return RidgeCV(alphas=[0.001, 0.01, 0.1, 1.0, 10, 50])
+        return RidgeCV()
     elif estimator_name == 'lasso_cv':
-        return LassoCV(alphas=[0.1, 1.0, 10.0])
+        return LassoCV(alphas=[0.0001, 0.001, 0.01, 0.1, 1.0, 10.0], random_state=0)
+    elif estimator_name == 'lasso':
+        return Lasso(alpha=0.0001, random_state=0)
+    elif estimator_name == 'ridge':
+        return Ridge(alpha=0.001, random_state=0)
     elif estimator_name == 'logistic':
         return LogisticRegression(penalty='l1', n_jobs=-1)
     elif estimator_name == 'logistic_cv':

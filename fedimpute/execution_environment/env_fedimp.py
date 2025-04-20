@@ -15,6 +15,7 @@ from fedimpute.utils.format_utils import arrays_to_dataframes
 from fedimpute.scenario import ScenarioBuilder
 import gc
 from fedimpute.utils.reproduce_utils import setup_clients_seed
+from fedimpute.execution_environment.loaders.register import Register
 
 class FedImputeEnv:
 
@@ -55,6 +56,10 @@ class FedImputeEnv:
                 format="<level>{message}</level>",
                 level="INFO"
             )
+        
+        # registeration
+        self.register = Register()
+    
 
     def configuration(
         self, 
@@ -68,52 +73,22 @@ class FedImputeEnv:
     ):
 
         # check if imputer and fed strategy are supported and set the imputer and fed strategy names
-        if imputer in ['mean']:
-            imputer_name = imputer
-            if fed_strategy in ['local', 'central', 'fedmean']:
-                fed_strategy_name = fed_strategy
-            else:
-                raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
-            workflow_name = 'mean'
-        elif imputer in ['em']:
-            imputer_name = imputer
-            if fed_strategy in ['local', 'central', 'fedem']:
-                fed_strategy_name = fed_strategy
-            else:
-                raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
-            workflow_name = 'em'
-        elif imputer in ['mice']:
-            imputer_name = imputer
-            if fed_strategy in ['local', 'central', 'fedmice']:
-                fed_strategy_name = fed_strategy
-            else:
-                raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
-            workflow_name = 'ice'
-        
-        elif imputer in ['missforest']:
-            imputer_name = 'missforest'
-            if fed_strategy in ['fedtree', 'local', 'central']:
-                fed_strategy_name = fed_strategy
-            else:
-                raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
-            workflow_name = 'ice'
-        
-        elif imputer in ['miwae', 'gain', 'notmiwae', 'gnr']:
-            imputer_name = imputer
-            workflow_name = 'jm'
-            if fed_strategy in [
-                'fedavg', 'fedavg_ft', 'fedprox', 'scaffold', 'fedadam', 'fedadagrad', 'fedyogi'
-            ]:
-                fed_strategy_name = fed_strategy
-            elif fed_strategy in ['local']:
-                fed_strategy_name = 'local_nn'
-            elif fed_strategy in ['central']:
-                fed_strategy_name = 'central_nn'
-            else:
-                raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
-        
-        else:
+        if imputer not in self.register.get_imputer_mapping():
             raise ValueError(f"Imputer {imputer} not supported")
+
+        imputer_name = imputer
+        workflow_name = self.register.get_imputer_workflow_mapping()[imputer]
+        
+        if imputer in ['miwae', 'gain', 'notmiwae', 'gnr']:
+            if fed_strategy in ['local']:
+                fed_strategy = 'local_nn'
+            elif fed_strategy in ['central']:
+                fed_strategy = 'central_nn'
+
+        supported_fed_strategies = self.register.get_imputer_strategy_mapping()[imputer]
+        if fed_strategy not in supported_fed_strategies:
+            raise ValueError(f"Federated strategy {fed_strategy} not supported for imputer {imputer}")
+        fed_strategy_name = fed_strategy
 
         # add to the configuration
         self.imputer_name = imputer_name
@@ -161,7 +136,7 @@ class FedImputeEnv:
             clients_data, clients_seeds, data_config,
             imp_model_name=self.imputer_name, imp_model_params=self.imputer_params,
             fed_strategy=self.fed_strategy_name, fed_strategy_client_params=self.fed_strategy_params,
-            client_config={'local_dir_path': self.env_dir_path}
+            client_config={'local_dir_path': self.env_dir_path}, register=self.register
         )
 
         # setup server
@@ -171,13 +146,13 @@ class FedImputeEnv:
         self.server = setup_server(
             fed_strategy=self.fed_strategy_name, fed_strategy_params=self.fed_strategy_params,
             imputer_name=self.imputer_name, imputer_params=self.imputer_params,
-            global_test=global_test, data_config=data_config, server_config={}
+            global_test=global_test, data_config=data_config, server_config={}, register=self.register
         )
 
         # setup workflow
         if verbose > 0:
             loguru.logger.info(f"Setting up workflow...")
-        self.workflow = load_workflow(self.workflow_name, self.workflow_params)
+        self.workflow = self.register.initialize_workflow(self.workflow_name, self.workflow_params)
 
         # evaluator, tracker, result analyzer
         self.evaluator = Evaluator({})  # initialize evaluator
