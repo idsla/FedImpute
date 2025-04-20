@@ -91,14 +91,8 @@ class FedImputePipeline:
         for setting in fed_imp_configs:
             imputer, fed_strategies, imputer_params, strategies_params = setting
            
-            assert (
-                len(fed_strategies) == len(strategies_params), 
-                "The number of strategies and strategy parameters must be the same"
-            )
-            assert (
-                isinstance(imputer, str) and isinstance(strategies_params, dict),
-                "The imputer must be a string and the strategy parameters must be a dictionary"
-            )
+            assert len(fed_strategies) == len(strategies_params), "The number of strategies and strategy parameters must be the same"
+            assert isinstance(imputer, str) and isinstance(strategies_params, list), "The imputer must be a string and the strategy parameters must be a list"
             
             for fed_strategy, strategy_params in zip(fed_strategies, strategies_params):
                 config = {
@@ -357,6 +351,8 @@ class FedImputePipeline:
         plot_type: str = 'bar',
         plot_params: dict = None,
         save_path: str = None,
+        legend: bool = True,
+        dpi: int = 150
     ):
         """
         Plot the pipeline comparison results.
@@ -380,6 +376,11 @@ class FedImputePipeline:
         }
         
         strategy_colors['local'] = '#f7931e'
+        # move local to front
+        strategy_colors = {
+            'local': strategy_colors['local'],
+            **{k: v for k, v in strategy_colors.items() if k != 'local'}
+        }
              
         if plot_params is None:
             plot_params = {
@@ -412,9 +413,13 @@ class FedImputePipeline:
                 interval_width = interval_width * len(metric_names) / n_cols
                 n_cols = len(metric_names)
             n_rows = int(np.ceil(len(metric_names) / n_cols))
-            
+            if legend:
+                plot_width = 4*n_cols + n_cols
+            else:
+                plot_width = 4*n_cols
+
             fig, axes = plt.subplots(
-                n_rows, n_cols, figsize=(4*n_cols + 0.5*n_cols, plt_height*(n_rows)), sharey=True, squeeze=False
+                n_rows, n_cols, figsize=(plot_width, plt_height*(n_rows)), sharey=True, squeeze=False
             )
             
             # plot each metric in a separate subplot
@@ -424,7 +429,7 @@ class FedImputePipeline:
                 
                 # data calculation
                 metric_data = data_mean[data_mean['metric_name'] == metric_name].drop(columns=['metric_name'])
-                metric_data['imputer'] = metric_data['imputer'].str.title()
+                metric_data['imputer'] = metric_data['imputer'].str.upper()
                 
                 ################################################################################################################
                 # Bar plot
@@ -474,13 +479,32 @@ class FedImputePipeline:
                 ax.set_yticks(tick_positions)
                 ax.set_yticklabels(tick_labels)
                 
+                metric_name = metric_name.replace('_', ' ').title()
+                if 'Auc' in metric_name:
+                    metric_name = metric_name.replace('Auc', 'AUROC')
+                elif 'Prc' in metric_name:
+                    metric_name = metric_name.replace('Prc', 'AUPRC')
+
+                if metric_name == 'Nrmse':
+                    metric_name = 'NRMSE'
+                elif metric_name == 'Rmse':
+                    metric_name = 'RMSE'
+                elif metric_name == 'Sliced-Ws':
+                    metric_name = 'Sliced-WD'
+                
                 ax.set_title(metric_name, fontsize=font_size, fontweight='bold')
                 ax.tick_params(axis='y', labelsize=font_size, labelrotation=45)
-                ax.tick_params(axis='x', labelsize=font_size - 2, labelrotation=45)
+                ax.tick_params(axis='x', labelsize=font_size, labelrotation=0)
                 for tick in ax.get_yticklabels():
                     tick.set_fontweight('bold')
+
+                if 'pred' in metric_aspect:
+                    # set ticks to be '0.0', '0.2', '0.4', '0.6', '0.8'
+                    ax.set_xticks([0.0, 0.2, 0.4, 0.6, 0.8])
+
                 for tick in ax.get_xticklabels():
-                    tick.set_fontsize(font_size - 2)
+                    tick.set_fontsize(font_size-2)
+                    #tick.set_fontweight('bold')
 
             # remove empty axes
             for idx in range(len(metric_names), n_rows * n_cols):
@@ -492,18 +516,19 @@ class FedImputePipeline:
                 Patch(facecolor=color, edgecolor='white', label=strat) 
                 for strat, color in strategy_colors.items()
             ]
-            plt.legend(
-                handles=legend_elements, loc='upper left', bbox_to_anchor=(1.05, 1.0), frameon=False, 
-                title='Fed Strategy', title_fontproperties={'weight': 'bold', 'size': font_size},  # Bold title
-                prop={'weight': 'bold', 'size': font_size - 2}  # Bold labels  
-            )
+            if legend:
+                plt.legend(
+                    handles=legend_elements, loc='upper left', bbox_to_anchor=(1.05, 1.0), frameon=False, 
+                    title='Fed Strategy', title_fontproperties={'weight': 'bold', 'size': font_size},  # Bold title
+                    prop={'weight': 'bold', 'size': font_size-1}  # Bold labels  
+                )
             plt.subplots_adjust(wspace=0.1, hspace=0.3)
             plt.tight_layout()
             if save_path is not None:
                 dir_path = os.path.dirname(save_path)
                 if not os.path.exists(dir_path):
                     os.makedirs(dir_path)
-                plt.savefig(save_path, bbox_inches='tight', dpi=150)
+                plt.savefig(save_path, bbox_inches='tight', dpi=dpi)
                 plt.close()
             else:
                 plt.show()
