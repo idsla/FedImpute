@@ -97,6 +97,7 @@ class TwoNNRegressor(nn.Module):
 
     def fit(self, X, y, seed = 0):
 
+        set_seed(0)
         X_tensor = torch.tensor(X, dtype=torch.float32)
         y_tensor = torch.tensor(y, dtype=torch.float32).unsqueeze(1)  # Ensure y_tensor is 2D for MSE Loss
 

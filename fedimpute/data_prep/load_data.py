@@ -1,15 +1,17 @@
 import pandas as pd
 import numpy as np
-from sklearn.datasets import fetch_openml
+from sklearn.datasets import fetch_openml, fetch_california_housing
 from sklearn.preprocessing import (
     StandardScaler, MinMaxScaler
 )
+from sklearn.pipeline import Pipeline
 
 from fedimpute.data_prep.helper import download_data
 
 def load_data(data_name: str):
     
     if data_name == "codrna":
+        
         features, labels = fetch_openml(data_id = 351, as_frame='auto', return_X_y = True)
         df_pred = pd.DataFrame.sparse.from_spmatrix(features).sparse.to_dense()
         df_pred.columns = [f"X{i+1}" for i in range(df_pred.shape[1])]
@@ -40,18 +42,6 @@ def load_data(data_name: str):
             df = pd.read_csv('./data/heart_disease/processed.{}.data'.format(site), header=None, na_values='?')
             columns = ['age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 'restecg', 'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal', 'num']
             df.columns = columns
-            #df['fbs']  = df['fbs'].fillna(df['fbs'].mean())
-            #df['trestbps'] = df['trestbps'].fillna(df['trestbps'].mean())
-            #df['chol'] = df['chol'].fillna(df['chol'].mean())
-            #df['thalach'] = df['thalach'].fillna(df['thalach'].mean())
-            #df['exang'] = df['exang'].fillna(df['exang'].mean())
-            #df = df.drop(columns=['ca', 'slope', 'thal'])
-            #df = df.dropna()
-            #df['fbs'] = df['fbs'].astype(int)
-            #df['sex'] = df['sex'].astype(int)
-            #df['cp'] = df['cp'].astype(int)
-            #df['restecg'] = df['restecg'].astype(int)
-            #print(site, df.shape)
             dfs.append(df)
         
         df = pd.concat(dfs, axis=0).reset_index(drop=True)
@@ -92,67 +82,43 @@ def load_data(data_name: str):
           
         return dfs, data_config
 
-        #cat_cols = ['sex', 'cp', 'restecg', 'fbs']
-        # target_col = 'num'
-        # num_cols = [col for col in dfs[0].columns if col != target_col and col not in cat_cols]
-
-        # df = pd.concat(dfs, axis=0)
-        # client_split_indices = np.cumsum([df_sub.shape[0] for df_sub in dfs[:-1]])
-        # print(client_split_indices)
-
-        # # standardize
-        # from sklearn.preprocessing import StandardScaler, MinMaxScaler
-
-        # scaler = StandardScaler()
-        # df[num_cols] = scaler.fit_transform(df[num_cols])
-        # scaler = MinMaxScaler()
-        # df[num_cols] = scaler.fit_transform(df[num_cols])
-
-        # df = pd.get_dummies(df, columns=cat_cols, drop_first=True)
-
-        # print(df.shape)
-        # print(num_cols)
-        # cat_cols = [col for col in df.columns if col not in num_cols + [target_col]]
-        # df = df[num_cols + cat_cols + [target_col]]
-        # for col in cat_cols:
-        #     df[col] = df[col].astype(int)
-            
-        # df[target_col] = df[target_col].map({0: 0, 1: 1, 2: 1, 3: 1, 4: 1})
-
-        # data_config = {
-        #     'target': target,
-        #     'important_features_idx': [
-        #         idx for idx in range(0, df.shape[1]) 
-        #         if (df.columns[idx] != target) and (df.columns[idx] not in cat_cols)
-        #     ],
-        #     'features_idx': [idx for idx in range(0, df.shape[1]) if df.columns[idx] != target],
-        #     "num_cols": df.shape[1] - 1 - len(cat_cols),
-        #     'task_type': 'classification',
-        #     'clf_type': 'binary-class',
-        #     'data_type': 'tabular',
-        #     'client_split_indices': client_split_indices.tolist()
-        # }
-        # print(data_config)
-
-        # with open('./data/heart_disease/data_config_binary.json', 'w') as f:
-        #     json.dump(data_config, f)
-
-        # df.to_csv('./data/heart_disease/data_clean_binary.csv', index=False)
+    if data_name == "california":
         
+        housing = fetch_california_housing()
+        data = pd.DataFrame(data=housing.data, columns=housing.feature_names)
+        target_col = 'MedHouseVal'
+        data[target_col] = housing.target
+
+        # drop missing values
+        data = data.dropna()
+
+        # remove outliers
+        data = outlier_remove_iqr(data, 'AveRooms')
+        data = outlier_remove_iqr(data, 'AveBedrms')
+        data = outlier_remove_iqr(data, 'Population')
+        data = outlier_remove_iqr(data, 'AveOccup')
+
+        # gaussian transform
+        data = convert_gaussian(data, 'MedInc')
+
+        num_cols = data.columns.tolist()[:-1]
+
+        scaler = Pipeline([
+            ('standard', StandardScaler()),
+            ('minmax', MinMaxScaler())
+        ])
+
+        data[num_cols] = scaler.fit_transform(data[num_cols])
         
-    
-    elif data_name == "california":
-        pass
-    elif data_name == 'hhnp':
-        pass
-    elif data_name == 'dvisits':
-        pass
-    elif data_name == 'condon':
-        pass
-    elif data_name == 'school':
-        pass
-    elif data_name == 'vehicle':
-        pass
+        data_config = {
+            'target': target_col,
+            'task_type': 'regression',            
+            'natural_partition': False,
+        }
+        
+        data = data.sample(n=5000, random_state=42).reset_index(drop=True)
+        
+        return data, data_config
     else:
         raise ValueError(f"Data {data_name} not found")
     

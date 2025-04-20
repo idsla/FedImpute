@@ -3,7 +3,7 @@ from collections import OrderedDict
 from copy import deepcopy
 from typing import List, Dict, Union
 import warnings
-
+import os
 import loguru
 import numpy as np
 import sys
@@ -262,7 +262,8 @@ class Evaluator:
         alpha: float = 0.5,
         sampling_size: int = None,
         overall: bool = False,
-        seed: int = 0
+        seed: int = 0,
+        save_path: str = None
     ):
 
         X_imps = [item.values for item in X_imps]
@@ -273,7 +274,7 @@ class Evaluator:
             'imputed': 'blue'
         }
 
-        def eval_tsne(origin_data, imputed_data):
+        def eval_tsne(origin_data, imputed_data, save_path: str = None):
 
             # overall
             plot_data = np.concatenate((origin_data, imputed_data), axis=0)
@@ -346,7 +347,15 @@ class Evaluator:
             prop={'weight': 'bold', 'size': fontsize}, frameon=False
         )
         plt.subplots_adjust(wspace=0.0)
-        plt.show()
+        plt.tight_layout()
+        if save_path is not None:
+            dir_path = os.path.dirname(save_path)
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            plt.savefig(save_path, bbox_inches='tight', dpi=150)
+            plt.close()
+        else:
+            plt.show()
 
     def run_local_regression_analysis(
         self, 
