@@ -69,6 +69,7 @@ def distributed_qr_regression(xparts: List[np.ndarray], yparts: List[np.ndarray]
 
 def eval_fed_reg_linear(X_train_imps: List[pd.DataFrame], y_trains: List[pd.Series]):
     
+    np.random.seed(seed=233423)
     X_train_imps = [
         pd.concat(
             [

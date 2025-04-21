@@ -20,27 +20,30 @@ class WorkflowICE(BaseWorkflow):
 
     def __init__(
             self,
-            imp_iterations: int = 40,
+            imp_iterations: int = 20,
             evaluation_interval: int = 1,
             early_stopping: bool = True,
+            early_stopping_metric: str = 'imp_rmse',
             tolerance: float = 0.001,
             tolerance_patience: int = 5,
-            increase_patience: int = 40,
+            increase_patience: int = 5,
             window_size: int = 3,
             log_interval: int = 1,
+            log_metric: str = 'loss',
             save_model_interval: int = 5
     ):
         super().__init__('ICE (Imputation via Chain Equation)')
         self.imp_iterations = imp_iterations
         self.evaluation_interval = evaluation_interval
         self.early_stopping = early_stopping
-        self.early_stopping_metric = 'loss'  # TODO: Need to make this as a parameter
+        self.early_stopping_metric = early_stopping_metric
         self.tolerance = tolerance
         self.tolerance_patience = tolerance_patience
         self.increase_patience = increase_patience
         self.window_size = window_size
         self.log_interval = log_interval
         self.save_model_interval = save_model_interval
+        self.log_metric = log_metric
         self.tracker = None
 
     def fed_imp_sequential(
@@ -105,31 +108,29 @@ class WorkflowICE(BaseWorkflow):
                 if epoch % save_model_interval == 0:
                     central_client.save_imp_model(version=f'{epoch}')
                 
-                other_infos = self.calculate_other_info(
-                    other_info, metric=self.early_stopping_metric, data_utils=data_utils
-                )
+                other_infos = self.calculate_other_info(other_info, data_utils=data_utils)
                 
-                imp_qualities = self.eval_and_track(
-                    evaluator, tracker, clients, phase='round', epoch=epoch,
+                clients_round_stats = self.eval_and_track(
+                    evaluator, tracker, clients, phase='round', epoch=epoch, log_metric=self.log_metric,
                     central_client=server.fed_strategy.name == 'central', other_infos=other_infos
-                )   # TODO: merge other info （fit res) into eval and track function
+                )
 
                 if self.early_stopping:
                     # if has ground truth, use it to check convergence
-                    if imp_qualities is not None:
-                        central_imp_quality = imp_qualities[0]
-                        early_stopping.update(central_imp_quality)
-                        if early_stopping.check_convergence():
-                            loguru.logger.info(f"Central client converged, iteration {epoch}")
-                            break
-                    # if no ground truth, use parameter norm to check convergence
+                    if self.early_stopping_metric not in clients_round_stats:
+                        if 'loss' not in clients_round_stats:
+                            raise ValueError(f"Early stopping metric {self.early_stopping_metric} not found in clients_round_stats")
+                        else:
+                            early_stopping_metric = 'loss'
+                            loguru.logger.warning(f"Early stopping metric {self.early_stopping_metric} not found in clients_round_stats, using loss instead")
                     else:
-                        early_stopping_metric_value = other_infos[self.early_stopping_metric][0]
-                        early_stopping.update(early_stopping_metric_value)
-                        if early_stopping.check_convergence():
-                            loguru.logger.info(f"Central client converged, iteration {epoch}")
-                            break
-
+                        early_stopping_metric = self.early_stopping_metric
+                    
+                    early_stopping_metric_value = clients_round_stats[early_stopping_metric][0]
+                    early_stopping.update(early_stopping_metric_value)
+                    if early_stopping.check_convergence():
+                        loguru.logger.info(f"Central client converged, iteration {epoch}")
+                        break
         else:
             ############################################################################################################
             # Federated Imputation Sequential Workflow
@@ -191,30 +192,29 @@ class WorkflowICE(BaseWorkflow):
                         client.save_imp_model(version=f'{epoch}')
                 
                 other_infos = self.calculate_other_info(
-                    other_infos, metric=self.early_stopping_metric, data_utils=data_utils
+                    other_infos, data_utils=data_utils
                 )
-                imp_qualities = self.eval_and_track(
-                    evaluator, tracker, clients, phase='round', epoch=epoch,
+                clients_round_stats = self.eval_and_track(
+                    evaluator, tracker, clients, phase='round', epoch=epoch, log_metrics=self.log_metric,
                     central_client=server.fed_strategy.name == 'central', other_infos=other_infos
                 )
 
                 if self.early_stopping:
-                    # if has ground truth, use it to check convergence
-                    if imp_qualities is not None:
-                        for client_idx in range(len(clients)):
-                            imp_quality = imp_qualities[client_idx]
-                            early_stoppings[client_idx].update(imp_quality)
-                            if early_stoppings[client_idx].check_convergence():
-                                all_clients_converged[client_idx] = True
-                                loguru.logger.debug(f"Client {client_idx} converged, iteration {epoch}")
-                    # if no ground truth, use parameter norm to check convergence
+                    
+                    if self.early_stopping_metric not in clients_round_stats:
+                        if 'loss' not in clients_round_stats:
+                            raise ValueError(f"Early stopping metric {self.early_stopping_metric} not found in clients_round_stats")
+                        else:
+                            early_stopping_metric = 'loss'
+                            loguru.logger.warning(f"Early stopping metric {self.early_stopping_metric} not found in clients_round_stats, using loss instead")
                     else:
-                        for client_idx in range(len(clients)):
-                            early_stoppings_metric_value = other_infos[self.early_stopping_metric][client_idx]
-                            early_stoppings[client_idx].update(early_stoppings_metric_value)
-                            if early_stoppings[client_idx].check_convergence():
-                                all_clients_converged[client_idx] = True
-                                loguru.logger.debug(f"Client {client_idx} converged, iteration {epoch}")
+                        early_stopping_metric = self.early_stopping_metric
+                    
+                    for client_idx in range(len(clients)):
+                        early_stoppings[client_idx].update(clients_round_stats[early_stopping_metric][client_idx])
+                        if early_stoppings[client_idx].check_convergence():
+                            all_clients_converged[client_idx] = True
+                            loguru.logger.debug(f"Client {client_idx} converged, iteration {epoch}")
 
                     if all(all_clients_converged):
                         loguru.logger.info(f"All clients converged, iteration {epoch}")
@@ -225,6 +225,7 @@ class WorkflowICE(BaseWorkflow):
         self.eval_and_track(
             evaluator, tracker, clients, phase='final', central_client=server.fed_strategy.name == 'central'
         )
+        
         for client in clients:
             client.save_imp_model(version='final')
 
@@ -450,10 +451,10 @@ class WorkflowICE(BaseWorkflow):
 
         return tracker
     
-    def calculate_other_info(self, other_info: List[dict], metric: str = 'loss', data_utils: List[dict] = None):
+    def calculate_other_info(self, other_info: List[dict], data_utils: List[dict] = None):
         
         other_info_calculated = {
-            f"{metric}": {client_idx: 0 for client_idx in range(len(other_info))}
+            "loss": {client_idx: 0 for client_idx in range(len(other_info))}
         }
         
         for client_idx, fit_res in enumerate(other_info):
@@ -465,11 +466,11 @@ class WorkflowICE(BaseWorkflow):
                 cum_metric = 0
                 for feature_idx, param in fit_res.items():
                     if feature_idx in ms_cols_idx:
-                        cum_metric += param[metric]
+                        cum_metric += param['loss']
             
                 avg_metric = cum_metric / len(ms_cols_idx)
                         
-            other_info_calculated[f"{metric}"][client_idx] = avg_metric
+            other_info_calculated[f"loss"][client_idx] = avg_metric
         
         return other_info_calculated
         

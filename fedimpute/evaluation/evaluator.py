@@ -365,7 +365,8 @@ class Evaluator:
         verbose: int = 0
     ):
         setup_logger(verbose)
-
+        np.random.seed(seed=233423)
+        
         if data_config['task_type'] == 'regression':
             import statsmodels.api as sm
             results = []

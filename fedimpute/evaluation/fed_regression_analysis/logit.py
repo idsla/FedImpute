@@ -75,6 +75,7 @@ def eval_fed_reg_logit(
     X_train_imps: List[pd.DataFrame], 
     y_trains: List[pd.Series]
 ):
+    np.random.seed(seed=233423)
     N = X_train_imps[0].shape[0]
     # Add constant term (intercept) to each client's data
     X_train_imps = [
