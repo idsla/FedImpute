@@ -77,6 +77,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../tutorials/real_scenario/">Real World Distributed Imputation</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/develop_new_method/">Developing Customized Methods</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
@@ -120,6 +122,7 @@ comprehensive benchmarking studies and comparative analyses. We briefly introduc
 <li><code>fed_imp_configs</code>: a list of configuration tuples, where each tuple specifies an imputer, associated federated
 aggregation strategies, and their parameters. </li>
 <li><code>evaluation_aspects</code>: a list of evaluation criteria including imputation quality (<code>imp_quality</code>), local prediction (<code>local_pred</code>), and federated prediction (<code>fed_pred</code>).</li>
+<li><code>evaluation_params</code>: a dictionary to specify the evaluation process. It includes <code>metrics</code> a list specifying the aspects of evaluation and <code>model</code> which downstream task used for evaluation.</li>
 </ul>
 <p>Finally, the pipeline execution is via the <code>run_pipeline()</code> method, which takes a scenario object as input. It executes all configured algorithms on the input scenario, performs evaluations, and stores the results.</p>
 <p>We also have a <code>pipeline_setup_summary()</code> function to provide a summary of constructed pipeline.</p>
@@ -133,6 +136,10 @@ pipeline.setup(
         (&#39;mice&#39;, [&#39;local&#39;, &#39;fedmice&#39;], {}, [{}, {}]),
         (&#39;gain&#39;, [&#39;local&#39;, &#39;fedavg&#39;], {}, [{}, {}]),
     ],
+    evaluation_params = {
+        &#39;metrics&#39;: [&#39;imp_quality&#39;, &#39;local_pred&#39;, &#39;fed_pred&#39;],
+        &#39;model&#39;: &#39;lr&#39;,
+    },
     persist_data = False,
     description = &#39;benchmark demonstration&#39;
 )

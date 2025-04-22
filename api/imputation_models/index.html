@@ -71,6 +71,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../tutorials/real_scenario/">Real World Distributed Imputation</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/develop_new_method/">Developing Customized Methods</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul class="current">
@@ -140,7 +142,7 @@
 </p>
 <p class="mkapi-object">
   <span class="mkapi-object-kind">class</span>
-  <span class="mkapi-object-name"><span class="mkapi-name">BaseMLImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-paren">)</span></span></p>
+  <span class="mkapi-object-name"><span class="mkapi-name">BaseMLImputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">model_persistable</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-paren">)</span></span></p>
 <p>Abstract class for the non-NN based imputer to be used in the federated imputation environment</p>
 <p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
 <ul>
@@ -167,6 +169,10 @@ Fit imputer to train local imputation models
 <li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.impute">impute</span></span> &mdash;
 Impute missing values using an imputation model
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.get_fit_res">get_fit_res</span></span>
   </p>
 </li>
 <li>
@@ -382,6 +388,10 @@ name of the imputer
   </p>
 </li>
 <li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.simple_imputer.SimpleImputer.get_fit_res">get_fit_res</span></span>
+  </p>
+</li>
+<li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.save_model">save_model</span></span> &mdash;
 Save the imputer model
   </p>
@@ -389,10 +399,6 @@ Save the imputer model
 <li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.load_model">load_model</span></span> &mdash;
 Load the imputer model
-  </p>
-</li>
-<li>
-<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.simple_imputer.SimpleImputer.get_fit_res">get_fit_res</span></span>
   </p>
 </li>
 </ul>
@@ -518,6 +524,10 @@ Impute the missing values in the data.
   </p>
 </li>
 <li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer.get_fit_res">get_fit_res</span></span>
+  </p>
+</li>
+<li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer.save_model">save_model</span></span> &mdash;
 Save the imputer model
   </p>
@@ -547,10 +557,6 @@ Perform the EM step for imputing missing values.
 <li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer._converged">_converged</span></span> &mdash;
 Checks if the EM loop has converged.
-  </p>
-</li>
-<li>
-<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.em_imputer.EMImputer.get_fit_res">get_fit_res</span></span>
   </p>
 </li>
 </ul>
@@ -670,6 +676,10 @@ Impute missing values using an imputation model
   </p>
 </li>
 <li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.get_fit_res">get_fit_res</span></span>
+  </p>
+</li>
+<li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.save_model">save_model</span></span>
   </p>
 </li>
@@ -687,10 +697,6 @@ Impute missing values using an imputation model
 </li>
 <li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.get_visit_indices">get_visit_indices</span></span>
-  </p>
-</li>
-<li>
-<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.linear_ice_imputer.LinearICEImputer.get_fit_res">get_fit_res</span></span>
   </p>
 </li>
 </ul>
@@ -807,6 +813,10 @@ name of the imputer, defaults to 'missforest'
   </p>
 </li>
 <li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.get_fit_res">get_fit_res</span></span>
+  </p>
+</li>
+<li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.save_model">save_model</span></span>
   </p>
 </li>
@@ -824,10 +834,6 @@ name of the imputer, defaults to 'missforest'
 </li>
 <li>
 <p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.ice_imputer.ICEImputerMixin.get_visit_indices">get_visit_indices</span></span>
-  </p>
-</li>
-<li>
-<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.imputers.missforest_imputer.MissForestImputer.get_fit_res">get_fit_res</span></span>
   </p>
 </li>
 </ul>

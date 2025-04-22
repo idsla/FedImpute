@@ -70,6 +70,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#monitoring-imputation-process">Monitoring Imputation Process</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#develop-new-federated-imputation-methods">Develop New Federated Imputation Methods</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#miscellaneous">Miscellaneous</a>
     </li>
     </ul>
@@ -86,6 +88,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../../tutorials/benchmark/">Benchmarking Pipeline Demo</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../tutorials/real_scenario/">Real World Distributed Imputation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/develop_new_method/">Developing Customized Methods</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
@@ -361,6 +365,12 @@ in the scenario where user have their own data that not simulated from simulator
 <div class="highlight"><pre><span></span><code>tensorboard --logdir .logs
 </code></pre></div>
 <p>We also provide another API <code>env.tracker.visualize_imputation_process()</code> it will show the line chart of imputation process measured by imputation quality or loss, it can only be run after imputation finished unlike tensorboard utility.</p>
+<h2 id="develop-new-federated-imputation-methods">Develop New Federated Imputation Methods</h2>
+<p><code>FedImputeEnv</code> class supports functionality to register new imputers, strategies and workflows. User can develope their new imputation methods, federated strategies and workflow. Basically, these three components have to work tightly to formalize a federated imputation algorithm.</p>
+<p>To develop new workflow, user need to implement a new workflow by inherit the <code>Workflow</code> class from <code>fedimpute.execution_environment.workflow</code>. In implementation of workflow, user need to think how to allow clients and server to interact with each other.</p>
+<p>To develop new federated strategies, user need to implement new strategy for both client and server. </p>
+<p>To develop new imputers, user need to implement new imputer by inherit the one of two abstract class <code>BaseMLImputer</code> and <code>BaseNNImputer</code> from <code>fedimpute.execution_environment.imputation.base</code>, one for traditional methods and another for generative model based methods, and implement all its abstract methods (interfaces). Because, each imputer is associated with federated strategy and workflow, user need also to think how to make developed new imputer to be compatible with existed or new federated strategy and workflows.</p>
+<p>Then user can use <code>env.register.register_imputer</code>, <code>env.register.register_strategy</code>, <code>env.register.register_workflow</code> to register these new developed classes. After registeration, user can use them in <code>FedImputeEnv</code> following the same way as using built-in methods. We provided a detailed example in tutorials.</p>
 <h2 id="miscellaneous">Miscellaneous</h2>
 <ul>
 <li><strong>verbose</strong> (int) - Verbosity level. 0: no output, 1: minimal output, 2: detailed output</li>

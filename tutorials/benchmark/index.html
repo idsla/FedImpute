@@ -73,6 +73,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../real_scenario/">Real World Distributed Imputation</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../develop_new_method/">Developing Customized Methods</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul>
@@ -177,6 +179,10 @@
         <span class="p">(</span><span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;fedmice&#39;</span><span class="p">],</span> <span class="p">{},</span> <span class="p">[{},</span> <span class="p">{}]),</span>
         <span class="p">(</span><span class="s1">&#39;gain&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">,</span> <span class="s1">&#39;fedavg&#39;</span><span class="p">],</span> <span class="p">{},</span> <span class="p">[{},</span> <span class="p">{}]),</span>
     <span class="p">],</span>
+    <span class="n">evaluation_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;metrics&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span> <span class="s1">&#39;local_pred&#39;</span><span class="p">,</span> <span class="s1">&#39;fed_pred&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="s1">&#39;lr&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
     <span class="n">persist_data</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;benchmark demonstration&#39;</span>
 <span class="p">)</span>
@@ -190,7 +196,9 @@
 <span class="o">==============================================================</span>
 <span class="nl">Description</span><span class="p">:</span><span class="w"> </span><span class="n">benchmark</span><span class="w"> </span><span class="n">demonstration</span>
 <span class="n">Persist</span><span class="w"> </span><span class="n">Data</span><span class="o">:</span><span class="w"> </span><span class="n">False</span>
-<span class="nl">Evaluation</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">&#39;</span><span class="n">imp_quality</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">local_pred</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">fed_pred</span><span class="err">&#39;</span><span class="p">]</span>
+<span class="nl">Evaluation</span><span class="p">:</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">metrics</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="err">&#39;</span><span class="n">imp_quality</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">local_pred</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">fed_pred</span><span class="err">&#39;</span><span class="p">]</span>
+<span class="w">  </span><span class="o">-</span><span class="w"> </span><span class="n">model</span><span class="o">:</span><span class="w"> </span><span class="n">lr</span>
 <span class="nl">Seed</span><span class="p">:</span><span class="w"> </span><span class="mi">100330201</span>
 <span class="o">--------------------------------------------------------------</span>
 <span class="w">    </span><span class="n">Imputer</span><span class="w">    </span><span class="n">Fed</span><span class="w"> </span><span class="n">Strategy</span><span class="w">    </span><span class="n">Imp</span><span class="w"> </span><span class="n">Params</span><span class="w">    </span><span class="n">Strategy</span><span class="w"> </span><span class="n">Params</span>
@@ -218,31 +226,35 @@
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">plot_pipeline_results</span><span class="p">(</span>
     <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;fed_pred_personalized&#39;</span><span class="p">,</span>
     <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
-    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_fedpred.pdf&quot;</span>  
+    <span class="n">plot_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;bar_width&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_fedpred.png&quot;</span><span class="p">,</span>
+    <span class="n">legend</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">dpi</span> <span class="o">=</span> <span class="mi">300</span>
 <span class="p">)</span>
 </code></pre></div>
-<p><img alt="png" src="../benchmark_files/benchmark_9_0.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">plot_pipeline_results</span><span class="p">(</span>
     <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;local_pred&#39;</span><span class="p">,</span>    
     <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
-    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_localpred.pdf&quot;</span>  
+    <span class="n">plot_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;bar_width&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_localpred.png&quot;</span><span class="p">,</span>
+    <span class="n">legend</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
-<p><img alt="png" src="../benchmark_files/benchmark_10_0.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">plot_pipeline_results</span><span class="p">(</span>
     <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span>    
     <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
-    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_impquality.pdf&quot;</span>  
+    <span class="n">plot_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;bar_width&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_impquality.png&quot;</span>  
 <span class="p">)</span>
 </code></pre></div>
-<p><img alt="png" src="../benchmark_files/benchmark_11_0.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="n">pipeline</span><span class="o">.</span><span class="n">plot_pipeline_results</span><span class="p">(</span>
     <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;fed_pred_global&#39;</span><span class="p">,</span>    
     <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
-    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_fedpredglobal.pdf&quot;</span>  
+    <span class="n">plot_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;font_size&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;bar_width&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">},</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./plots/benchmark_fedpredglobal.png&quot;</span><span class="p">,</span>
+    <span class="n">legend</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span>
 </code></pre></div>
-<p><img alt="png" src="../benchmark_files/benchmark_12_0.png" /></p>
 <div class="highlight"><pre><span></span><code><span class="n">data</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">show_pipeline_results</span><span class="p">(</span>
     <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;dataframe&#39;</span><span class="p">,</span>  
     <span class="n">metric_aspect</span> <span class="o">=</span> <span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span>

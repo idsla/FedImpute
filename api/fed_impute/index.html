@@ -71,6 +71,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../tutorials/real_scenario/">Real World Distributed Imputation</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/develop_new_method/">Developing Customized Methods</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul class="current">
@@ -78,6 +80,8 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Imputation Execution Environment</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#environment">Environment</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#client">Client</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#server">Server</a>
@@ -114,6 +118,185 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="federated-imputation-execution-environment">Federated Imputation Execution Environment</h1>
+<h2 id="environment">Environment</h2>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.env_fedimp.FedImputeEnv">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp">env_fedimp</span>.FedImputeEnv</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">class</span>
+  <span class="mkapi-object-name"><span class="mkapi-name">FedImputeEnv</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">debug_mode</span><span class="mkapi-colon">: </span><span class="mkapi-ann">bool</span><span class="mkapi-equal"> = </span><span class="mkapi-default">False</span><span class="mkapi-paren">)</span></span></p>
+<p class="mkapi-section"><span class="mkapi-section-name">Methods</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.configuration">configuration</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.setup_from_data">setup_from_data</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.setup_from_scenario_builder">setup_from_scenario_builder</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.clear_env">clear_env</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.run_fed_imputation">run_fed_imputation</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.show_env_info">show_env_info</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.save_env">save_env</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.load_env">load_env</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.reset_env">reset_env</span></span>
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.env_fedimp.FedImputeEnv.get_data">get_data</span></span>
+  </p>
+</li>
+</ul>
+</div>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.loaders.register.Register.register_imputer">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders">loaders</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders.register">register</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders.register.Register">Register</span>.register_imputer</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">Register</span><span class="mkapi-dot">.</span><span class="mkapi-name">register_imputer</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">imputer_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imputer_class</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">BaseMLImputer</span>, <span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer">BaseNNImputer</span>]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">workflow_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">supported_fed_strategies</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.List">List</span>[str]</span><span class="mkapi-paren">)</span></span></p>
+<p>Register a new imputer to the environment</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">imputer_name</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+str, name of the imputer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">imputer_class</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[<span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseMLImputer">BaseMLImputer</span>, <span class="mkapi-tooltip" title="fedimpute.execution_environment.imputation.base.base_imputer.BaseNNImputer">BaseNNImputer</span>]</span> &mdash;
+Union[BaseMLImputer, BaseNNImputer], class of the imputer
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">workflow_name</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+str, name of the workflow
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">supported_fed_strategies</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.List">List</span>[str]</span> &mdash;
+List[str], list of supported federated strategies
+  </p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function will register the imputer to the environment.</p>
+</div>
+<p class="mkapi-section"><span class="mkapi-section-name">Raises</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type">ValueError</span>
+  </p>
+</li>
+</ul>
+</div>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.loaders.register.Register.register_workflow">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders">loaders</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders.register">register</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders.register.Register">Register</span>.register_workflow</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">Register</span><span class="mkapi-dot">.</span><span class="mkapi-name">register_workflow</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">workflow_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">workflow_class</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="fedimpute.execution_environment.workflows.workflow.BaseWorkflow">BaseWorkflow</span></span><span class="mkapi-paren">)</span></span></p>
+<p>Register a new workflow to the environment</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">workflow_name</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+str, name of the workflow
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">workflow_class</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.workflows.workflow.BaseWorkflow">BaseWorkflow</span></span> &mdash;
+BaseWorkflow, class of the workflow
+  </p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function will register the workflow to the environment.</p>
+</div>
+<p class="mkapi-section"><span class="mkapi-section-name">Raises</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type">ValueError</span>
+  </p>
+</li>
+</ul>
+</div>
+<div class="mkapi-content">
+<p class="mkapi-heading" id="fedimpute.execution_environment.loaders.register.Register.register_strategy">
+<span class="mkapi-heading-name"><span class="mkapi-tooltip" title="fedimpute">fedimpute</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment">execution_environment</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders">loaders</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders.register">register</span>.<span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders.register.Register">Register</span>.register_strategy</span>
+<span class="mkapi-source-link"></span>
+</p>
+<p class="mkapi-object">
+  <span class="mkapi-object-kind">method</span>
+  <span class="mkapi-object-name"><span class="mkapi-prefix">Register</span><span class="mkapi-dot">.</span><span class="mkapi-name">register_strategy</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">strategy_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">strategy_client</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="fedimpute.execution_environment.fed_strategy.fed_strategy_client.strategy_base.StrategyBaseClient">StrategyBaseClient</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">strategy_server</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Union">Union</span>[<span class="mkapi-tooltip" title="fedimpute.execution_environment.fed_strategy.fed_strategy_server.basic_strategy.RawBaseStrategyServer">RawBaseStrategyServer</span>, <span class="mkapi-tooltip" title="fedimpute.execution_environment.fed_strategy.fed_strategy_server.strategy_base.NNStrategyBaseServer">NNStrategyBaseServer</span>]</span><span class="mkapi-paren">)</span></span></p>
+<p>Register a new strategy to the environment</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">strategy_name</span> : 
+  <span class="mkapi-item-type">str</span> &mdash;
+str, name of the strategy
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">strategy_client</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.execution_environment.fed_strategy.fed_strategy_client.strategy_base.StrategyBaseClient">StrategyBaseClient</span></span> &mdash;
+StrategyBaseClient, class of the strategy client
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">strategy_server</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Union">Union</span>[<span class="mkapi-tooltip" title="fedimpute.execution_environment.fed_strategy.fed_strategy_server.basic_strategy.RawBaseStrategyServer">RawBaseStrategyServer</span>, <span class="mkapi-tooltip" title="fedimpute.execution_environment.fed_strategy.fed_strategy_server.strategy_base.NNStrategyBaseServer">NNStrategyBaseServer</span>]</span> &mdash;
+Union[RawBaseStrategyServer, NNStrategyBaseServer], class of the strategy server
+  </p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function will register the strategy to the environment.</p>
+</div>
+<p class="mkapi-section"><span class="mkapi-section-name">Raises</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-type">ValueError</span>
+  </p>
+</li>
+</ul>
+</div>
 <h2 id="client">Client</h2>
 <div class="mkapi-content">
 <p class="mkapi-heading" id="fedimpute.execution_environment.client.client.Client">
@@ -122,7 +305,7 @@
 </p>
 <p class="mkapi-object">
   <span class="mkapi-object-kind">class</span>
-  <span class="mkapi-object-name"><span class="mkapi-name">Client</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">client_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-comma">, </span><span class="mkapi-arg">train_data</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">test_data</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">X_train_ms</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imp_model_name</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imp_model_params</span><span class="mkapi-comma">, </span><span class="mkapi-arg">fed_strategy</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">fed_strategy_params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">client_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-equal">=</span><span class="mkapi-default">0</span><span class="mkapi-paren">)</span></span></p>
+  <span class="mkapi-object-name"><span class="mkapi-name">Client</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">client_id</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-comma">, </span><span class="mkapi-arg">train_data</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">test_data</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">X_train_ms</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imp_model_name</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imp_model_params</span><span class="mkapi-comma">, </span><span class="mkapi-arg">fed_strategy</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">fed_strategy_params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">client_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">columns</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.List">List</span>[str]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">register</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders.register.Register">Register</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-equal">=</span><span class="mkapi-default">0</span><span class="mkapi-paren">)</span></span></p>
 <p>Client class presenting a client in the federated imputation execution environment, it contains
 the training and testing data, missing data, imputed data, imputation model class, and federated strategy class.</p>
 <p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
@@ -336,7 +519,7 @@ imputed data or None
 </p>
 <p class="mkapi-object">
   <span class="mkapi-object-kind">class</span>
-  <span class="mkapi-object-name"><span class="mkapi-name">Server</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">fed_strategy_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">fed_strategy_params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imputer_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imputer_params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">global_test</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">server_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Dict">Dict</span>[str, <span class="mkapi-tooltip" title="typing.Union">Union</span>[str, int, float]]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">21</span><span class="mkapi-paren">)</span></span></p>
+  <span class="mkapi-object-name"><span class="mkapi-name">Server</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">fed_strategy_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">fed_strategy_params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imputer_name</span><span class="mkapi-colon">: </span><span class="mkapi-ann">str</span><span class="mkapi-comma">, </span><span class="mkapi-arg">imputer_params</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">global_test</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="numpy">np</span>.ndarray</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann">dict</span><span class="mkapi-comma">, </span><span class="mkapi-arg">server_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Dict">Dict</span>[str, <span class="mkapi-tooltip" title="typing.Union">Union</span>[str, int, float]]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">21</span><span class="mkapi-comma">, </span><span class="mkapi-arg">columns</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.List">List</span>[str]</span><span class="mkapi-equal"> = </span><span class="mkapi-default">None</span><span class="mkapi-comma">, </span><span class="mkapi-arg">register</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="fedimpute.execution_environment.loaders.register.Register">Register</span></span><span class="mkapi-equal"> = </span><span class="mkapi-default">None</span><span class="mkapi-paren">)</span></span></p>
 <p>Server class to be used in the federated imputation environment</p>
 <p class="mkapi-section"><span class="mkapi-section-name">Attributes</span></p>
 <ul>

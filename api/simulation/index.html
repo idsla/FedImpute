@@ -71,6 +71,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../tutorials/real_scenario/">Real World Distributed Imputation</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../tutorials/develop_new_method/">Developing Customized Methods</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
               <ul class="current">
@@ -187,7 +189,8 @@ Simulate missing data scenario
   </p>
 </li>
 <li>
-<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.scenario.scenario_builder.ScenarioBuilder.create_real_scenario">create_real_scenario</span></span>
+<p><span class="mkapi-item-type"><span class="mkapi-tooltip" title="fedimpute.scenario.scenario_builder.ScenarioBuilder.create_real_scenario">create_real_scenario</span></span> &mdash;
+Create a real scenario from a list of pandas DataFrames
   </p>
 </li>
 <li>
@@ -443,6 +446,34 @@ dictionary of clients training data, test data, training data with missing value
 <p class="mkapi-object">
   <span class="mkapi-object-kind">method</span>
   <span class="mkapi-object-name"><span class="mkapi-prefix">ScenarioBuilder</span><span class="mkapi-dot">.</span><span class="mkapi-name">create_real_scenario</span></span><span class="mkapi-signature"><span class="mkapi-paren">(</span><span class="mkapi-arg">datas</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.List">List</span>[<span class="mkapi-tooltip" title="pandas">pd</span>.<span class="mkapi-tooltip" title="pandas.core.frame.DataFrame">DataFrame</span>]</span><span class="mkapi-comma">, </span><span class="mkapi-arg">data_config</span><span class="mkapi-colon">: </span><span class="mkapi-ann"><span class="mkapi-tooltip" title="typing.Dict">Dict</span></span><span class="mkapi-comma">, </span><span class="mkapi-arg">seed</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">100330201</span><span class="mkapi-comma">, </span><span class="mkapi-arg">verbose</span><span class="mkapi-colon">: </span><span class="mkapi-ann">int</span><span class="mkapi-equal"> = </span><span class="mkapi-default">0</span><span class="mkapi-paren">)</span></span></p>
+<p>Create a real scenario from a list of pandas DataFrames</p>
+<p class="mkapi-section"><span class="mkapi-section-name">Parameters</span></p>
+<ul>
+<li>
+<p><span class="mkapi-item-name">datas</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.List">List</span>[<span class="mkapi-tooltip" title="pandas">pd</span>.<span class="mkapi-tooltip" title="pandas.core.frame.DataFrame">DataFrame</span>]</span> &mdash;
+list of pandas DataFrames
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">data_config</span> : 
+  <span class="mkapi-item-type"><span class="mkapi-tooltip" title="typing.Dict">Dict</span></span> &mdash;
+data configuration dictionary
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">seed</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+random seed, default: 100330201
+  </p>
+</li>
+<li>
+<p><span class="mkapi-item-name">verbose</span> : 
+  <span class="mkapi-item-type">int</span> &mdash;
+whether verbose the simulation process, default: 0
+  </p>
+</li>
+</ul>
 <p class="mkapi-section"><span class="mkapi-section-name">Raises</span></p>
 <ul>
 <li>
@@ -455,7 +486,7 @@ dictionary of clients training data, test data, training data with missing value
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../../tutorials/real_scenario/" class="btn btn-neutral float-left" title="Real World Distributed Imputation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../tutorials/develop_new_method/" class="btn btn-neutral float-left" title="Developing Customized Methods"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../fed_impute/" class="btn btn-neutral float-right" title="Imputation Execution Environment">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
@@ -479,7 +510,7 @@ dictionary of clients training data, test data, training data with missing value
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../../tutorials/real_scenario/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../../tutorials/develop_new_method/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../fed_impute/" style="color: #fcfcfc">Next &raquo;</a></span>
