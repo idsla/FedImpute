@@ -134,6 +134,18 @@ tensorboard --logdir .logs
 
 We also provide another API `env.tracker.visualize_imputation_process()` it will show the line chart of imputation process measured by imputation quality or loss, it can only be run after imputation finished unlike tensorboard utility.
 
+## Develop New Federated Imputation Methods
+
+`FedImputeEnv` class supports functionality to register new imputers, strategies and workflows. User can develope their new imputation methods, federated strategies and workflow. Basically, these three components have to work tightly to formalize a federated imputation algorithm.
+
+To develop new workflow, user need to implement a new workflow by inherit the `Workflow` class from `fedimpute.execution_environment.workflow`. In implementation of workflow, user need to think how to allow clients and server to interact with each other.
+
+To develop new federated strategies, user need to implement new strategy for both client and server. 
+
+To develop new imputers, user need to implement new imputer by inherit the one of two abstract class `BaseMLImputer` and `BaseNNImputer` from `fedimpute.execution_environment.imputation.base`, one for traditional methods and another for generative model based methods, and implement all its abstract methods (interfaces). Because, each imputer is associated with federated strategy and workflow, user need also to think how to make developed new imputer to be compatible with existed or new federated strategy and workflows.
+
+Then user can use `env.register.register_imputer`, `env.register.register_strategy`, `env.register.register_workflow` to register these new developed classes. After registeration, user can use them in `FedImputeEnv` following the same way as using built-in methods. We provided a detailed example in tutorials.
+
 ## Miscellaneous
 
 - **verbose** (int) - Verbosity level. 0: no output, 1: minimal output, 2: detailed output

@@ -596,7 +596,15 @@ class ScenarioBuilder:
         seed: int = 100330201,
         verbose: int = 0,
     ):
-        
+        """
+        Create a real scenario from a list of pandas DataFrames
+
+        Args:
+            datas (List[pd.DataFrame]): list of pandas DataFrames
+            data_config (Dict): data configuration dictionary
+            seed (int): random seed, default: 100330201
+            verbose (int): whether verbose the simulation process, default: 0
+        """
         # clients seed
         global_seed = seed
         global_rng = np.random.default_rng(seed)

@@ -1,5 +1,15 @@
 # Federated Imputation Execution Environment
 
+## Environment
+
+::: fedimpute.execution_environment.env_fedimp.FedImputeEnv
+
+::: fedimpute.execution_environment.loaders.register.Register.register_imputer
+
+::: fedimpute.execution_environment.loaders.register.Register.register_workflow
+
+::: fedimpute.execution_environment.loaders.register.Register.register_strategy
+
 ## Client
 
 ::: fedimpute.execution_environment.client.client.Client

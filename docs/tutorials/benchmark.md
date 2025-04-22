@@ -1,3 +1,4 @@
+
 ```python
 import numpy as np
 import pandas as pd
@@ -81,6 +82,10 @@ pipeline.setup(
         ('mice', ['local', 'fedmice'], {}, [{}, {}]),
         ('gain', ['local', 'fedavg'], {}, [{}, {}]),
     ],
+    evaluation_params = {
+        'metrics': ['imp_quality', 'local_pred', 'fed_pred'],
+        'model': 'lr',
+    },
     persist_data = False,
     description = 'benchmark demonstration'
 )
@@ -95,7 +100,9 @@ pipeline.pipeline_setup_summary()
     ==============================================================
     Description: benchmark demonstration
     Persist Data: False
-    Evaluation: ['imp_quality', 'local_pred', 'fed_pred']
+    Evaluation:
+      - metrics: ['imp_quality', 'local_pred', 'fed_pred']
+      - model: lr
     Seed: 100330201
     --------------------------------------------------------------
         Imputer    Fed Strategy    Imp Params    Strategy Params
@@ -133,60 +140,44 @@ plt.rc('ps', fonttype = 42)
 pipeline.plot_pipeline_results(
     metric_aspect = 'fed_pred_personalized',
     plot_type = 'bar',
-    save_path = "./plots/benchmark_fedpred.pdf"  
+    plot_params = {'font_size': 20, 'bar_width': 0.2},
+    save_path = "./plots/benchmark_fedpred.png",
+    legend = False,
+    dpi = 300
 )
 ```
-
-
-    
-![png](benchmark_files/benchmark_9_0.png)
-    
-
 
 
 ```python
 pipeline.plot_pipeline_results(
     metric_aspect = 'local_pred',    
     plot_type = 'bar',
-    save_path = "./plots/benchmark_localpred.pdf"  
+    plot_params = {'font_size': 20, 'bar_width': 0.2},
+    save_path = "./plots/benchmark_localpred.png",
+    legend = False
 )
 ```
-
-
-    
-![png](benchmark_files/benchmark_10_0.png)
-    
-
 
 
 ```python
 pipeline.plot_pipeline_results(
     metric_aspect = 'imp_quality',    
     plot_type = 'bar',
-    save_path = "./plots/benchmark_impquality.pdf"  
+    plot_params = {'font_size': 20, 'bar_width': 0.2},
+    save_path = "./plots/benchmark_impquality.png"  
 )
 ```
-
-
-    
-![png](benchmark_files/benchmark_11_0.png)
-    
-
 
 
 ```python
 pipeline.plot_pipeline_results(
     metric_aspect = 'fed_pred_global',    
     plot_type = 'bar',
-    save_path = "./plots/benchmark_fedpredglobal.pdf"  
+    plot_params = {'font_size': 20, 'bar_width': 0.2},
+    save_path = "./plots/benchmark_fedpredglobal.png",
+    legend = False
 )
 ```
-
-
-    
-![png](benchmark_files/benchmark_12_0.png)
-    
-
 
 
 ```python

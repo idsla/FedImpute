@@ -101,8 +101,9 @@ The `run_local_regression_analysis()` method in the evaluation.Evaluator class p
 
 - `X_train_imps, y_trains`: lists of client-specific imputed training datasets and targets
 - `data_config`: the data configuration dictionary.
+- `client_ids`: the list of clients ids to used for analysis, default to use all clients
 
-The method returns a Dict containing evaluation results. Users can utilize the `show_local_regression_results()` method
+The method returns a Dict containing evaluation results. Users can utilize the `show_local_regression_results(client_idx)` method
 in the evaluation.Evaluator class to print a formatted output of the evaluation results.
 
 ```{python} 
@@ -126,8 +127,8 @@ The `run_local_prediction()` method in the evaluation.Evaluator class provides f
 
 - `X_train_imps, y_train`: lists of client-specific imputed training datasets and targets
 -  `X_tests, y_tests`: lists of client-specific local test datasets and targets
-- `model`: a model specification parameter. The method currently implements three built-in downstream prediction models: linear models
-('lr'), random forests ('rf'), and two-layer neural networks ('nn'). 
+- `model`: a model specification parameter. The method currently implements three built-in downstream prediction models: linear models ('lr'), random forests ('rf'), and two-layer neural networks ('nn'). 
+- `client_ids`: the list of clients ids to used for analysis, default to use all clients
 
 The method trains prediction models for each client using the imputed training data and evaluates performance on the corresponding test data. For classification tasks, the evaluation metrics include accuracy, F1-score, Area Under the Receiver Operating Characteristic Curve (AUROC), and Area Under
 the Precision-Recall Curve (AUPRC). Mean squared error and R2 score are computed for regression tasks.

@@ -360,10 +360,17 @@ class Evaluator:
     def run_local_regression_analysis(
         self, 
         X_train_imps: List[pd.DataFrame], 
-        y_trains: List[pd.Series], 
+        y_trains: List[pd.Series],
         data_config: dict,
+        clients_ids: Union[List[int], str] = 'all',
         verbose: int = 0
     ):
+        if clients_ids == 'all':
+            clients_ids = list(range(len(X_train_imps)))
+        
+        X_train_imps = [X_train_imps[i] for i in clients_ids]
+        y_trains = [y_trains[i] for i in clients_ids]
+
         setup_logger(verbose)
         np.random.seed(seed=233423)
         
@@ -428,9 +435,18 @@ class Evaluator:
         model: str = 'nn', 
         model_params=None, 
         pred_fairness_metrics=None,
+        clients_ids: Union[List[int], str] = 'all',
         seed: int = 0,
         verbose: int = 0
     ):
+        if clients_ids == 'all':
+            clients_ids = list(range(len(X_train_imps)))
+        
+        X_train_imps = [X_train_imps[i] for i in clients_ids]
+        y_trains = [y_trains[i] for i in clients_ids]
+        X_tests = [X_tests[i] for i in clients_ids]
+        y_tests = [y_tests[i] for i in clients_ids]
+        
         X_train_imps = [item.values for item in X_train_imps]
         X_tests = [item.values for item in X_tests]
         y_trains = [item.values for item in y_trains]

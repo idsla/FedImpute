@@ -1,3 +1,4 @@
+
 ```python
 import numpy as np
 import pandas as pd
@@ -21,19 +22,21 @@ scenario_data = scenario_builder.create_real_scenario(
 scenario_builder.summarize_scenario()
 ```
 
+    The autoreload extension is already loaded. To reload it, use:
+      %reload_ext autoreload
     ==================================================================
     Scenario Summary
     ==================================================================
     Total clients: 4
-    Global Test Data: (94, 21)
+    Global Test Data: (94, 15)
     Missing Mechanism Category: MCAR
     Clients Data Summary:
          Train     Test      Miss     MS Ratio    MS Feature    Seed
     --  --------  -------  --------  ----------  ------------  ------
-    C1  (244,21)  (28,21)  (244,20)     0.00         0/20       6077
-    C2  (237,21)  (27,21)  (237,20)     0.04         4/20       577
-    C3  (99,21)   (11,21)  (99,20)      0.01         3/20       7231
-    C4  (162,21)  (18,21)  (162,20)     0.07         5/20       5504
+    C1  (244,15)  (28,15)  (244,14)     0.00         0/14       6077
+    C2  (237,15)  (27,15)  (237,14)     0.05         4/14       577
+    C3  (99,15)   (11,15)  (99,14)      0.01         3/14       7231
+    C4  (162,15)  (18,15)  (162,14)     0.10         5/14       5504
     ==================================================================
     
     
@@ -46,23 +49,11 @@ scenario_builder.visualize_missing_pattern(
 ```
 
 
-    
-![png](real_scenario_files/real_scenario_3_0.png)
-    
-
-
-
 ```python
 scenario_builder.visualize_missing_pattern(
     client_ids=[0, 1, 2, 3], data_type='test', fontsize=20, save_path='./plots/real_pattern_test.png'
 )
 ```
-
-
-    
-![png](real_scenario_files/real_scenario_4_0.png)
-    
-
 
 # Running Federated Imputation
 
@@ -73,7 +64,7 @@ scenario_builder.visualize_missing_pattern(
 from fedimpute.execution_environment import FedImputeEnv
 
 env = FedImputeEnv(debug_mode=False)
-env.configuration(imputer = 'mice', fed_strategy='fedmice', workflow_params = {})
+env.configuration(imputer = 'mice', fed_strategy='fedmice', workflow_params = {'early_stopping_metric': 'loss'})
 env.setup_from_scenario_builder(scenario_builder = scenario_builder, verbose=1)
 env.show_env_info()
 env.run_fed_imputation(verbose=1)
@@ -105,46 +96,38 @@ env.run_fed_imputation(verbose=1)
 
 
 
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
+    Feature_idx:   0%|          | 0/14 [00:00<?, ?it/s]
 
 
 
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
+    Feature_idx:   0%|          | 0/14 [00:00<?, ?it/s]
 
 
 
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
+    Feature_idx:   0%|          | 0/14 [00:00<?, ?it/s]
 
 
 
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
+    Feature_idx:   0%|          | 0/14 [00:00<?, ?it/s]
 
 
 
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
+    Feature_idx:   0%|          | 0/14 [00:00<?, ?it/s]
 
 
 
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
+    Feature_idx:   0%|          | 0/14 [00:00<?, ?it/s]
 
 
 
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
+    Feature_idx:   0%|          | 0/14 [00:00<?, ?it/s]
 
 
 
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
+    Feature_idx:   0%|          | 0/14 [00:00<?, ?it/s]
 
 
-
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
-
-
-
-    Feature_idx:   0%|          | 0/20 [00:00<?, ?it/s]
-
-
-    [32m[1mFinished. Running time: 1.0724 seconds[0m
+    [32m[1mFinished. Running time: 0.6903 seconds[0m
     
 
 # Evaluation
@@ -157,71 +140,63 @@ from fedimpute.evaluation import Evaluator
 
 evaluator = Evaluator()
 
-X_trains, y_trains = env.get_data(client_ids='all', data_type = 'train', include_y=True)
+X_train_imps, y_trains = env.get_data(client_ids='all', data_type = 'train_imp', include_y=True)
 X_tests, y_tests = env.get_data(client_ids='all', data_type = 'test', include_y=True)
-X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
 X_test_imps = env.get_data(client_ids='all', data_type = 'test_imp')
+X_global_test, y_global_test = env.get_data(data_type = 'global_test', include_y = True)
+X_global_test_imp = env.get_data(data_type = 'global_test_imp')
 data_config = env.get_data(data_type = 'config')
-
-ret = evaluator.evaluate_local_pred(
-    X_train_imps = X_train_imps,
-    y_trains = y_trains,
-    X_tests = X_test_imps,
-    y_tests = y_tests,
-    data_config = data_config,
-    model = 'nn',
-    seed= 0
-)
-evaluator.show_local_pred_results()
 ```
 
     The autoreload extension is already loaded. To reload it, use:
       %reload_ext autoreload
     
 
-
-    Clients:   0%|          | 0/4 [00:00<?, ?it/s]
-
-
-    [1mEarly stopping at epoch 316[0m
-    [1mEarly stopping at epoch 324[0m
-    [1mEarly stopping at epoch 249[0m
-    [1mEarly stopping at epoch 288[0m
-    ==========================================================
-    Downstream Prediction (Local)
-    ==========================================================
-                 accuracy       f1         auc         prc
-    ----------  ----------  ----------  ----------  ----------
-     Client 1     0.607       0.645       0.708       0.742
-     Client 2     0.852       0.778       0.953       0.933
-     Client 3     0.909       0.952       0.100       0.848
-     Client 4     0.722       0.828       0.631       0.799
-    ----------  ----------  ----------  ----------  ----------
-     Average      0.773       0.801       0.598       0.831
-       Std        0.117       0.110       0.311       0.070
-    ==========================================================
-    
-
 ### Federated Prediction
 
 
 ```python
-X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
-X_test_imps = env.get_data(client_ids='all', data_type = 'test_imp')
-X_global_test_imp = env.get_data(data_type = 'global_test_imp')
+evaluator.run_fed_regression_analysis(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    data_config = data_config
+)
+evaluator.show_fed_regression_results()
+```
 
-_ , y_trains = env.get_data(
-    client_ids='all', data_type = 'train', include_y=True
-)
-_ , y_tests = env.get_data(
-    client_ids='all', data_type = 'test', include_y=True
-)
-_, y_global_test = env.get_data(
-    data_type = 'global_test', include_y = True
-)
-data_config = env.get_data(data_type = 'config')
+                          Federated Logit Regression Result                       
+    ==============================================================================
+    Dep. Variable:                    num   No. Observations:                  742
+    Model:                          Logit   Df Residuals:                      727
+    Method:                           MLE   Df Model:                           14
+    Date:                Mon, 21 Apr 2025   Pseudo R-squ.:                  0.4122
+    Time:                        16:45:26   Log-Likelihood:                -299.78
+    converged:                       True   LL-Null:                       -509.99
+    Covariance Type:            nonrobust   LLR p-value:                 6.246e-81
+    ==============================================================================
+                     coef    std err          z      P>|z|      [0.025      0.975]
+    ------------------------------------------------------------------------------
+    const         -2.0137      0.211     -9.561      0.000      -2.426      -1.601
+    age            1.2148      0.095     12.775      0.000       1.028       1.401
+    trestbps       0.7584      0.205      3.694      0.000       0.356       1.161
+    chol          -0.8222      0.082    -10.029      0.000      -0.983      -0.662
+    thalach       -1.2272      0.122    -10.030      0.000      -1.467      -0.987
+    oldpeak        4.1905      0.180     23.263      0.000       3.837       4.544
+    slope          0.9589      0.081     11.897      0.000       0.801       1.117
+    sex_1.0        1.2922      0.077     16.878      0.000       1.142       1.442
+    cp_2.0        -0.8841      0.072    -12.272      0.000      -1.025      -0.743
+    cp_3.0        -0.3322      0.060     -5.506      0.000      -0.450      -0.214
+    cp_4.0         1.1759      0.060     19.538      0.000       1.058       1.294
+    fbs_0.0       -1.6318      0.101    -16.154      0.000      -1.830      -1.434
+    fbs_1.0       -0.6695      0.103     -6.470      0.000      -0.872      -0.467
+    exang_0.0     -0.3233      0.037     -8.806      0.000      -0.395      -0.251
+    exang_1.0      0.7180      0.038     19.114      0.000       0.644       0.792
+    ==============================================================================
+    
 
-ret = evaluator.evaluate_fed_pred(
+
+```python
+ret = evaluator.run_fed_prediction(
     X_train_imps = X_train_imps,
     y_trains = y_trains,
     X_tests = X_test_imps,
@@ -229,42 +204,30 @@ ret = evaluator.evaluate_fed_pred(
     X_test_global = X_global_test_imp,
     y_test_global = y_global_test,
     data_config = data_config,
-    train_params = {
-        'global_epoch': 100,
-        'local_epoch': 10,
-        'fine_tune_epoch': 200,
-    },
+    model_name = 'lr',
     seed= 0
 )
 
-evaluator.show_fed_pred_results()
+evaluator.show_fed_prediction_results()
 ```
 
+    (149, 14) (149,)
+    
 
-    Global Epoch:   0%|          | 0/100 [00:00<?, ?it/s]
+                                                                    1.09it/s]
 
-
-    [1mEpoch 0 - average loss: 0.6512317483623822[0m
-    [1mEpoch 10 - average loss: 0.5921915372212728[0m
-    [1mEarly stopping at epoch 11[0m
-    [1mEpoch 20 - average loss: 0.544242156876458[0m
-    [1mEpoch 30 - average loss: 0.5479222436745962[0m
-    [1mEarly stopping at epoch 30[0m
-    [1mEpoch 40 - average loss: 0.5100965698560079[0m
-    [1mEarly stopping at epoch 49[0m
-    [1mEpoch 50 - average loss: 0.48613545298576355[0m
-    [1mEarly stopping at epoch 51[0m
-    [1mEarly stopping at epoch 72[0m
     ===============================================================
     Downstream Prediction (Fed)
     ===============================================================
      Personalized    accuracy       f1         auc         prc
     --------------  ----------  ----------  ----------  ----------
-       Client 1       0.679       0.710       0.815       0.838
-       Client 2       0.852       0.778       0.976       0.962
-       Client 3       0.909       0.952       0.700       0.970
-       Client 4       0.833       0.897       0.523       0.716
+       Client 1       0.714       0.692       0.713       0.771
+       Client 2       0.926       0.889       0.988       0.981
+       Client 3       0.364       0.533       0.000       0.798
+       Client 4       0.500       0.609       0.462       0.697
       ----------    ----------  ----------  ----------  ----------
-        Global        0.798       0.812       0.873       0.860
+        Global        0.809       0.804       0.891       0.903
     ===============================================================
+    
+
     

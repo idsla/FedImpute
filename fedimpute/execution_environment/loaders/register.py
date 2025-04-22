@@ -79,6 +79,71 @@ class Register:
         self.imputer_strategy_mapping = self._imputer_strategy_mapping()
         self.strategy_mapping = self._strategy_mapping()
 
+    def register_imputer(
+        self,
+        imputer_name: str,
+        imputer_class: Union[BaseMLImputer, BaseNNImputer],
+        workflow_name: str,
+        supported_fed_strategies: List[str]
+    ):
+        """
+        Register a new imputer to the environment
+
+        Args:
+            imputer_name: str, name of the imputer
+            imputer_class: Union[BaseMLImputer, BaseNNImputer], class of the imputer
+            workflow_name: str, name of the workflow
+            supported_fed_strategies: List[str], list of supported federated strategies
+        
+        Note:
+            This function will register the imputer to the environment.
+        """
+        if imputer_name in self.imputer_mapping:
+            raise ValueError(f"Imputer {imputer_name} already registered")
+        self.imputer_mapping[imputer_name] = imputer_class
+        self.imputer_workflow_mapping[imputer_name] = workflow_name
+        self.imputer_strategy_mapping[imputer_name] = supported_fed_strategies
+
+    def register_workflow(
+        self,
+        workflow_name: str,
+        workflow_class: BaseWorkflow
+    ):
+        """
+        Register a new workflow to the environment
+
+        Args:
+            workflow_name: str, name of the workflow
+            workflow_class: BaseWorkflow, class of the workflow
+        
+        Note:
+            This function will register the workflow to the environment. 
+        """
+        if workflow_name in self.workflow_mapping:
+            raise ValueError(f"Workflow {workflow_name} already registered")
+        self.workflow_mapping[workflow_name] = workflow_class
+
+    def register_strategy(
+        self,
+        strategy_name: str,
+        strategy_client: StrategyBaseClient,
+        strategy_server: Union[RawBaseStrategyServer, NNStrategyBaseServer]
+    ):
+        """
+        Register a new strategy to the environment
+
+        Args:
+            strategy_name: str, name of the strategy
+            strategy_client: StrategyBaseClient, class of the strategy client
+            strategy_server: Union[RawBaseStrategyServer, NNStrategyBaseServer], class of the strategy server
+        
+        Note:
+            This function will register the strategy to the environment.
+        """
+        if strategy_name in self.strategy_mapping:
+            raise ValueError(f"Strategy {strategy_name} already registered")
+        self.strategy_mapping[strategy_name] = (strategy_client, strategy_server)
+
     def _workflow_mapping(self):
         """
         Load the workflow mapping
@@ -92,18 +157,6 @@ class Register:
         }
 
         return workflow_mapping
-
-    def register_workflow(
-        self,
-        workflow_name: str,
-        workflow_class: BaseWorkflow
-    ):
-        """
-        Register a new workflow to the environment
-        """
-        if workflow_name in self.workflow_mapping:
-            raise ValueError(f"Workflow {workflow_name} already registered")
-        self.workflow_mapping[workflow_name] = workflow_class
 
     def _strategy_mapping(self):
         """
@@ -129,20 +182,6 @@ class Register:
         }
 
         return strategy_mapping
-    
-    def register_strategy(
-        self,
-        strategy_name: str,
-        strategy_client: StrategyBaseClient,
-        strategy_server: Union[RawBaseStrategyServer, NNStrategyBaseServer]
-    ):
-        """
-        Register a new strategy to the environment
-        """
-        if strategy_name in self.strategy_mapping:
-            raise ValueError(f"Strategy {strategy_name} already registered")
-        self.strategy_mapping[strategy_name] = (strategy_client, strategy_server)
-
 
     def _imputer_mapping(self):
         """
@@ -208,22 +247,6 @@ class Register:
         }
 
         return imputer_strategy_mapping
-    
-    def register_imputer(
-        self,
-        imputer_name: str,
-        imputer_class: Union[BaseMLImputer, BaseNNImputer],
-        workflow_name: str,
-        supported_fed_strategies: List[str]
-    ):
-        """
-        Register a new imputer to the environment
-        """
-        if imputer_name in self.imputer_mapping:
-            raise ValueError(f"Imputer {imputer_name} already registered")
-        self.imputer_mapping[imputer_name] = imputer_class
-        self.imputer_workflow_mapping[imputer_name] = workflow_name
-        self.imputer_strategy_mapping[imputer_name] = supported_fed_strategies
 
     def get_workflow_mapping(self):
         """

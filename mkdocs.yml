@@ -13,6 +13,7 @@ nav:
       - 'Basic Usage': 'tutorials/basic_usage.md'
       - 'Benchmarking Pipeline Demo': 'tutorials/benchmark.md'
       - 'Real World Distributed Imputation': 'tutorials/real_scenario.md' 
+      - 'Developing Customized Methods': 'tutorials/develop_new_method.md'
   - 'API Reference':
       - 'Scenario Builder': 'api/simulation.md'
       - 'Imputation Execution Environment': 'api/fed_impute.md'

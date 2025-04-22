@@ -10,6 +10,7 @@ The pipeline workflow begins with a constructed distributed data scenario. Users
 - `fed_imp_configs`: a list of configuration tuples, where each tuple specifies an imputer, associated federated
 aggregation strategies, and their parameters. 
 - `evaluation_aspects`: a list of evaluation criteria including imputation quality (`imp_quality`), local prediction (`local_pred`), and federated prediction (`fed_pred`).
+- `evaluation_params`: a dictionary to specify the evaluation process. It includes `metrics` a list specifying the aspects of evaluation and `model` which downstream task used for evaluation.
 
 Finally, the pipeline execution is via the `run_pipeline()` method, which takes a scenario object as input. It executes all configured algorithms on the input scenario, performs evaluations, and stores the results.
 
@@ -26,6 +27,10 @@ pipeline.setup(
         ('mice', ['local', 'fedmice'], {}, [{}, {}]),
         ('gain', ['local', 'fedavg'], {}, [{}, {}]),
     ],
+    evaluation_params = {
+        'metrics': ['imp_quality', 'local_pred', 'fed_pred'],
+        'model': 'lr',
+    },
     persist_data = False,
     description = 'benchmark demonstration'
 )
