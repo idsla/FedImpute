@@ -13,8 +13,9 @@ class BaseMLImputer(metaclass=ABCMeta):
     """
     Abstract class for the non-NN based imputer to be used in the federated imputation environment
     """
-    def __init__(self):
-        pass
+    def __init__(self, name: str, model_persistable: bool):
+        self.name = name
+        self.model_persistable = model_persistable
 
     @abstractmethod
     def get_imp_model_params(self, params: dict) -> OrderedDict:
@@ -83,6 +84,10 @@ class BaseMLImputer(metaclass=ABCMeta):
         Returns:
             np.ndarray: imputed data - numpy array - same dimension as X
         """
+        pass
+    
+    @abstractmethod
+    def get_fit_res(self, params: dict) -> dict:
         pass
 
     def save_model(self, model_path: str, version: str) -> None:

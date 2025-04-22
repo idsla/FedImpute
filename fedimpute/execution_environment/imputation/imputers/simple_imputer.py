@@ -24,7 +24,7 @@ class SimpleImputer(BaseMLImputer):
             self,
             strategy: str = 'mean'
     ):
-        super().__init__()
+        super().__init__('simple', True)
         if strategy not in ['mean']:
             raise ValueError(f"Strategy {strategy} not supported")
         self.strategy: str = strategy

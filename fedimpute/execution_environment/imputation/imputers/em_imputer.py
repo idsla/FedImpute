@@ -34,7 +34,7 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
             clip: bool = True,
             use_y: bool = False
     ):
-        super().__init__()
+        super().__init__('em', True)
 
         # estimator for numerical and categorical columns
         self.clip = clip

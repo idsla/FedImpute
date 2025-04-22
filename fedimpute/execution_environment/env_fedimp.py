@@ -24,6 +24,9 @@ class FedImputeEnv:
         debug_mode: bool = False
     ):
 
+        # registeration
+        self.register = Register()
+        
         # clients, server and workflow
         self.clients = None
         self.server = None
@@ -56,11 +59,7 @@ class FedImputeEnv:
                 format="<level>{message}</level>",
                 level="INFO"
             )
-        
-        # registeration
-        self.register = Register()
     
-
     def configuration(
         self, 
         imputer: str, 

@@ -95,11 +95,34 @@ evaluator.tsne_visualization(
 )
 ```
 
+### Local Regression Analysis
+
+The `run_local_regression_analysis()` method in the evaluation.Evaluator class provides functionality for evaluation via local regression analysis tasks. It accepts several parameters: 
+
+- `X_train_imps, y_trains`: lists of client-specific imputed training datasets and targets
+- `data_config`: the data configuration dictionary.
+
+The method returns a Dict containing evaluation results. Users can utilize the `show_local_regression_results()` method
+in the evaluation.Evaluator class to print a formatted output of the evaluation results.
+
+```{python} 
+X_trains, y_trains = env.get_data(client_ids='all', data_type = 'train', include_y=True)
+X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
+data_config = env.get_data(data_type = 'config')
+
+ret = evaluator.run_local_regression_analysis(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    data_config = data_config
+)
+evaluator.show_local_regression_results()
+```
+
 ### Local Prediction
 
 After missing data are imputed,  the downstream task prediction can be performed on imputed data.  During the data partition stage, we retain a local test dataset for each client and a global test dataset for global data.  These test datasets can be used to evaluate downstream prediction models trained on clients' local imputed datasets to measure  the goodness of imputation and how it influences the prediction.  
 
-The `evaluate_local_pred()` method in the evaluation.Evaluator class provides functionality for evaluation via local prediction tasks. It accepts several parameters: 
+The `run_local_prediction()` method in the evaluation.Evaluator class provides functionality for evaluation via local prediction tasks. It accepts several parameters: 
 
 - `X_train_imps, y_train`: lists of client-specific imputed training datasets and targets
 -  `X_tests, y_tests`: lists of client-specific local test datasets and targets
@@ -109,7 +132,7 @@ The `evaluate_local_pred()` method in the evaluation.Evaluator class provides fu
 The method trains prediction models for each client using the imputed training data and evaluates performance on the corresponding test data. For classification tasks, the evaluation metrics include accuracy, F1-score, Area Under the Receiver Operating Characteristic Curve (AUROC), and Area Under
 the Precision-Recall Curve (AUPRC). Mean squared error and R2 score are computed for regression tasks.
 
-`show_local_pred_results()` will give a formatted result summary for the evaluation.
+`show_local_prediction_results()` will give a formatted result summary for the evaluation.
 
 ```{python}
 X_trains, y_trains = env.get_data(client_ids='all', data_type = 'train', include_y=True)
@@ -127,18 +150,47 @@ ret = evaluator.evaluate_local_pred(
     model = 'nn',
     seed= 0
 )
-evaluator.show_local_pred_results()
+evaluator.show_local_prediction_results()
+```
+
+### Federated Regression Analysis
+
+The `run_fed_regression_analysis()` method in the evaluation.Evaluator class provides functionality for evaluation via federated regression analysis tasks. It accepts several parameters: 
+
+- `X_train_imps, y_trains`: lists of client-specific imputed training data and targets
+- `data_config`: the data configuration dictionary.
+
+The method returns a Dict containing evaluation results. Users can utilize the `show_fed_regression_results()` method
+in the evaluation.Evaluator class to print a formatted output of the evaluation results.
+
+```{python}
+X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
+X_trains, y_trains = env.get_data(
+    client_ids='all', data_type = 'train', include_y=True
+)
+data_config = env.get_data(data_type = 'config')
+
+ret = evaluator.run_fed_regression_analysis(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    data_config = data_config
+)
+evaluator.show_fed_regression_results()
 ```
 
 ### Federated Prediction
 
-We implement federated prediction functionality by evalute_fed_pred() method. The current implementation supports federated prediction using a two-layer neural network with Federated Averaging (FedAvg) as the federated learning strategy. We will include more federated models in the future. Similarly, it uses accuracy, F1-Score, AUROC, AUPRC for classification tasks, and mean square error, R2 score for regression tasks. 
+We implement federated prediction functionality by `run_fed_prediction()` method. The current implementation supports federated prediction using a two-layer neural network with Federated Averaging (FedAvg) as the federated learning strategy. We will include more federated models in the future. Similarly, it uses accuracy, F1-Score, AUROC, AUPRC for classification tasks, and mean square error, R2 score for regression tasks. 
 
 It accepts multiple parameters: 
 
 - `X_train_imps, y_trains`: lists of client-specific imputed training data and targets
 - `X_tests, y_tests`: lists of client-specific local test data and targets
 - `X_test_global, y_test_global`: global test data 
+- `model_name`: the name of the model to be used for federated prediction. Currently, federated models including`lr`, `svm`, `rf`, `xgboost`, `nn` are supported.
+- `train_params`: the parameters for the federated learning training.
+- `model_params`: the parameters for the model.
+- `seed`: the random seed for the evaluation.
 
 The method returns a Dict containing evaluation results. Users can utilize the `show_fed_pred_result()` method
 in the evaluation.Evaluator class to print a formatted output of the evaluation results.
@@ -156,7 +208,7 @@ X_global_test, y_global_test = env.get_data(
 )
 data_config = env.get_data(data_type = 'config')
 
-ret = evaluator.evaluate_fed_pred(
+ret = evaluator.run_fed_prediction(
     X_train_imps = X_train_imps,
     X_train_origins = X_trains,
     y_trains = y_trains,
@@ -173,10 +225,10 @@ ret = evaluator.evaluate_fed_pred(
     seed= 0
 )
 
-evaluator.show_fed_pred_results()
+evaluator.show_fed_prediction_results()
 ```
 
 ## Save Evaluation Results
 
 The evaluation module provides convenient interfaces for presenting and exporting the results. All evaluation functions return results in a dictionary format, which can be formatted into readable tables through dedicated display functions, including `show_imp_results()`,
-`show_local_pred_results()`, `show_fed_pred_results()` for each evaluation aspects. For further analysis and reporting, the `export_results()` method supports exporting results to different formats, including `pandas.DataFrame` and structured dictionaries.
+`show_local_prediction_results()`, `show_fed_prediction_results()` for each evaluation aspects. For further analysis and reporting, the `export_results()` method supports exporting results to different formats, including `pandas.DataFrame` and structured dictionaries.

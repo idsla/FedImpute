@@ -38,7 +38,7 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
             clip: bool = True,
             use_y: bool = False,
     ):
-        super().__init__()
+        super().__init__('missforest', False)
 
         # estimator for numerical and categorical columns
         self.clip = clip

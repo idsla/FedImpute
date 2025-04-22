@@ -221,7 +221,8 @@ class Register:
         """
         if imputer_name in self.imputer_mapping:
             raise ValueError(f"Imputer {imputer_name} already registered")
-        self.imputer_mapping[imputer_name] = (imputer_class, workflow_name)
+        self.imputer_mapping[imputer_name] = imputer_class
+        self.imputer_workflow_mapping[imputer_name] = workflow_name
         self.imputer_strategy_mapping[imputer_name] = supported_fed_strategies
 
     def get_workflow_mapping(self):

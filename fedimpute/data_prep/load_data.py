@@ -47,7 +47,7 @@ def load_data(data_name: str):
         df = pd.concat(dfs, axis=0).reset_index(drop=True)
         split_indices = np.cumsum([0] + [df_sub.shape[0] for df_sub in dfs])
         
-        cat_cols = ['sex', 'cp', 'fbs', 'restecg', 'exang', 'thal']
+        cat_cols = ['sex', 'cp', 'fbs', 'exang']
         num_cols = ['age', 'trestbps', 'chol', 'thalach', 'oldpeak', 'slope']
         drop_cols = ['ca']
         target_col = 'num'
