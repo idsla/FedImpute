@@ -1,14 +1,3 @@
-```python
-cd ..
-```
-
-    d:\min\research_projects\FedImpute
-    
-
-    d:\min\research_projects\FedImpute\.venv\Lib\site-packages\IPython\core\magics\osm.py:417: UserWarning: This is now an optional IPython functionality, setting dhist requires you to install the `pickleshare` library.
-      self.shell.db['dhist'] = compress_dhist(dhist)[-100:]
-    
-
 # Load Dataset
 
 We first load `codrna` dataset from fedimpute.
