@@ -334,3 +334,9 @@ class FedImputeEnv:
             return self.server.data_config
         else:
             raise ValueError(f"Invalid data type: {data_type}")
+
+    def __str__(self):
+        return f"FedImpute Environment"
+
+    def __repr__(self):
+        return f"FedImpute Environment"

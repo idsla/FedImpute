@@ -997,3 +997,8 @@ class ScenarioBuilder:
         else:
             plt.show()
         
+    def __str__(self):
+        return f"Scenario Builder"
+
+    def __repr__(self):
+        return f"Scenario Builder"

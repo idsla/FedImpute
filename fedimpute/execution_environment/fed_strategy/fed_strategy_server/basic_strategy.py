@@ -74,6 +74,12 @@ class CentralStrategyServer(RawBaseStrategyServer):
     
     def get_global_model_params(self) -> Union[OrderedDict, None]:
         return self.global_model_params_dict
+    
+    def __str__(self):
+        return f"Central Strategy Server"
+
+    def __repr__(self):
+        return f"Central Strategy Server"
 
 
 class LocalStrategyServer(RawBaseStrategyServer):
@@ -106,6 +112,12 @@ class LocalStrategyServer(RawBaseStrategyServer):
     
     def get_global_model_params(self) -> Union[OrderedDict, None]:
         return None
+    
+    def __str__(self):
+        return f"Local Strategy Server"
+    
+    def __repr__(self):
+        return f"Local Strategy Server"
 
 
 class SimpleAvgStrategyServer(RawBaseStrategyServer):
@@ -159,22 +171,44 @@ class SimpleAvgStrategyServer(RawBaseStrategyServer):
     def get_global_model_params(self) -> Union[OrderedDict, None]:
         return self.global_model_params_dict
     
+    def __str__(self):
+        return f"Simple Average Strategy Server"
+    
+    def __repr__(self):
+        return f"Simple Average Strategy Server"
 
 class FedMICEStrategyServer(SimpleAvgStrategyServer):
 
     def __init__(self):
         super().__init__('fedavg', 'fedmice', 0)
         
+    def __str__(self):
+        return f"FedMICE Strategy Server"
+    
+    def __repr__(self):
+        return f"FedMICE Strategy Server"
+        
 class FedEMStrategyServer(SimpleAvgStrategyServer):
 
     def __init__(self):
         super().__init__('fedavg', 'fedem', 0)
+        
+    def __str__(self):
+        return f"FedEM Strategy Server"
+    
+    def __repr__(self):
+        return f"FedEM Strategy Server"
         
 class FedMeanStrategyServer(SimpleAvgStrategyServer):
 
     def __init__(self):
         super().__init__('fedavg', 'fedmean', 0)
 
+    def __str__(self):
+        return f"FedMean Strategy Server"
+    
+    def __repr__(self):
+        return f"FedMean Strategy Server"
 
 class FedTreeStrategyServer(RawBaseStrategyServer):
 
@@ -227,3 +261,10 @@ class FedTreeStrategyServer(RawBaseStrategyServer):
     
     def get_global_model_params(self) -> Union[OrderedDict, None]:
         return self.global_model_params_dict
+    
+    def __str__(self):
+        return f"FedTree Strategy Server"
+    
+    def __repr__(self):
+        return f"FedTree Strategy Server"
+

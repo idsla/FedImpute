@@ -7,6 +7,12 @@ class FedAvgFtStrategyServer(FedAvgStrategyServer):
 
     def __init__(self, fine_tune_epochs: int = 100):
         super(FedAvgFtStrategyServer, self).__init__(fine_tune_epochs)
+    
+    def __str__(self):
+        return f"FedAvgFt Strategy Server"
+
+    def __repr__(self):
+        return f"FedAvgFt Strategy Server"
 
 # from copy import deepcopy
 # from typing import List, Tuple

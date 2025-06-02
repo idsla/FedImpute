@@ -186,3 +186,11 @@ class ScaffoldStrategyClient(StrategyBaseClient):
         return {
             'loss': self.loss, 'delta_y': self.delta_y, 'delta_c': self.delta_c
         }
+        
+    def __str__(self):
+        return f"Scaffold Strategy Client"
+
+    def __repr__(self):
+        return f"Scaffold Strategy Client"
+
+

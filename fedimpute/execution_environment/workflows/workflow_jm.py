@@ -554,3 +554,9 @@ class WorkflowJM(BaseWorkflow):
             loguru.logger.debug(
                 f"Client {idx}: {eval_results['imp_rmse_clients'][idx]}, {eval_results['imp_ws_clients'][idx]}"
             )
+            
+    def __str__(self):
+        return f"Joint Modeling Workflow"
+
+    def __repr__(self):
+        return f"Joint Modeling Workflow"

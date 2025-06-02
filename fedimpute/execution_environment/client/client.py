@@ -333,3 +333,9 @@ class Client:
             loguru.logger.debug(
                 "| MR Cols (Test): {} |".format(np.array2string(ms_ratio_cols, precision=2, suppress_small=True))
             )
+             
+    def __str__(self):
+        return f"Client {self.client_id}"
+
+    def __repr__(self):
+        return f"Client {self.client_id}"   

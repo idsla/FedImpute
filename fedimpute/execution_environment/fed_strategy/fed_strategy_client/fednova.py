@@ -328,6 +328,13 @@ class FedNovaStrategyClient(StrategyBaseClient):
         return local_model, {
             'loss': final_loss, 'sample_size': len(train_dataloader.dataset),
         }
+    
+    def __str__(self):
+        return f"FedNova Strategy Client"
+
+    def __repr__(self):
+        return f"FedNova Strategy Client"
+
 
 
 """

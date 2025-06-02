@@ -440,3 +440,10 @@ class WorkflowEM(BaseWorkflow):
             clients_converged.append(converged)
 
         return clients_converged
+
+    def __str__(self):
+        return f"EM (Expectation Maximization) Workflow"
+
+    def __repr__(self):
+        return f"EM (Expectation Maximization) Workflow"
+

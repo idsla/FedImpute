@@ -66,36 +66,78 @@ class LocalStrategyClient(BasicStrategyClient):
     def __init__(self):
         self.name = 'local'
         self.description = 'Local'
+        
+    def __str__(self):
+        return f"Local Strategy Client"
+
+    def __repr__(self):
+        return f"Local Strategy Client"
 
 class CentralStrategyClient(BasicStrategyClient):
     def __init__(self):
         self.name = 'central'
         self.description = 'Centralized'
+    
+    def __str__(self):
+        return f"Central Strategy Client"
+
+    def __repr__(self):
+        return f"Central Strategy Client"
 
 class SimpleAvgStrategyClient(BasicStrategyClient):
     def __init__(self):
         self.name = 'simple_avg'
         self.description = 'Simple Averaging'
+    
+    def __str__(self):
+        return f"Simple Average Strategy Client"
+
+    def __repr__(self):
+        return f"Simple Average Strategy Client"
 
 class FedMeanStrategyClient(SimpleAvgStrategyClient):
     def __init__(self):
         self.name = 'fedmean'
         self.description = 'Federated Mean with simple averaging'
 
+    def __str__(self):
+        return f"Federated Mean Strategy Client"
+
+    def __repr__(self):
+        return f"Federated Mean Strategy Client"
+
 class FedMICEStrategyClient(SimpleAvgStrategyClient):
     def __init__(self):
         self.name = 'fedmice'
         self.description = 'Federated MICE with simple averaging'
+    
+    def __str__(self):
+        return f"Federated MICE Strategy Client"
+
+    def __repr__(self):
+        return f"Federated MICE Strategy Client"
 
 class FedEMStrategyClient(SimpleAvgStrategyClient):
     def __init__(self):
         self.name = 'fedem'
         self.description = 'Federated EM with simple averaging'
 
+    def __str__(self):
+        return f"Federated EM Strategy Client"
+
+    def __repr__(self):
+        return f"Federated EM Strategy Client"
+
 class FedTreeStrategyClient(BasicStrategyClient):
 
     def __init__(self):
         self.name = 'fedavg'
         self.description = 'Federated Tree'
+
+    def __str__(self):
+        return f"Federated Tree Strategy Client"
+
+    def __repr__(self):
+        return f"Federated Tree Strategy Client"
 
 

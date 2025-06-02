@@ -150,3 +150,9 @@ class WorkflowICEGrad(BaseWorkflow):
             self, clients: List[Client], server: Server, evaluator: Evaluator, tracker: Tracker, train_params: dict
     ) -> Tracker:
         return tracker
+
+    def __str__(self):
+        return f"ICEGrad Workflow"
+
+    def __repr__(self):
+        return f"ICEGrad Workflow"

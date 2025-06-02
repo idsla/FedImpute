@@ -187,3 +187,9 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
         gc.collect()
 
         return x_imp
+    
+    def __str__(self):
+        return f"GAIN Imputer"
+
+    def __repr__(self):
+        return f"GAIN Imputer"

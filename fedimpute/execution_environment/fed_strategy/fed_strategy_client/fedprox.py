@@ -133,4 +133,10 @@ class FedproxStrategyClient(StrategyBaseClient):
 
     def get_fit_res(self, local_model: torch.nn.Module, params: dict) -> dict:
         return {'loss': self.loss}
+    
+    def __str__(self):
+        return f"FedProx Strategy Client"
+    
+    def __repr__(self):
+        return f"FedProx Strategy Client"
 

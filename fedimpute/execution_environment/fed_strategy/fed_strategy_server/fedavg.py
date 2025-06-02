@@ -95,3 +95,9 @@ class FedAvgStrategyServer(NNStrategyBaseServer):
     
     def get_global_model_params(self) -> Union[OrderedDict, None]:
         return convert_params_format(self.global_model_params_dict, output_type='state_dict')
+    
+    def __str__(self):
+        return f"FedAvg Strategy Server"
+
+    def __repr__(self):
+        return f"FedAvg Strategy Server"

@@ -156,3 +156,9 @@ class WorkflowSimple(BaseWorkflow):
             p.close()
 
         return tracker
+    
+    def __str__(self):
+        return f"Simple Imputation Workflow"
+
+    def __repr__(self):
+        return f"Simple Imputation Workflow"

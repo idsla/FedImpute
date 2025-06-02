@@ -81,4 +81,10 @@ class ScaffoldStrategyServer(NNStrategyBaseServer):
     
     def get_global_model_params(self) -> Union[OrderedDict, None]:
         return get_parameters(self.global_model, trainable_only=True, return_type='state_dict')
+    
+    def __str__(self):
+        return f"Scaffold Strategy Server"
+
+    def __repr__(self):
+        return f"Scaffold Strategy Server"
 

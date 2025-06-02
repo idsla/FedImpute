@@ -46,3 +46,10 @@ class LocalNNStrategyServer(NNStrategyBaseServer):
     
     def get_global_model_params(self) -> Union[OrderedDict, None]:
         return None
+    
+    def __str__(self):
+        return f"LocalNNStrategyServer"
+
+    def __repr__(self):
+        return f"LocalNNStrategyServer"
+

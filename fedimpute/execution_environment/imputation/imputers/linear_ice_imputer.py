@@ -231,3 +231,9 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
             raise ValueError("Feature index not found in params")
         
         return self.fit_res_history[feature_idx][-1]
+
+    def __str__(self):
+        return f"Linear ICE Imputer"
+
+    def __repr__(self):
+        return f"Linear ICE Imputer"

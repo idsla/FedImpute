@@ -178,9 +178,15 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         pass
 
     def get_fit_res(self, params: dict) -> dict:
-            try:
-                feature_idx = params['feature_idx']
-            except KeyError:
-                raise ValueError("Feature index not found in params")
-            
-            return self.fit_res_history[feature_idx][-1]
+        try:
+            feature_idx = params['feature_idx']
+        except KeyError:
+            raise ValueError("Feature index not found in params")
+        
+        return self.fit_res_history[feature_idx][-1]
+    
+    def __str__(self):
+        return f"MissForest Imputer"
+    
+    def __repr__(self):
+        return f"MissForest Imputer"

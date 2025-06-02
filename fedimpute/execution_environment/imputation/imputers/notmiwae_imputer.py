@@ -264,3 +264,9 @@ class NotMIWAEImputer(BaseNNImputer, JMImputerMixin):
                 x_imp[:, i] = np.clip(x_imp[:, i], self.min_values[i], self.max_values[i])
 
         return x_imp
+    
+    def __str__(self):
+        return f"NotMIWAE Imputer"
+
+    def __repr__(self):
+        return f"NotMIWAE Imputer"

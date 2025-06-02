@@ -473,4 +473,9 @@ class WorkflowICE(BaseWorkflow):
             other_info_calculated[f"loss"][client_idx] = avg_metric
         
         return other_info_calculated
-        
+    
+    def __str__(self):
+        return f"ICE (Imputation via Chain Equation) Workflow"
+
+    def __repr__(self):
+        return f"ICE (Imputation via Chain Equation) Workflow"

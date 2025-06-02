@@ -256,3 +256,9 @@ class EMImputer(BaseMLImputer, ICEImputerMixin):
     def get_fit_res(self, params: dict) -> dict:
         
         return self.fit_res_history[-1]
+
+    def __str__(self):
+        return f"EM Imputer"
+
+    def __repr__(self):
+        return f"EM Imputer"
