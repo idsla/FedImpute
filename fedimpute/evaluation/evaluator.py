@@ -282,8 +282,7 @@ class Evaluator:
             N2 = imputed_data.shape[0]
             colors = [color_mapping['original'] for i in range(N1)] + [color_mapping['imputed'] for i in range(N2)]
             tsne = TSNE(
-                metric='precomputed', n_components=2, verbose=0, n_iter=1000, perplexity=40,
-                n_iter_without_progress=300, init='random', n_jobs=-1, random_state=seed
+                metric='precomputed', n_components=2, verbose=0, n_iter=1000, perplexity=40, init='random', n_jobs=-1, random_state=seed
             )
 
             tsne_results = tsne.fit_transform(np.clip(gower.gower_matrix(plot_data), 0, 1))

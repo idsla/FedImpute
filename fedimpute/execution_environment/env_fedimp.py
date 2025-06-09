@@ -111,10 +111,10 @@ class FedImputeEnv:
 
     def setup_from_data(
         self, 
-        clients_train_data: List[np.ndarray], 
-        clients_test_data: List[np.ndarray],
-        clients_train_data_ms: List[np.ndarray], 
-        global_test: np.ndarray,
+        clients_train_data: List[pd.DataFrame], 
+        clients_test_data: List[pd.DataFrame],
+        clients_train_data_ms: List[pd.DataFrame], 
+        global_test: pd.DataFrame,
         data_config: dict, 
         verbose: int = 0
     ):

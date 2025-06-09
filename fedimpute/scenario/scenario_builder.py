@@ -459,13 +459,13 @@ class ScenarioBuilder:
             print("Simulation done. Using summary function to check the simulation results.")
 
         return {
-            'clients_train_data': clients_train_data,
-            'clients_test_data': clients_test_data,
-            'clients_train_data_ms': clients_train_data_ms,
+            'clients_train_data': self.clients_train_data,
+            'clients_test_data': self.clients_test_data,
+            'clients_train_data_ms': self.clients_train_data_ms,
             'clients_seeds': client_seeds,
-            'global_test_data': global_test_data,
-            'data_config': data_config,
-            'stats': stats
+            'global_test_data': self.global_test,
+            'data_config': self.data_config,
+            'stats': self.stats
         }
 
     def create_simulated_scenario_lite(
@@ -672,7 +672,8 @@ class ScenarioBuilder:
     def summarize_scenario(
         self, 
         log_to_file: bool = False, 
-        file_path: str = None
+        file_path: str = None,
+        return_summary: bool = False
     ):
         
         clients_train_data = self.clients_train_data
@@ -680,6 +681,17 @@ class ScenarioBuilder:
         clients_train_data_ms = self.clients_train_data_ms
         global_test_data = self.global_test
         clients_seeds = self.clients_seeds
+        
+        if (
+            clients_train_data_ms is None
+        ) or (
+            clients_test_data is None
+        ) or (
+            clients_train_data is None
+        ) or (
+            global_test_data is None
+        ):
+            return "Scenario is not initialized."
         
         ################################################################################################
         # Summarizing Report
@@ -751,7 +763,10 @@ class ScenarioBuilder:
             with open(file_path, 'w') as file:
                 file.write(summary)
         else:
-            print(summary)
+            if return_summary:
+                return summary
+            else:
+                print(summary)
 
     def show_missing_data_details(
         self, 
@@ -998,7 +1013,7 @@ class ScenarioBuilder:
             plt.show()
         
     def __str__(self):
-        return f"Scenario Builder"
+        return f"This is the Scenario Builder Object.\n " + self.summarize_scenario(return_summary=True)
 
     def __repr__(self):
-        return f"Scenario Builder"
+        return f"This is the Scenario Builder Object.\n " + self.summarize_scenario(return_summary=True)
