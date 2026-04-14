@@ -1,0 +1,64 @@
+Loading data...
+==================================================================
+Scenario Summary
+==================================================================
+Total clients: 4
+Global Test Data: (94, 15)
+Missing Mechanism Category: MCAR
+Clients Data Summary:
+     Train     Test      Miss     MS Ratio    MS Feature    Seed
+--  --------  -------  --------  ----------  ------------  ------
+C1  (244,15)  (28,15)  (244,14)     0.00         0/14       6077
+C2  (237,15)  (27,15)  (237,14)     0.05         4/14       577
+C3  (99,15)   (11,15)  (99,14)      0.01         3/14       7231
+C4  (162,15)  (18,15)  (162,14)     0.10         5/14       5504
+==================================================================
+
+Running federated imputation...
+Setting up clients...
+Setting up server...
+Setting up workflow...
+Environment setup complete.
+============================================================
+Environment Information:
+============================================================
+Workflow: ICE (Imputation via Chain Equation)
+Clients:
+ - Client 0: imputer: mice, fed-strategy: fedmice
+ - Client 1: imputer: mice, fed-strategy: fedmice
+ - Client 2: imputer: mice, fed-strategy: fedmice
+ - Client 3: imputer: mice, fed-strategy: fedmice
+Server: fed-strategy: fedmice
+============================================================
+
+Imputation Start ...
+Finished. Running time: 0.7065 seconds
+Running federated regression analysis...
+                      Federated Logit Regression Result                       
+==============================================================================
+Dep. Variable:                    num   No. Observations:                  742
+Model:                          Logit   Df Residuals:                      727
+Method:                           MLE   Df Model:                           14
+Date:                Mon, 09 Jun 2025   Pseudo R-squ.:                  0.4122
+Time:                        12:37:03   Log-Likelihood:                -299.78
+converged:                       True   LL-Null:                       -509.99
+Covariance Type:            nonrobust   LLR p-value:                 6.246e-81
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const         -2.0137      0.211     -9.561      0.000      -2.426      -1.601
+age            1.2148      0.095     12.775      0.000       1.028       1.401
+trestbps       0.7584      0.205      3.694      0.000       0.356       1.161
+chol          -0.8222      0.082    -10.029      0.000      -0.983      -0.662
+thalach       -1.2272      0.122    -10.030      0.000      -1.467      -0.987
+oldpeak        4.1905      0.180     23.263      0.000       3.837       4.544
+slope          0.9589      0.081     11.897      0.000       0.801       1.117
+sex_1.0        1.2922      0.077     16.878      0.000       1.142       1.442
+cp_2.0        -0.8841      0.072    -12.272      0.000      -1.025      -0.743
+cp_3.0        -0.3322      0.060     -5.506      0.000      -0.450      -0.214
+cp_4.0         1.1759      0.060     19.538      0.000       1.058       1.294
+fbs_0.0       -1.6318      0.101    -16.154      0.000      -1.830      -1.434
+fbs_1.0       -0.6695      0.103     -6.470      0.000      -0.872      -0.467
+exang_0.0     -0.3233      0.037     -8.806      0.000      -0.395      -0.251
+exang_1.0      0.7180      0.038     19.114      0.000       0.644       0.792
+==============================================================================

@@ -27,13 +27,13 @@ Install from package repo:
 git clone https://github.com/idsla/FedImpute
 cd FedImpute
 
-python -m venv ./venv
+python -m venv .venv
 
 # window gitbash
-source ./venv/Scripts/activate
+source .venv/Scripts/activate
 
 # linux/unix
-source ./venv/bin/activate
+source .venv/bin/activate
 
 # Install the required packages
 pip install -r requirements.txt
