@@ -82,11 +82,12 @@ class ScenarioBuilder:
         self.obs_cols: Union[str, List[int]] = 'random'
         self.ms_global_mechanism: bool = False
         self.ms_mr_dist_clients: str = 'randu-int'
+        self.ms_mr_clients: Any = (0.3, 0.7)
         self.ms_mf_dist_clients: str = 'identity'  # TODO
         self.ms_mm_dist_clients: str = 'random'
         self.ms_missing_features: str = 'all'
-        self.ms_mr_lower: float = 0.3
-        self.ms_mr_upper: float = 0.7
+        self.ms_mr_lower: float = 0.1
+        self.ms_mr_upper: float = 0.9
         self.ms_mm_funcs_bank: str = 'lr'
         self.ms_mm_strictness: bool = True
         self.ms_mm_obs: bool = False
@@ -117,11 +118,12 @@ class ScenarioBuilder:
         ms_mech_type: str = 'mcar',
         ms_global_mechanism: bool = False,
         ms_mr_dist_clients: str = 'randu',
+        ms_mr_clients: Any = (0.3, 0.7),
         ms_mf_dist_clients: str = 'identity',  # TODO
         ms_mm_dist_clients: str = 'random',
         ms_missing_features: str = 'all',
-        ms_mr_lower: float = 0.3,
-        ms_mr_upper: float = 0.7,
+        ms_mr_lower: float = 0.1,
+        ms_mr_upper: float = 0.9,
         ms_mm_funcs_bank: str = 'lr',
         ms_mm_strictness: bool = True,
         ms_mm_obs: bool = False,
@@ -130,7 +132,6 @@ class ScenarioBuilder:
         seed: int = 100330201,
         verbose: int = 0
     ) -> Dict[str, List[np.ndarray]]:
-
         """
         Simulate missing data scenario
 
@@ -154,12 +155,13 @@ class ScenarioBuilder:
             ms_cols (Union[str, List[int]]): missing columns, default: 'all' - `all`, `all-num`, `random`
             obs_cols (Union[str, List[int]]): fully observed columns for MAR, default: 'random' - `random`, `rest`
             ms_global_mechanism (bool): global missing mechanism, default: False
-            ms_mr_dist_clients (str): missing ratio distribution, default: 'randu-int' - 'fixed', 'uniform', 'uniform_int', 'gaussian', 'gaussian_int'
+            ms_mr_dist_clients (str): missing ratio distribution, default: 'randu' - 'randu', 'randu-int', 'randn', 'randn-int'
+            ms_mr_clients (Any): client-level missing ratio settings, default: (0.3, 0.7)
             ms_mf_dist_clients (str): missing features distribution, default: 'identity' - 'identity', 'random', 'random2'
             ms_mm_dist_clients (str): missing mechanism functions distribution, default: 'random' - 'identity', 'random', 'random2'
             ms_missing_features (str): missing features strategy, default: 'all' - 'all', 'all-num'
-            ms_mr_lower (float): minimum missing ratio for each feature, default: 0.3
-            ms_mr_upper (float): maximum missing ratio for each feature, default: 0.7
+            ms_mr_lower (float): missing ratio lower clipping bound, default: 0.1
+            ms_mr_upper (float): missing ratio upper clipping bound, default: 0.9
             ms_mm_funcs_bank (str): missing mechanism functions banks, default: 'lr' - None, 'lr', 'mt', 'all'
             ms_mm_strictness (bool): missing adding probabilistic or deterministic, default: True
             ms_mm_obs (bool): missing adding based on observed data, default: False
@@ -256,6 +258,7 @@ class ScenarioBuilder:
         self.obs_cols = obs_cols
         self.ms_global_mechanism = ms_global_mechanism
         self.ms_mr_dist_clients = ms_mr_dist_clients
+        self.ms_mr_clients = ms_mr_clients
         self.ms_mf_dist_clients = ms_mf_dist_clients
         self.ms_mm_dist_clients = ms_mm_dist_clients
         self.ms_missing_features = ms_missing_features
@@ -419,6 +422,7 @@ class ScenarioBuilder:
             mf_strategy=ms_missing_features, 
             mf_dist=ms_mf_dist_clients,
             mr_dist=ms_mr_dist_clients, 
+            ms_mr_clients=ms_mr_clients,
             mr_lower=ms_mr_lower, 
             mr_upper=ms_mr_upper,
             mm_funcs_dist=ms_mm_dist_clients, 
@@ -481,8 +485,9 @@ class ScenarioBuilder:
         ms_scenario: str = 'mcar',
         ms_cols: Union[str, List[int]] = 'all',
         obs_cols: Union[str, List[int]] = 'random',
-        ms_mr_lower: float = 0.3,
-        ms_mr_upper: float = 0.7,
+        ms_mr_clients: Any = (0.3, 0.7),
+        ms_mr_lower: float = 0.1,
+        ms_mr_upper: float = 0.9,
         seed: int = 100330201,
         verbose: int = 0,
     ):
@@ -501,8 +506,9 @@ class ScenarioBuilder:
             obs_cols (Union[str, List[int]]): fully observed columns for MAR, default: 'random' - 'random', 'rest'
             dp_min_samples (Union[float, int]): minimum samples for clients, default: 50
             dp_max_samples (Union[float, int]): maximum samples for clients, default: 8000
-            ms_mr_lower (float): minimum missing ratio for each feature, default: 0.3
-            ms_mr_upper (float): maximum missing ratio for each feature, default: 0.7
+            ms_mr_clients (Any): client-level missing ratio settings, default: (0.3, 0.7)
+            ms_mr_lower (float): final missing ratio lower clipping bound, default: 0.1
+            ms_mr_upper (float): final missing ratio upper clipping bound, default: 0.9
             seed (int): random seed, default: 100330201
             verbose (int): whether verbose the simulation process, default: 0
 
@@ -580,6 +586,7 @@ class ScenarioBuilder:
             obs_cols=obs_cols,
             ms_global_mechanism=ms_global_mechanism,
             ms_mr_dist_clients=ms_mr_dist_clients,
+            ms_mr_clients=ms_mr_clients,
             ms_mm_dist_clients=ms_mm_dist_clients,
             ms_mr_lower=ms_mr_lower,
             ms_mr_upper=ms_mr_upper,

@@ -1,36 +1,117 @@
-from typing import Tuple, List
+from numbers import Real
+from typing import Any, List, Tuple
 
 import numpy as np
 import scipy.stats as stats
 
 
+MR_RANGE_BANK = {
+    'extra-small': (0.1, 0.2),
+    'small': (0.2, 0.4),
+    'moderate': (0.4, 0.6),
+    'large': (0.6, 0.8),
+    'extra-large': (0.8, 0.9),
+}
+
+def _validate_missing_ratio(value: Any) -> float:
+    
+    if not (isinstance(value, Real) and not isinstance(value, bool)):
+        raise ValueError(f'should be a numeric value.')
+
+    value = float(value)
+    if value < 0 or value > 1:
+        raise ValueError(f'should be in [0, 1].')
+
+    return value
+
+
+def resolve_ms_mr_clients(ms_mr_clients: Any, num_clients: int) -> List[Tuple[float, float]]:
+    """
+    Normalize client missing ratio settings to a list of per-client ratio ranges.
+
+    :param ms_mr_clients: scalar, tuple range, or list of scalars/ranges/bucket names
+    :param num_clients: number of clients
+    :return: list of tuple ranges with length num_clients
+    """
+    def _resolve_missing_ratio_entry(value: Any) -> Tuple[float, float]:
+    
+        if isinstance(value, str):
+            if value not in MR_RANGE_BANK:
+                raise ValueError(f'Unknown missing ratio bucket: {value}.')
+            return MR_RANGE_BANK[value]
+        
+        if isinstance(value, Real) and not isinstance(value, bool):
+            ratio = _validate_missing_ratio(value)
+            return ratio, ratio
+
+        if isinstance(value, tuple):
+            if len(value) != 2:
+                raise ValueError('Missing ratio range tuple should be of length 2.')
+            lower, upper = value
+            lower = _validate_missing_ratio(lower)
+            upper = _validate_missing_ratio(upper)
+            if lower > upper:
+                raise ValueError('Lower bound should be less than or equal to upper bound.')
+            return lower, upper
+
+        raise ValueError(
+            f'ms_mr_clients should be a numeric value, a ratio range tuple, or a predefined ratio bucket.'
+        )
+    
+
+    if num_clients <= 0:
+        raise ValueError('num_clients should be greater than 0.')
+
+    # if it's already a list, validate each entry and return the list of resolved ranges
+    if isinstance(ms_mr_clients, list):
+        if len(ms_mr_clients) == 0:
+            raise ValueError('ms_mr_clients should not be an empty list.')
+        if len(ms_mr_clients) != num_clients:
+            raise ValueError('Length of ms_mr_clients should be equal to num_clients.')
+        return [
+            _resolve_missing_ratio_entry(value)
+            for idx, value in enumerate(ms_mr_clients)
+        ]
+    
+    # for scalar or tuple input, apply the same setting to all clients
+    else:
+        mr_range = _resolve_missing_ratio_entry(ms_mr_clients)
+        return [mr_range for _ in range(num_clients)]
+
+
 def generate_missing_ratios(
-        dist: str, ms_range: Tuple[float, float], num_clients: int, num_cols: int, seed: int
+    dist: str,
+    ms_range: List[Tuple[float, float]],
+    num_clients: int,
+    num_cols: int,
+    seed: int,
+    mr_lower: float = 0.1,
+    mr_upper: float = 0.9
 ) -> List[List[float]]:
     """
     Generate missing ratios for each client and each feature
     Options:
     - fixed: missing ratio is fixed for all clients and features
-    - uniform: missing ratio is uniformly distributed between ms_range[0] and ms_range[1]
+    - uniform: missing ratio is uniformly distributed between each client's range
     - gaussian: missing ratio is truncated normal distributed with mu=dist_params['mu'] and sigma=dist_params['loc']
-    - uniform_int: missing ratio is uniformly distributed between ms_range[0] and ms_range[1] with step 0.1
+    - uniform_int: missing ratio is uniformly distributed between each client's range with step 0.1
     - gaussian_int: missing ratio is truncated normal distributed with mu=dist_params['mu'] and sigma=dist_params['loc']
 
     :param dist: distribution type - support fixed, uniform, gaussian, uniform_int
-    :param ms_range: missing ratios upper and lower bounds
+    :param ms_range: missing ratio lower and upper bounds for each client
     :param num_clients: number of clients
     :param num_cols:  number of features
     :param seed: seed
+    :param mr_lower: final missing ratio lower clipping bound
+    :param mr_upper: final missing ratio upper clipping bound
     :return: missing ratios array of shape (num_clients, num_cols)
     """
-
-    # check missing ratios
-    if ms_range[0] > ms_range[1]:
-        raise ValueError('ms_range[0] should be less than ms_range[1]')
-    elif ms_range[0] < 0 or ms_range[0] > 1:
-        raise ValueError('ms_range[0] should be in [0, 1]')
-    elif ms_range[1] < 0 or ms_range[1] > 1:
-        raise ValueError('ms_range[1] should be in [0, 1]')
+    
+    # validate mr_lower, mr_upper, and ms_range
+    mr_lower = _validate_missing_ratio(mr_lower)
+    mr_upper = _validate_missing_ratio(mr_upper)
+    if mr_lower > mr_upper:
+        raise ValueError('mr_lower should be less than or equal to mr_upper.')
 
     # check num_clients
     if num_clients > 50:
@@ -38,34 +119,46 @@ def generate_missing_ratios(
 
     # distribution
     np.random.seed(seed)
-    if dist == 'fixed':
-        missing_ratios = np.ones((num_clients, num_cols)) * ms_range[0]
-    elif dist == 'randu':
-        missing_ratios = np.random.uniform(ms_range[0], ms_range[1], (num_clients, num_cols))
-    elif dist == 'randu-int':
-        start = float(ms_range[0])
-        stop = float(ms_range[1])
-        step = round((stop - start) / 0.1) + 1
-        mr_list = np.linspace(start, stop, step, endpoint=True)
-        missing_ratios = np.random.choice(mr_list, (num_clients, num_cols))
-    elif dist == 'randn':
-        lower, upper = ms_range[0], ms_range[1]
-        mu, sigma = (lower + upper) / 2, (upper - lower) / 3  # sigma set to range/3 - 1.5 std cover range
-        # truncated norm distribution
-        trunc_norm_dist = stats.truncnorm((lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma)
-        missing_ratios = trunc_norm_dist.rvs(size=(num_clients, num_cols))
-    elif dist == 'randn-int':
-        start = float(ms_range[0])
-        stop = float(ms_range[1])
-        step = round((stop - start) / 0.1) + 1
-        mr_list = np.linspace(start, stop, step, endpoint=True)
-        # truncated norm distribution
-        lower, upper = ms_range[0], ms_range[1]
-        mu, sigma = np.mean(mr_list), (upper - lower) / 3  # mean and sigma - 1.5 std = 1/2(upper - lower)
-        probs = stats.truncnorm.pdf(mr_list, (lower - mu) / sigma, (upper - mu) / sigma, loc=0.5, scale=sigma)
-        missing_ratios = np.random.choice(mr_list, (num_clients, num_cols), p=probs / probs.sum())
-    else:
-        raise ValueError('Strategy not found')
+    missing_ratios = np.empty((num_clients, num_cols))
+    for client_idx, (lower, upper) in enumerate(ms_range):
+        if dist == 'randu':
+            missing_ratios[client_idx] = np.random.uniform(lower, upper, num_cols)
+        elif dist == 'randu-int':
+            
+            def _get_discrete_ratio_values(lower: float, upper: float) -> np.ndarray:
+                if lower == upper:
+                    return np.array([lower])
+
+                step = round((upper - lower) / 0.1) + 1
+                return np.linspace(lower, upper, step, endpoint=True)
+            
+            mr_list = _get_discrete_ratio_values(lower, upper)
+            missing_ratios[client_idx] = np.random.choice(mr_list, num_cols)
+        elif dist == 'randn':
+            if lower == upper:
+                missing_ratios[client_idx] = np.ones(num_cols) * lower
+            else:
+                mu = (lower + upper) / 2
+                sigma = (upper - lower) / 3
+                trunc_norm_dist = stats.truncnorm(
+                    (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma
+                )
+                missing_ratios[client_idx] = trunc_norm_dist.rvs(size=num_cols)
+        elif dist == 'randn-int':
+            mr_list = _get_discrete_ratio_values(lower, upper)
+            if len(mr_list) == 1:
+                missing_ratios[client_idx] = np.ones(num_cols) * mr_list[0]
+            else:
+                mu = np.mean(mr_list)
+                sigma = (upper - lower) / 3
+                probs = stats.truncnorm.pdf(
+                    mr_list, (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma
+                )
+                missing_ratios[client_idx] = np.random.choice(mr_list, num_cols, p=probs / probs.sum())
+        else:
+            raise ValueError('Strategy not found')
+
+    missing_ratios = np.clip(missing_ratios, mr_lower, mr_upper)
 
     return missing_ratios.tolist()
 

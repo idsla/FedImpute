@@ -4,7 +4,10 @@ import fedimpute.scenario.missing_simulate.mar_simulate as mar_simulate
 import fedimpute.scenario.missing_simulate.mnar_simulate as mnar_simulate
 from typing import List, Union
 from .add_missing_utils import (
-    generate_missing_cols, generate_missing_ratios, generate_missing_mech_funcs
+    generate_missing_cols,
+    generate_missing_ratios,
+    generate_missing_mech_funcs,
+    resolve_ms_mr_clients,
 )
 import loguru
 
@@ -19,8 +22,9 @@ def add_missing(
         mf_strategy: str = 'all',
         mf_dist: str = 'identity',
         mr_dist: str = 'randu',
-        mr_lower: float = 0.3,
-        mr_upper: float = 0.7,
+        ms_mr_clients: Union[float, tuple, list, str] = (0.3, 0.7),
+        mr_lower: float = 0.1,
+        mr_upper: float = 0.9,
         mm_funcs_dist: str = 'identity',
         mm_funcs_bank: str = 'lr',
         mm_mech: str = 'mcar',
@@ -41,8 +45,9 @@ def add_missing(
     :param mf_strategy: missing features strategy
     :param mf_dist: missing features distribution across clients
     :param mr_dist: missing ratio distribution
-    :param mr_lower: missing ratio lower bound
-    :param mr_upper: missing ratio upper bound
+    :param ms_mr_clients: client-level missing ratio settings
+    :param mr_lower: missing ratio hard lower clipping bound
+    :param mr_upper: missing ratio hard upper clipping bound
     :param mm_funcs_dist: missing mechanism functions distribution across clients and features
     :param mm_funcs_bank: missing mechanism functions banks
     :param mm_mech: missing mechanism
@@ -69,7 +74,8 @@ def add_missing(
         split_indices = np.cumsum([item.shape[0] for item in clients_data])[:-1]
 
         global_data_ms = _add_missing_central(
-            global_data, cols, mf_strategy=mf_strategy, mr_dist=mr_dist, mr_lower=mr_lower, mr_upper=mr_upper,
+            global_data, cols, mf_strategy=mf_strategy, mr_dist=mr_dist, ms_mr_clients=ms_mr_clients,
+            mr_lower=mr_lower, mr_upper=mr_upper,
             mm_funcs_bank=mm_funcs_bank, mm_mech=mm_mech, mm_strictness=mm_strictness, mm_obs=mm_obs,
             mm_feature_option=mm_feature_option, mm_beta_option=mm_beta_option, seed=seed
         )
@@ -79,7 +85,8 @@ def add_missing(
     # add missing to separately
     else:
         clients_data_ms = _add_missing_dist(
-            clients_data, cols, rngs, mf_strategy=mf_strategy, mr_dist=mr_dist, mr_lower=mr_lower, mr_upper=mr_upper,
+            clients_data, cols, rngs, mf_strategy=mf_strategy, mr_dist=mr_dist, ms_mr_clients=ms_mr_clients,
+            mr_lower=mr_lower, mr_upper=mr_upper,
             mm_funcs_dist=mm_funcs_dist, mm_funcs_bank=mm_funcs_bank, mm_mech=mm_mech, mm_strictness=mm_strictness,
             mm_obs=mm_obs, mm_feature_option=mm_feature_option, mm_beta_option=mm_beta_option, seed=seed
         )
@@ -93,8 +100,9 @@ def _add_missing_central(
         mf_strategy: str = 'all',
         mf_dist: str = 'identity',
         mr_dist: str = 'randu',
-        mr_lower: float = 0.3,
-        mr_upper: float = 0.7,
+        ms_mr_clients: Union[float, tuple, list, str] = (0.3, 0.7),
+        mr_lower: float = 0.1,
+        mr_upper: float = 0.9,
         mm_funcs_bank: str = 'lr',
         mm_mech: str = 'mcar',
         mm_strictness: bool = True,
@@ -111,8 +119,9 @@ def _add_missing_central(
     :param mf_strategy: missing features strategy
     :param mf_dist: missing features distribution across clients
     :param mr_dist: missing ratio distribution
-    :param mr_lower: missing ratio lower bound
-    :param mr_upper: missing ratio upper bound
+    :param ms_mr_clients: client-level missing ratio settings
+    :param mr_lower: missing ratio hard lower clipping bound
+    :param mr_upper: missing ratio hard upper clipping bound
     :param mm_mech: missing mechanism
     :param mm_strictness: missing adding probailistic or deterministic
     :param mm_obs:  missing adding based on observed data
@@ -128,11 +137,14 @@ def _add_missing_central(
     missing_cols = missing_cols[0]
     num_cols = len(missing_cols)
 
-    # missing ratios - 'uniform@mrl=0.3-mrr=0.7'
-    # mr_dist, mr_params = parse_strategy_params(mr_strategy)
-    mr_range = (mr_lower, mr_upper)
+    # missing ratios
+    if isinstance(ms_mr_clients, list):
+        raise ValueError('For global missing, ms_mr_clients should not be a list of ranges. Please provide a single range or scalar value to apply to all clients.')
+    
+    mr_range = resolve_ms_mr_clients(ms_mr_clients, num_clients=1)
     missing_ratios = generate_missing_ratios(
-        mr_dist, ms_range=mr_range, num_clients=1, num_cols=num_cols, seed=seed
+        mr_dist, ms_range=mr_range, num_clients=1, num_cols=num_cols, seed=seed,
+        mr_lower=mr_lower, mr_upper=mr_upper
     )
     missing_ratios = missing_ratios[0]
 
@@ -166,8 +178,9 @@ def _add_missing_dist(
         mf_strategy: str = 'all',
         mf_dist: str = 'identity',
         mr_dist: str = 'randu',
-        mr_lower: float = 0.3,
-        mr_upper: float = 0.7,
+        ms_mr_clients: Union[float, tuple, list, str] = (0.3, 0.7),
+        mr_lower: float = 0.1,
+        mr_upper: float = 0.9,
         mm_funcs_dist: str = 'random',
         mm_funcs_bank: str = 'lr',
         mm_mech: str = 'mcar',
@@ -187,8 +200,9 @@ def _add_missing_dist(
         :param mf_strategy: missing features strategy
         :param mf_dist: missing features distribution across clients
         :param mr_dist: missing ratio distribution
-        :param mr_lower: missing ratio lower bound
-        :param mr_upper: missing ratio upper bound
+        :param ms_mr_clients: client-level missing ratio settings
+        :param mr_lower: missing ratio hard lower clipping bound
+        :param mr_upper: missing ratio hard upper clipping bound
         :param mm_mech: missing mechanism
         :param mm_strictness: missing adding probailistic or deterministic
         :param mm_obs:  missing adding based on observed data
@@ -206,9 +220,10 @@ def _add_missing_dist(
 
     # missing ratios - 'uniform@mrl=0.3-mrr=0.7'
     # mr_dist, mr_params = parse_strategy_params(mr_strategy)
-    mr_range = (mr_lower, mr_upper)
+    mr_range = resolve_ms_mr_clients(ms_mr_clients, num_clients=num_clients)
     clients_missing_ratios = generate_missing_ratios(
-        mr_dist, ms_range=mr_range, num_clients=num_clients, num_cols=num_cols, seed=seed
+        mr_dist, ms_range=mr_range, num_clients=num_clients, num_cols=num_cols, seed=seed,
+        mr_lower=mr_lower, mr_upper=mr_upper
     )
 
     # missing mechanism funcs - 'identity', 'random'

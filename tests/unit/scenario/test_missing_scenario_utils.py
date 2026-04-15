@@ -6,6 +6,7 @@ from fedimpute.scenario.missing_simulate.add_missing_utils import (
     generate_missing_mech,
     generate_missing_mech_funcs,
     generate_missing_ratios,
+    resolve_ms_mr_clients,
 )
 
 pytestmark = pytest.mark.unit
@@ -21,21 +22,77 @@ def test_generate_missing_cols_rejects_unsupported_strategies(strategy):
         generate_missing_cols(strategy, num_clients=3, cols=[0, 1, 2])
 
 
-def test_generate_missing_ratios_fixed_distribution():
-    ratios = np.array(generate_missing_ratios("fixed", (0.3, 0.3), 4, 3, seed=123))
+def test_generate_missing_ratios_randu_equal_bounds_behaves_like_fixed_distribution():
+    ratios = np.array(generate_missing_ratios("randu", [(0.3, 0.3)] * 4, 4, 3, seed=123))
 
     assert ratios.shape == (4, 3)
     assert np.allclose(ratios, 0.3)
 
 
-@pytest.mark.parametrize("dist", ["randu", "randn", "randu-int", "randn-int"])
+@pytest.mark.parametrize("dist", ["randu", "randn", "randu-int"])
 def test_generate_missing_ratios_random_distributions_stay_in_range(dist):
-    ratios = np.array(generate_missing_ratios(dist, (0.2, 0.7), 5, 4, seed=123))
+    ratios = np.array(generate_missing_ratios(dist, [(0.2, 0.7)] * 5, 5, 4, seed=123))
 
     assert ratios.shape == (5, 4)
     assert np.nanmin(ratios) >= 0.2
     assert np.nanmax(ratios) <= 0.7
 
+
+def test_resolve_ms_mr_clients_expands_scalar_for_each_client():
+    assert resolve_ms_mr_clients(0.5, 3) == [(0.5, 0.5), (0.5, 0.5), (0.5, 0.5)]
+
+
+def test_resolve_ms_mr_clients_expands_tuple_for_each_client():
+    assert resolve_ms_mr_clients((0.2, 0.5), 2) == [(0.2, 0.5), (0.2, 0.5)]
+
+
+def test_resolve_ms_mr_clients_accepts_float_list():
+    assert resolve_ms_mr_clients([0.2, 0.3], 2) == [(0.2, 0.2), (0.3, 0.3)]
+
+
+def test_resolve_ms_mr_clients_accepts_mixed_list():
+    assert resolve_ms_mr_clients([0.5, (0.2, 0.3)], 2) == [(0.5, 0.5), (0.2, 0.3)]
+
+
+def test_resolve_ms_mr_clients_accepts_bucket_list():
+    assert resolve_ms_mr_clients(["extra-small", "large"], 2) == [(0.1, 0.2), (0.6, 0.8)]
+
+
+@pytest.mark.parametrize(
+    "ms_mr_clients",
+    [
+        [],
+        [0.2],
+        1.2,
+        (0.5, 0.2),
+        (0.1, 0.2, 0.3),
+        ["unknown", "small"],
+    ],
+)
+def test_resolve_ms_mr_clients_rejects_invalid_inputs(ms_mr_clients):
+    with pytest.raises(ValueError):
+        resolve_ms_mr_clients(ms_mr_clients, 2)
+
+
+def test_generate_missing_ratios_respects_per_client_ranges():
+    ranges = [(0.1, 0.2), (0.5, 0.6), (0.8, 0.9)]
+    ratios = np.array(generate_missing_ratios("randu", ranges, 3, 5, seed=123))
+
+    assert ratios.shape == (3, 5)
+    for client_idx, (lower, upper) in enumerate(ranges):
+        assert np.nanmin(ratios[client_idx]) >= lower
+        assert np.nanmax(ratios[client_idx]) <= upper
+
+
+def test_generate_missing_ratios_clips_to_hard_bounds():
+    ratios = np.array(
+        generate_missing_ratios(
+            "randu", [(0.05, 0.05), (0.95, 0.95)], 2, 3, seed=123, mr_lower=0.1, mr_upper=0.9
+        )
+    )
+
+    assert np.allclose(ratios[0], 0.1)
+    assert np.allclose(ratios[1], 0.9)
 
 @pytest.mark.parametrize(
     ("mech", "expected_name"),

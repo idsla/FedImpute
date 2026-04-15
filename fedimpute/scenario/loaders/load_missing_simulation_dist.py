@@ -42,7 +42,7 @@ def missing_scenario(n_clients: int, cols: list, mm_strategy: str, seed: int = 2
     # mr_strategy: fixed@mrl=0.1-mrr=0.9
     mr_dist, mr_params = parse_strategy_params(mm_params['mr_strategy'])
     mr_range = (float(mr_params['mrl']), float(mr_params['mrr']))
-    missing_ratios = generate_missing_ratios(mr_dist, mr_range, n_clients, len(cols), seed)
+    missing_ratios = generate_missing_ratios(mr_dist, [mr_range] * n_clients, n_clients, len(cols), seed)
 
     ####################################################################################################################
     # Simulate Missing Mechanism
