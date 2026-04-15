@@ -208,6 +208,7 @@ def eval_fed_pred_xgboost(
             y_pred_proba_global = np.array([1 - y_pred_proba_global, y_pred_proba_global]).T
     else:
         y_pred_global = global_model.predict(test_dmatrix)
+        y_pred_proba_global = None
 
     global_ret = {}
     for eval_metric in eval_metrics:
@@ -219,10 +220,17 @@ def eval_fed_pred_xgboost(
 
     ret_personalized = {eval_metric: [] for eval_metric in eval_metrics}
     for X_train_imp, y_train, X_test, y_test in zip(X_train_imps, y_trains, X_tests, y_tests):
-        y_pred = global_model.predict(X_test)
+        client_test_dmatrix = xgb.DMatrix(X_test, label=y_test.reshape(-1, 1))
         if task_type == 'classification':
-            y_pred_proba = global_model.predict_proba(X_test)
+            if clf_type == 'multi-class':
+                y_pred_proba = global_model.predict(client_test_dmatrix)
+                y_pred = np.argmax(y_pred_proba, axis=1)
+            else:
+                y_pred_proba_binary = global_model.predict(client_test_dmatrix)
+                y_pred = (y_pred_proba_binary > 0.5).astype(float)
+                y_pred_proba = np.array([1 - y_pred_proba_binary, y_pred_proba_binary]).T
         else:
+            y_pred = global_model.predict(client_test_dmatrix)
             y_pred_proba = None
 
         for eval_metric in eval_metrics:

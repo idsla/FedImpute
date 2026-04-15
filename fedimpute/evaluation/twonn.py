@@ -169,7 +169,7 @@ class TwoNNRegressor(nn.Module):
         val_loss_choice = 'rmse'
         with torch.no_grad():
             X_val_tensor = torch.tensor(X_val, dtype=torch.float32).to(DEVICE)
-            y_val_tensor = torch.tensor(y_val, dtype=torch.float32).to(DEVICE)
+            y_val_tensor = torch.tensor(y_val, dtype=torch.float32).unsqueeze(1).to(DEVICE)
             outputs = self(X_val_tensor)
             loss = self.criterion(outputs, y_val_tensor)
             val_loss = loss.item()
