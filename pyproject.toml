@@ -6,6 +6,9 @@ authors = ["Sitao Min (idlsa Rutgers University) <sitaomin1994@gmail.com>"]
 license = "GPL GNU v3.0"
 readme = "README.md"
 package-mode = true
+include = [
+    { path = "fedimpute/data_prep/example_data/heart_disease/**/*", format = ["sdist", "wheel"] },
+]
 
 [tool.poetry.dependencies]
 python = "^3.12.3"
