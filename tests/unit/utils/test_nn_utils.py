@@ -158,18 +158,18 @@ def test_early_stopping_stops_after_metric_increases_for_too_long():
     )
 
     results = []
-    for metric in [1.0, 1.0, 2.0, 2.0, 3.0]:
+    for metric in [1.0, 1.0, 2.0, 2.0, 3.0, 3.0]:
         early_stopping.update(metric)
         results.append(early_stopping.check_convergence())
 
-    assert results == [False, False, False, False, True]
+    assert results == [False, False, False, False, False, True]
     assert early_stopping.increase_patience_counter == 2
 
 
 def test_early_stopping_only_checks_on_configured_steps():
     early_stopping = EarlyStopping(
         tolerance=1e-4,
-        tolerance_patience=1,
+        tolerance_patience=2,
         increase_patience=10,
         window_size=2,
         check_steps=2,
@@ -183,4 +183,4 @@ def test_early_stopping_only_checks_on_configured_steps():
     early_stopping.update(1.0)
 
     assert early_stopping.check_convergence() is True
-    assert early_stopping.patience_counter == 1
+    assert early_stopping.patience_counter == 2

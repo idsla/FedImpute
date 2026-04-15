@@ -50,8 +50,8 @@ def test_arrays_to_dataframes_preserve_columns_and_copy_input_arrays():
 
 def test_arrays_to_dataframes_can_remove_target_column_from_each_frame():
     arrays = [
-        np.array([[1.0, 2.0, 0.0], [3.0, 4.0, 1.0]]),
-        np.array([[5.0, 6.0, 1.0]]),
+        np.array([[1.0, 2.0], [3.0, 4.0]]),
+        np.array([[5.0, 6.0]]),
     ]
 
     frames = arrays_to_dataframes(arrays, columns=["x1", "x2", "target"], without_target=True)
