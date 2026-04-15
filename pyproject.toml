@@ -27,6 +27,7 @@ openpyxl = "3.1.5"
 statsmodels = "0.14.4"
 xgboost = "3.0.0"
 requests = "2.32.3"
+umap-learn = "^0.5.7"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.0.0"

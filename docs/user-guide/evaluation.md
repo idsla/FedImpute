@@ -80,15 +80,28 @@ ret = evaluator.evaluate_imp_quality(
 evaluator.show_imp_results()
 ```
 
-### Imputation Quality via tSNE visualization
+### Imputation Quality via dimensionality reduction visualization
 
-`Evaluator` class also provides a method called `tsne_visualization()` to give the visualized comparison of similarity between the imputed data and the original data (ground-truth data). It visualizes the t-Distributed Stochastic Neighbor Embedding (t-SNE) of imputed data and original data so that the user can visually assess the effectiveness of the imputation outcome. tsne_visualization() takes parameters including client’s imputation data (`X_imp`) and original data (ground-truth data) (`X_origin`) and a random seed (`seed`) used for calculating t-SNE embedding.
+`Evaluator` class also provides dimensionality reduction visualizations to compare imputed data with original ground-truth data. Use `tsne_visualization()`, `pca_visualization()`, or `umap_visualization()` for method-specific plots, or use `dimensionality_visualization(method=...)` with `method` set to `"tsne"`, `"pca"`, or `"umap"`. These methods take client imputation data (`X_imps`), original data (`X_origins`), a random seed (`seed`) where the selected method uses randomness, and optional method-specific settings through `method_params`.
 
 ```{python}
 X_trains = env.get_data(client_ids='all', data_type = 'train')
 X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
 
 evaluator.tsne_visualization(
+    X_imps = X_train_imps,
+    X_origins = X_trains,
+    seed = 0,
+    method_params = {"perplexity": 30}
+)
+
+evaluator.pca_visualization(
+    X_imps = X_train_imps,
+    X_origins = X_trains,
+    seed = 0
+)
+
+evaluator.umap_visualization(
     X_imps = X_train_imps,
     X_origins = X_trains,
     seed = 0

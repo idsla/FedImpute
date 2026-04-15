@@ -3,16 +3,11 @@ from collections import OrderedDict
 from copy import deepcopy
 from typing import List, Dict, Union
 import warnings
-import os
 import loguru
 import numpy as np
 import sys
 
-from sklearn.manifold import TSNE
-import gower
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 from sklearn.linear_model import RidgeCV, LogisticRegressionCV, LinearRegression, LogisticRegression
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.neural_network import MLPRegressor, MLPClassifier
@@ -28,6 +23,7 @@ from tabulate import tabulate
 from .imp_quality_metrics import rmse, sliced_ws
 from .twonn import TwoNNRegressor, TwoNNClassifier
 from .pred_model_metrics import task_eval
+from .dimensionality_reduction import visualize_embeddings
 from ..utils.reproduce_utils import set_seed
 from ..utils.nn_utils import EarlyStopping
 from ..utils.logger import setup_logger
@@ -263,98 +259,121 @@ class Evaluator:
         sampling_size: int = None,
         overall: bool = False,
         seed: int = 0,
-        save_path: str = None
+        save_path: str = None,
+        method_params: dict = None,
     ):
+        """
+        Visualize original and imputed data with t-SNE.
 
-        X_imps = [item.values for item in X_imps]
-        X_origins = [item.values for item in X_origins]
-
-        color_mapping = {
-            'original': 'red',
-            'imputed': 'blue'
-        }
-
-        def eval_tsne(origin_data, imputed_data, save_path: str = None):
-
-            # overall
-            plot_data = np.concatenate((origin_data, imputed_data), axis=0)
-            N1 = origin_data.shape[0]
-            N2 = imputed_data.shape[0]
-            colors = [color_mapping['original'] for i in range(N1)] + [color_mapping['imputed'] for i in range(N2)]
-            tsne = TSNE(
-                metric='precomputed', n_components=2, verbose=0, n_iter=1000, perplexity=40, init='random', n_jobs=-1, random_state=seed
-            )
-
-            tsne_results = tsne.fit_transform(np.clip(gower.gower_matrix(plot_data), 0, 1))
-
-            return tsne_results, colors, N1, N2
-
-        def plot_tsne(tsne_results, colors, N1, N2, alpha = 0.5, ax = None):
-            ax.scatter(tsne_results[:N1, 0], tsne_results[:N1, 1], c=color_mapping['original'], label='original', alpha = alpha)
-            ax.scatter(tsne_results[N1:, 0], tsne_results[N1:, 1], c=color_mapping['imputed'], label='imputed', alpha = alpha)
-            return ax
-        
-        if overall:
-            X_imp = np.concatenate(X_imps, axis=0)
-            X_origin = np.concatenate(X_origins, axis=0)
-            X_imps.append(X_imp)
-            X_origins.append(X_origin)
-            
-            titles = [f"Client {i+1}" for i in range(len(X_imps))]
-            titles[-1] = 'Overall'
-        else:
-            titles = [f"Client {i+1}" for i in range(len(X_imps))]
-        
-        n_clients = len(X_imps)
-        
-        if sampling_size is not None:
-            np.random.seed(seed)
-            for i in range(n_clients):
-                indices = np.random.choice(len(X_imps[i]), sampling_size, replace=False)
-                X_imps[i] = X_imps[i][indices]
-                X_origins[i] = X_origins[i][indices]
-        
-        n_cols = 5
-        if n_clients < 5:
-            n_cols = n_clients
-        n_rows = n_clients // n_cols + (n_clients % n_cols > 0)
-        fig, axs = plt.subplots(n_rows, n_cols, figsize=(4 * n_cols, 4 * n_rows))
-        axs = axs.flatten()
-        
-        for i in range(n_clients):
-            print(f'Evaluating TSNE for {titles[i]} ...')
-            tsne_results, colors, N1, N2 = eval_tsne(X_origins[i], X_imps[i])
-            plot_tsne(tsne_results, colors, N1, N2, ax=axs[i])
-            axs[i].set_title(titles[i], fontsize=fontsize, fontweight='bold')
-            axs[i].set_xlabel('')
-            axs[i].set_ylabel('')
-            axs[i].set_xticks([])
-            axs[i].set_yticks([])
-        
-        for i in range(n_clients, len(axs)):
-            axs[i].set_visible(False)
-        
-        legend_elements = [
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=color_mapping['original'], markersize=fontsize-3),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=color_mapping['imputed'], markersize=fontsize-3)
-        ]
-        
-        # add legend to bottom of the plot with out border
-        fig.legend(
-            legend_elements, 
-            ['Original', 'Imputed'], loc='lower center', ncol=2, bbox_to_anchor=(0.5, -0.1), 
-            prop={'weight': 'bold', 'size': fontsize}, frameon=False
+        ``method_params`` overrides default t-SNE parameters, such as
+        ``perplexity`` or ``max_iter``.
+        """
+        return visualize_embeddings(
+            X_imps=X_imps,
+            X_origins=X_origins,
+            method="tsne",
+            fontsize=fontsize,
+            alpha=alpha,
+            sampling_size=sampling_size,
+            overall=overall,
+            seed=seed,
+            save_path=save_path,
+            method_params=method_params,
         )
-        plt.subplots_adjust(wspace=0.0)
-        plt.tight_layout()
-        if save_path is not None:
-            dir_path = os.path.dirname(save_path)
-            if not os.path.exists(dir_path):
-                os.makedirs(dir_path)
-            plt.savefig(save_path, bbox_inches='tight', dpi=150)
-            plt.close()
-        else:
-            plt.show()
+
+    def pca_visualization(
+        self,
+        X_imps: List[pd.DataFrame],
+        X_origins: List[pd.DataFrame],
+        fontsize: int = 20,
+        alpha: float = 0.5,
+        sampling_size: int = None,
+        overall: bool = False,
+        seed: int = 0,
+        save_path: str = None,
+        method_params: dict = None,
+    ):
+        """
+        Visualize original and imputed data with PCA.
+
+        ``method_params`` overrides default PCA parameters, such as
+        ``n_components`` or ``svd_solver``.
+        """
+        return visualize_embeddings(
+            X_imps=X_imps,
+            X_origins=X_origins,
+            method="pca",
+            fontsize=fontsize,
+            alpha=alpha,
+            sampling_size=sampling_size,
+            overall=overall,
+            seed=seed,
+            save_path=save_path,
+            method_params=method_params,
+        )
+
+    def umap_visualization(
+        self,
+        X_imps: List[pd.DataFrame],
+        X_origins: List[pd.DataFrame],
+        fontsize: int = 20,
+        alpha: float = 0.5,
+        sampling_size: int = None,
+        overall: bool = False,
+        seed: int = 0,
+        save_path: str = None,
+        method_params: dict = None,
+    ):
+        """
+        Visualize original and imputed data with UMAP.
+
+        ``method_params`` overrides default UMAP parameters, such as
+        ``n_neighbors`` or ``min_dist``.
+        """
+        return visualize_embeddings(
+            X_imps=X_imps,
+            X_origins=X_origins,
+            method="umap",
+            fontsize=fontsize,
+            alpha=alpha,
+            sampling_size=sampling_size,
+            overall=overall,
+            seed=seed,
+            save_path=save_path,
+            method_params=method_params,
+        )
+
+    def dimensionality_visualization(
+        self,
+        X_imps: List[pd.DataFrame],
+        X_origins: List[pd.DataFrame],
+        method: str,
+        fontsize: int = 20,
+        alpha: float = 0.5,
+        sampling_size: int = None,
+        overall: bool = False,
+        seed: int = 0,
+        save_path: str = None,
+        method_params: dict = None,
+    ):
+        """
+        Visualize original and imputed data with a selected reduction method.
+
+        ``method`` must be one of ``"tsne"``, ``"pca"``, or ``"umap"``.
+        ``method_params`` overrides the selected reducer's default parameters.
+        """
+        return visualize_embeddings(
+            X_imps=X_imps,
+            X_origins=X_origins,
+            method=method,
+            fontsize=fontsize,
+            alpha=alpha,
+            sampling_size=sampling_size,
+            overall=overall,
+            seed=seed,
+            save_path=save_path,
+            method_params=method_params,
+        )
 
     def run_local_regression_analysis(
         self, 
