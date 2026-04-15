@@ -1,8 +1,11 @@
 from collections import OrderedDict
 
 import numpy as np
+import pytest
 
 from fedimpute.execution_environment.imputation.imputers.simple_imputer import SimpleImputer
+
+pytestmark = pytest.mark.unit
 
 
 def test_simple_imputer_fits_and_replaces_missing_values():

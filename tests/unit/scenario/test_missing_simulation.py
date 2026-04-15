@@ -1,6 +1,9 @@
 import numpy as np
+import pytest
 
 from fedimpute.scenario.missing_simulate.add_missing import add_missing
+
+pytestmark = pytest.mark.unit
 
 
 def test_add_missing_mcar_preserves_shapes_and_adds_missing_values():

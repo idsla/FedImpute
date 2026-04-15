@@ -53,3 +53,12 @@ mkdocs-jupyter = "^0.25.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "unit: fast deterministic module tests",
+    "smoke: small end-to-end integration tests",
+    "real_data: tests requiring bundled or downloaded real datasets",
+    "slow: tests that are too slow for default PR CI",
+]

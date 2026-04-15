@@ -13,12 +13,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - module: data-prep
+            tests: tests/unit/data_prep
           - module: imputation
-            tests: tests/test_simple_imputer.py
+            tests: tests/unit/imputation
           - module: scenario
-            tests: tests/test_partition_data_utils.py tests/test_missing_scenario_utils.py tests/test_missing_simulation.py
+            tests: tests/unit/scenario
           - module: execution-environment
-            tests: tests/test_consistency_checker.py
+            tests: tests/unit/execution_environment
+          - module: evaluation
+            tests: tests/unit/evaluation
+          - module: pipeline
+            tests: tests/unit/pipeline
 
     steps:
       - name: Check out repository

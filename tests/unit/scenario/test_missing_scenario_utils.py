@@ -8,6 +8,8 @@ from fedimpute.scenario.missing_simulate.add_missing_utils import (
     generate_missing_ratios,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_generate_missing_cols_all_repeats_columns_for_each_client():
     assert generate_missing_cols("all", num_clients=3, cols=[0, 2]) == [[0, 2], [0, 2], [0, 2]]

@@ -1,34 +1,17 @@
 import numpy as np
-import pandas as pd
+import pytest
 
 from fedimpute.pipeline import FedImputePipeline
 from fedimpute.scenario import ScenarioBuilder
 
-
-def _make_small_classification_data(n_samples=120):
-    rng = np.random.default_rng(2027)
-    y = np.array([0.0, 1.0] * (n_samples // 2))
-    rng.shuffle(y)
-    X = rng.normal(size=(n_samples, 4))
-    X[:, 0] += y * 0.5
-    data = pd.DataFrame(X, columns=["x1", "x2", "x3", "x4"])
-    data["y"] = y
-    return data
+pytestmark = pytest.mark.smoke
 
 
-def test_small_benchmark_smoke_runs_pipeline():
-    data = _make_small_classification_data()
-    data_config = {
-        "target": "y",
-        "task_type": "classification",
-        "natural_partition": False,
-        "num_cols": 4,
-    }
-
+def test_small_benchmark_smoke_runs_pipeline(small_classification_data, small_classification_data_config):
     scenario_builder = ScenarioBuilder()
     scenario_builder.create_simulated_scenario(
-        data,
-        data_config,
+        small_classification_data,
+        small_classification_data_config,
         num_clients=3,
         dp_strategy="iid-even",
         dp_min_samples=20,

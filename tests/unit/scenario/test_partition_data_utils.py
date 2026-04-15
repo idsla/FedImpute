@@ -1,10 +1,13 @@
 import numpy as np
+import pytest
 
 from fedimpute.scenario.data_partition.utils import (
     binning_target,
     calculate_data_partition_stats,
     generate_samples_iid,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_calculate_data_partition_stats_for_classification_labels():

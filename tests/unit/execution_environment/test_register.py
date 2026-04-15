@@ -2,6 +2,8 @@ import pytest
 
 from fedimpute.execution_environment.loaders.register import Register
 
+pytestmark = pytest.mark.unit
+
 
 def test_default_registry_contains_core_imputers_strategies_and_workflows():
     register = Register()

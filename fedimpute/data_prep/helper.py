@@ -22,7 +22,7 @@ def one_hot_encoding(
         data = pd.DataFrame(data)
 
     categorical_cols = [
-        data.columns[col_idx] for col_idx in range(data.shape[1]) if numerical_cols_num < col_idx < data.shape[1] - 1
+        data.columns[col_idx] for col_idx in range(data.shape[1]) if numerical_cols_num <= col_idx < data.shape[1] - 1
     ]
 
     one_hot_encoder.fit(data[categorical_cols])
@@ -61,7 +61,7 @@ def ordering_features(
     else:
         raise ValueError("data should be a pandas dataframe or a numpy array")
 
-    categorical_cols = [col for col in data.columns if col not in numerical_cols]
+    categorical_cols = [col for col in data.columns if col not in numerical_cols and col != target_col]
     data = data[numerical_cols + categorical_cols + [target_col]]
 
     return data

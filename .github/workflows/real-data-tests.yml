@@ -1,13 +1,11 @@
-name: Smoke Test - Benchmark
+name: Real Data Tests
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 jobs:
-  smoke-benchmark:
-    name: benchmark
+  real-data-tests:
+    name: real data
     runs-on: ubuntu-latest
 
     steps:
@@ -28,5 +26,5 @@ jobs:
           python -m pip install -e .
           python -m pip install pytest
 
-      - name: Run benchmark smoke test
-        run: python -m pytest -q tests/integration/smoke/test_benchmark_small.py
+      - name: Run real data tests
+        run: python -m pytest -q tests/real_data -m real_data
