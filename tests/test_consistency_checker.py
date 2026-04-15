@@ -1,32 +1,20 @@
-from src.utils.consistency_checker import check_consistency
 import pytest
 
-
-# Parametrized test for valid configurations
-@pytest.mark.parametrize("imputer_name, federated_strategy_name, workflow_name", [
-    ("missforest", "local", "ice"),
-    ("missforest", "fedtree", "ice"),
-    ("missforest", "central", "ice"),
-    ("linear_ice", "local", "ice"),
-    ("linear_ice", "fedavg", "ice"),
-    ("linear_ice", "central", "ice"),
-    ("simple", "local", "simple"),
-    ("simple", "fedavg", "simple"),
-    ("simple", "central", "simple"),
-])
-def test_valid_configurations(imputer_name, federated_strategy_name, workflow_name):
-    check_consistency(imputer_name, federated_strategy_name, workflow_name)
+from fedimpute.execution_environment.loaders.register import Register
 
 
-# Parametrized test for invalid configurations
-@pytest.mark.parametrize("imputer_name, federated_strategy_name, workflow_name", [
-    ("missforest", "fedavg", "ice"),
-    ("missforest", "local", "simple"),
-    ("linear_ice", "fedtree", "ice"),
-    ("linear_ice", "local", "simple"),
-    ("simple", "local", "ice"),
-    ("simple", "fedavg", "em"),  # Assuming 'em' is a typo or logic error
-])
-def test_invalid_configurations(imputer_name, federated_strategy_name, workflow_name):
-    with pytest.raises(AssertionError):
-        check_consistency(imputer_name, federated_strategy_name, workflow_name)
+def test_default_registry_contains_core_imputers_strategies_and_workflows():
+    register = Register()
+
+    assert {"mean", "mice", "em", "missforest"}.issubset(register.get_imputer_mapping())
+    assert {"local", "central", "fedmean", "fedmice", "fedem"}.issubset(register.get_strategy_mapping())
+    assert {"mean", "ice", "em", "jm"}.issubset(register.get_workflow_mapping())
+    assert register.get_imputer_workflow_mapping()["mean"] == "mean"
+    assert "fedmean" in register.get_imputer_strategy_mapping()["mean"]
+
+
+def test_registry_rejects_duplicate_imputer_registration():
+    register = Register()
+
+    with pytest.raises(ValueError):
+        register.register_imputer("mean", object, "mean", ["local"])

@@ -1,42 +1,57 @@
-import numpy as np
-import pytest
-
-from src.imputation.imputers.simple_imputer import SimpleImputer
 from collections import OrderedDict
 
+import numpy as np
 
-class TestSimpleImputer:
+from fedimpute.execution_environment.imputation.imputers.simple_imputer import SimpleImputer
 
-    def test_simple_imputer(self):
-        # initialization
-        simple_imp = SimpleImputer(strategy='mean')
-        data_utils = {'n_features': 3}
-        simple_imp.initialize(data_utils, {}, 42)
-        assert np.array_equal(simple_imp.mean_params, np.zeros(3))
 
-        # test get_imp_model_params
-        params = simple_imp.get_imp_model_params({})
-        print(params)
-        assert isinstance(params, dict) and isinstance(params['mean'], np.ndarray) and isinstance(params, OrderedDict)
+def test_simple_imputer_fits_and_replaces_missing_values():
+    imputer = SimpleImputer(strategy="mean")
+    X = np.array(
+        [
+            [1.0, 2.0, 3.0, 4.0],
+            [4.0, 5.0, 6.0, 7.0],
+            [7.0, 8.0, 9.0, 10.0],
+        ]
+    )
+    y = np.array([0.0, 1.0, 0.0])
+    missing_mask = np.array(
+        [
+            [False, False, False, False],
+            [False, True, True, False],
+            [True, False, False, True],
+        ]
+    )
 
-        # test fit and impute
-        X = np.array([[1, 2, 3, 4], [4, 5, 6, 7], [7, 8, 9, 10]], dtype=float)
-        y = np.array([1, 2, 3])
-        missing_mask = np.array([[False, False, False, False], [False, True, True, False], [True, False, False, True]])
+    imputer.initialize(X.copy(), missing_mask, {"n_features": X.shape[1]}, {}, seed=42)
+    assert np.array_equal(imputer.mean_params, np.zeros(X.shape[1]))
 
-        simple_imp.fit(X, y, missing_mask, {})
-        print(simple_imp.mean_params)
-        assert np.array_equal(simple_imp.mean_params, np.array([2.5, 5, 6, 5.5]))
+    fit_result = imputer.fit(X.copy(), y, missing_mask, {})
+    assert fit_result["sample_size"] == 3
+    assert np.allclose(imputer.mean_params, np.array([2.5, 5.0, 6.0, 5.5]))
 
-        imputed = simple_imp.impute(X, y, missing_mask, {})
-        print(imputed)
-        assert np.array_equal(imputed, np.array([[1, 2, 3, 4], [4, 5, 6, 7], [2.5, 8, 9, 5.5]]))
+    params = imputer.get_imp_model_params({})
+    assert isinstance(params, OrderedDict)
+    assert np.allclose(params["mean"], imputer.mean_params)
 
-        # test set_imp_model_params
-        new_mean = np.array([1, 2, 3, 4])
-        simple_imp.set_imp_model_params(OrderedDict({"mean": new_mean}), {})
-        assert np.array_equal(simple_imp.mean_params, new_mean)
+    imputed = imputer.impute(X.copy(), y, missing_mask, {})
+    expected = np.array(
+        [
+            [1.0, 2.0, 3.0, 4.0],
+            [4.0, 5.0, 6.0, 7.0],
+            [2.5, 8.0, 9.0, 5.5],
+        ]
+    )
+    assert np.allclose(imputed, expected)
 
-        imputed = simple_imp.impute(X, y, missing_mask, {})
-        print(imputed)
-        assert np.array_equal(imputed, np.array([[1, 2, 3, 4], [4, 2, 3, 7], [1, 8, 9, 4]]))
+
+def test_simple_imputer_accepts_global_model_parameters():
+    imputer = SimpleImputer(strategy="mean")
+    imputer.set_imp_model_params(OrderedDict({"mean": np.array([1.0, 2.0])}), {})
+
+    X = np.array([[10.0, 20.0], [30.0, 40.0]])
+    y = np.array([0.0, 1.0])
+    missing_mask = np.array([[False, True], [True, False]])
+
+    imputed = imputer.impute(X.copy(), y, missing_mask, {})
+    assert np.allclose(imputed, np.array([[10.0, 2.0], [1.0, 40.0]]))
