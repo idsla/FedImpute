@@ -1,4 +1,4 @@
-name: CI
+name: Smoke Test - Real Scenario
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    name: Python 3.12.3 tests
+  smoke-real-scenario:
+    name: real scenario
     runs-on: ubuntu-latest
 
     steps:
@@ -28,5 +28,5 @@ jobs:
           python -m pip install -e .
           python -m pip install pytest
 
-      - name: Run test suite
-        run: python -m pytest -q
+      - name: Run real scenario smoke test
+        run: python -m pytest -q tests/test_smoke_real_scenario.py

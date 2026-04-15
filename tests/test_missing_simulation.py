@@ -23,7 +23,7 @@ def test_add_missing_mcar_preserves_shapes_and_adds_missing_values():
         mm_mech="mcar",
         seed=123,
     )
-
+    
     assert [item.shape for item in clients_missing] == [(10, 4), (10, 4)]
     assert all(np.isnan(item[:, :3]).any() for item in clients_missing)
     assert all(not np.isnan(item[:, 3]).any() for item in clients_missing)
