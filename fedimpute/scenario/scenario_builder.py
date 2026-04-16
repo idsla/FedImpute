@@ -155,7 +155,7 @@ class ScenarioBuilder:
             ms_cols (Union[str, List[int]]): missing columns, default: 'all' - `all`, `all-num`, `random`
             obs_cols (Union[str, List[int]]): fully observed columns for MAR, default: 'random' - `random`, `rest`
             ms_global_mechanism (bool): global missing mechanism, default: False
-            ms_mr_dist_clients (str): missing ratio distribution, default: 'randu' - 'randu', 'randu-int', 'randn', 'randn-int'
+            ms_mr_dist_clients (str): missing ratio distribution, default: 'random' - 'random', 'random-int', 'normal', 'normal-int'
             ms_mr_clients (Any): client-level missing ratio settings, default: (0.3, 0.7)
             ms_mf_dist_clients (str): missing features distribution, default: 'identity' - 'identity', 'random', 'random2'
             ms_mm_dist_clients (str): missing mechanism functions distribution, default: 'random' - 'identity', 'random', 'random2'
@@ -186,7 +186,7 @@ class ScenarioBuilder:
             
             ms_mech_type = 'mcar'
             ms_global_mechanism = False
-            ms_mr_dist_clients = 'randu-int'
+            ms_mr_dist_clients = 'random'
             ms_mm_dist_clients = 'identity'
             ms_mm_beta_option = None
             ms_mm_obs = False
@@ -194,19 +194,19 @@ class ScenarioBuilder:
             if ms_scenario == 'mcar':
                 ms_mech_type = 'mcar'
                 ms_global_mechanism = False
-                ms_mr_dist_clients = 'randu'
+                ms_mr_dist_clients = 'random'
 
             elif ms_scenario == 'mar-homo':
                 ms_mech_type = 'mar_logit'
                 ms_global_mechanism = True
-                ms_mr_dist_clients = 'randu'
+                ms_mr_dist_clients = 'random'
                 ms_mm_beta_option = 'fixed'
                 ms_mm_obs = True
 
             elif ms_scenario == 'mar-heter':
                 ms_mech_type = 'mar_logit'
                 ms_global_mechanism = False
-                ms_mr_dist_clients = 'randu'
+                ms_mr_dist_clients = 'random'
                 ms_mm_dist_clients = 'random'
                 ms_mm_beta_option = 'randu'
                 ms_mm_obs = True
@@ -214,13 +214,13 @@ class ScenarioBuilder:
             elif ms_scenario == 'mnar-homo':
                 ms_mech_type = 'mnar_sm_logit'
                 ms_global_mechanism = True
-                ms_mr_dist_clients = 'randu'
+                ms_mr_dist_clients = 'random'
                 ms_mm_beta_option = 'self'
 
             elif ms_scenario == 'mnar-heter':
                 ms_mech_type = 'mnar_sm_logit'
                 ms_global_mechanism = False
-                ms_mr_dist_clients = 'randu'
+                ms_mr_dist_clients = 'random'
                 ms_mm_beta_option = 'self'
                 ms_mm_dist_clients = 'random'
 

@@ -91,13 +91,12 @@ def generate_missing_ratios(
     """
     Generate missing ratios for each client and each feature
     Options:
-    - fixed: missing ratio is fixed for all clients and features
-    - uniform: missing ratio is uniformly distributed between each client's range
-    - gaussian: missing ratio is truncated normal distributed with mu=dist_params['mu'] and sigma=dist_params['loc']
-    - uniform_int: missing ratio is uniformly distributed between each client's range with step 0.1
-    - gaussian_int: missing ratio is truncated normal distributed with mu=dist_params['mu'] and sigma=dist_params['loc']
+    - random: missing ratio is uniformly distributed between each client's range
+    - normal: missing ratio is truncated normal distributed with mu=dist_params['mu'] and sigma=dist_params['loc']
+    - random-int: missing ratio is uniformly distributed between each client's range with step 0.1
+    - normal-int: missing ratio is truncated normal distributed with mu=dist_params['mu'] and sigma=dist_params['loc']
 
-    :param dist: distribution type - support fixed, uniform, gaussian, uniform_int
+    :param dist: distribution type - support random, random-int, normal, normal-int
     :param ms_range: missing ratio lower and upper bounds for each client
     :param num_clients: number of clients
     :param num_cols:  number of features
@@ -121,9 +120,9 @@ def generate_missing_ratios(
     np.random.seed(seed)
     missing_ratios = np.empty((num_clients, num_cols))
     for client_idx, (lower, upper) in enumerate(ms_range):
-        if dist == 'randu':
+        if dist == 'random':
             missing_ratios[client_idx] = np.random.uniform(lower, upper, num_cols)
-        elif dist == 'randu-int':
+        elif dist == 'random-int':
             
             def _get_discrete_ratio_values(lower: float, upper: float) -> np.ndarray:
                 if lower == upper:
@@ -134,7 +133,7 @@ def generate_missing_ratios(
             
             mr_list = _get_discrete_ratio_values(lower, upper)
             missing_ratios[client_idx] = np.random.choice(mr_list, num_cols)
-        elif dist == 'randn':
+        elif dist == 'normal':
             if lower == upper:
                 missing_ratios[client_idx] = np.ones(num_cols) * lower
             else:
@@ -144,7 +143,7 @@ def generate_missing_ratios(
                     (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma
                 )
                 missing_ratios[client_idx] = trunc_norm_dist.rvs(size=num_cols)
-        elif dist == 'randn-int':
+        elif dist == 'normal-int':
             mr_list = _get_discrete_ratio_values(lower, upper)
             if len(mr_list) == 1:
                 missing_ratios[client_idx] = np.ones(num_cols) * mr_list[0]
