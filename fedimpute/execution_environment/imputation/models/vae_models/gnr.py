@@ -146,7 +146,10 @@ class GNR(nn.Module):
         #     td.Normal(loc=torch.unsqueeze(q_mu, dim=1), scale=torch.unsqueeze(q_std, dim=1)),
         #     1
         # )
-        log_qz_given_x = q_zgivenx.log_prob(l_z)  # (batch_size, K)
+        q_zgivenx_expanded = td.Independent(
+            td.Normal(loc=torch.unsqueeze(q_mu, dim=1), scale=torch.unsqueeze(q_std, dim=1)), 1
+        )
+        log_qz_given_x = q_zgivenx_expanded.log_prob(l_z)  # (batch_size, K)
 
         # p(z)
         log_pz = self.p_z.log_prob(l_z)  # (batch_size, K)
@@ -206,11 +209,10 @@ class GNR(nn.Module):
         )  # (batch_size, L)
 
         # q(z|x)
-        # q_z_given_x2 = td.Independent(
-        #     td.Normal(loc=torch.unsqueeze(q_mu, dim=1), scale=torch.unsqueeze(q_std, dim=1)), 1
-        # )
-        l_z_reshaped = l_z.view(-1, self.latent_size)  # (batch_size*L, latent size)
-        log_qz_given_x = q_zgivenx.log_prob(l_z_reshaped) # (batch_size, L)
+        q_zgivenx_expanded = td.Independent(
+            td.Normal(loc=torch.unsqueeze(q_mu, dim=1), scale=torch.unsqueeze(q_std, dim=1)), 1
+        )
+        log_qz_given_x = q_zgivenx_expanded.log_prob(l_z) # (batch_size, L)
 
 
         # p(z)
@@ -226,11 +228,10 @@ class GNR(nn.Module):
         l_w = torch.nn.Softmax(dim=1)(l_w)  # (batch_size, L)
 
         # imputation weighted samples
-        l_x_given_z = td.Normal(loc=mu, scale=std).rsample([L])  # (L, batch_size, num_features)
-        l_x_given_z = torch.transpose(l_x_given_z, 0, 1)  # (batch_size, L, num_features)
+        l_x_given_z = td.Normal(loc=mu, scale=std).rsample()  # (batch_size, L, num_features)
 
         # imputation
-        xm = torch.einsum("ki,kij->ij", l_w, l_x_given_z)  # (batch_size, num_features)
+        xm = torch.einsum("bi,bij->bj", l_w, l_x_given_z)  # (batch_size, num_features)
         xhat = torch.clone(x)
         xhat[~mask.bool()] = xm[~mask.bool()]
 

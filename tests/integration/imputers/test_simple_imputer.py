@@ -4,8 +4,9 @@ import numpy as np
 import pytest
 
 from fedimpute.execution_environment.imputation.imputers.simple_imputer import SimpleImputer
+from tests.integration.imputers._helpers import run_env_for_imputer
 
-pytestmark = pytest.mark.unit
+pytestmark = pytest.mark.smoke
 
 
 def test_simple_imputer_fits_and_replaces_missing_values():
@@ -58,3 +59,11 @@ def test_simple_imputer_accepts_global_model_parameters():
 
     imputed = imputer.impute(X.copy(), y, missing_mask, {})
     assert np.allclose(imputed, np.array([[10.0, 2.0], [1.0, 40.0]]))
+
+
+def test_mean_imputer_runs_through_fedimpute_environment(tmp_path):
+    run_env_for_imputer(
+        tmp_path=tmp_path,
+        imputer="mean",
+        fed_strategy="fedmean",
+    )
