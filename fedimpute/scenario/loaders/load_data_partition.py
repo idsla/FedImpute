@@ -58,7 +58,7 @@ def load_data_partition(
     #############################################################################################################
     # partition data
     # iid partition
-    np.random.seed(global_seed)
+    rng_legacy = np.random.RandomState(global_seed)
     if partition_strategy == 'iid':
         # evenly partition data
         if size_strategy == 'even':
@@ -67,7 +67,9 @@ def load_data_partition(
         elif size_strategy == 'even2':
             sample_fracs = [even_sample_size / data.shape[0] for _ in range(num_clients)]
         elif size_strategy == 'random_uniform':
-            sample_fracs = np.random.uniform(min_samples / data.shape[0], max_samples / data.shape[0], num_clients).tolist()
+            sample_fracs = rng_legacy.uniform(
+                min_samples / data.shape[0], max_samples / data.shape[0], num_clients
+            ).tolist()
         # dirichlet distribution
         elif size_strategy == 'dir':
             if max_samples == -1:
@@ -80,7 +82,7 @@ def load_data_partition(
         # hub and spoke
         elif size_strategy == 'hs':
             sample_fracs = [0.5] + [0.05 for _ in range(num_clients - 1)]
-            np.random.shuffle(sample_fracs)
+            rng_legacy.shuffle(sample_fracs)
         else:
             raise NotImplementedError
 

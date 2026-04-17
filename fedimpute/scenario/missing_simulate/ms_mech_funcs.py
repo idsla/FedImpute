@@ -1,11 +1,13 @@
-import random
 from scipy.special import expit
 import numpy as np
 from n_sphere import n_sphere
 from scipy import optimize
 
 
-def generate_param_vector(d, main_strength=30, direction='up', rng = np.random.default_rng(10020)):
+def generate_param_vector(d, main_strength=30, direction='up', rng=None):
+    if rng is None:
+        rng = np.random.default_rng(10020)
+
     # sampling a vector from unit sphere
     if direction == 'up':
         theta_1 = rng.uniform(0, main_strength)
@@ -62,7 +64,7 @@ def mask_sigmoid(
             coeffs = np.zeros((data_copy.shape[1], 1))
             coeffs[0] = 1.0
         elif beta_corr == 'sphere':  # randomly to axis cone of feature itself for MNAR missingness
-            coeffs = generate_param_vector(data_copy.shape[1], main_strength=30, direction='up')
+            coeffs = generate_param_vector(data_copy.shape[1], main_strength=30, direction='up', rng=rng)
         elif beta_corr == 'randu':  # randomly set beta coefficients for MNAR missingness - (-1, 1)
             coeffs = rng.random((data_copy.shape[1], 1))
             coeffs = coeffs / np.linalg.norm(coeffs)
@@ -158,7 +160,7 @@ def mask_sigmoid(
             raise NotImplementedError
 
         ps = ps.flatten()
-        ber = np.random.rand(data_copy.shape[0])
+        ber = rng.random(data_copy.shape[0])
         mask[:, col] = ber < ps
 
     else:

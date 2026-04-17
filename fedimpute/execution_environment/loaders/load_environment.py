@@ -30,11 +30,12 @@ def setup_clients(
 def setup_server(
         fed_strategy: str, fed_strategy_params: dict,
         imputer_name: str, imputer_params: dict,
-        global_test: pd.DataFrame, data_config: dict, server_config: dict, register: 'Register'
+        global_test: pd.DataFrame, data_config: dict, server_config: dict, register: 'Register', seed: int = 21
 ) -> Server:
 
     server = Server(
-        fed_strategy, fed_strategy_params, imputer_name, imputer_params, global_test.values, data_config, server_config, columns=global_test.columns.tolist(), register=register
+        fed_strategy, fed_strategy_params, imputer_name, imputer_params, global_test.values, data_config,
+        server_config, seed=seed, columns=global_test.columns.tolist(), register=register
     )
     return server
 

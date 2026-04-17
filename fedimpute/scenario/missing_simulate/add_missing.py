@@ -262,7 +262,7 @@ def simulate_nan(
         X_train: np.ndarray, y_train: np.ndarray, mm_mech: str,
         missing_features: List[int], missing_ratios: List[float], mechanism_funcs: List[str],
         mm_strictness: bool, mm_obs: bool, mm_feature_option: str, mm_beta_option: str,
-        rng: np.random.Generator = np.random.default_rng(100203)
+        rng: np.random.Generator = None
 ) -> np.ndarray:
     """
     Simulate missing values for one client
@@ -279,6 +279,9 @@ def simulate_nan(
     :param rng: randomness generator
     :return: data with missing values
     """
+
+    if rng is None:
+        rng = np.random.default_rng(100203)
 
     if mm_mech == 'mcar':
         X_train_ms = mcar_simulate.simulate_nan_mcar(

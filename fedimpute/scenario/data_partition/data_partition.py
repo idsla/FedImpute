@@ -74,7 +74,7 @@ def load_data_partition(
         #############################################################################################################
         # partition data
         # iid partition
-        np.random.seed(global_seed)
+        rng_legacy = np.random.RandomState(global_seed)
         if partition_strategy == 'iid-even':
             sample_fracs = [1 / num_clients for _ in range(num_clients)]
             regression = data_config['task_type'] == 'regression'
@@ -97,14 +97,14 @@ def load_data_partition(
             )
         elif partition_strategy == 'iid-hs':
             sample_fracs = [0.5] + [0.05 for _ in range(num_clients - 1)]
-            np.random.shuffle(sample_fracs)
+            rng_legacy.shuffle(sample_fracs)
             regression = data_config['task_type'] == 'regression'
             datas = generate_samples_iid(
                 train_data, sample_fracs, seeds, global_seed=global_seed, sample_iid_direct=sample_iid_direct,
                 regression=regression, reg_bins=reg_bins
             )
         elif partition_strategy == 'iid-random':
-            sample_fracs = np.random.uniform(
+            sample_fracs = rng_legacy.uniform(
                 min_samples / data.shape[0], max_samples / data.shape[0], num_clients
             ).tolist()
             regression = data_config['task_type'] == 'regression'
@@ -123,8 +123,7 @@ def load_data_partition(
                 elif split_cols_option == 'first':
                     split_col_idx = 0
                 elif split_cols_option == 'random':
-                    np.random.seed(global_seed)
-                    split_col_idx = np.random.randint(0, data.shape[1] - 1)
+                    split_col_idx = rng_legacy.randint(0, data.shape[1] - 1)
                 else:
                     raise ValueError(f'Invalid split_col options: {split_cols_option}')
             elif isinstance(split_cols_option, list):

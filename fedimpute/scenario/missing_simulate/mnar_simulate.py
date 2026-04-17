@@ -10,7 +10,7 @@ from .ms_mech_funcs import mask_sigmoid, mask_quantile
 def simulate_nan_mnar_sigmoid(
         data: np.ndarray, cols: list, missing_ratio: Union[str, list, dict],
         missing_func: Union[str, list, dict], strict: bool = False, mm_feature_option='all',
-        mm_beta_option: str = 'sphere', rng: np.random.Generator = np.random.default_rng(1002031),
+        mm_beta_option: str = 'sphere', rng: np.random.Generator = None,
 ) -> np.ndarray:
     """
     sigmoid based MNAR missing values
@@ -24,6 +24,9 @@ def simulate_nan_mnar_sigmoid(
     :param rng: random generator
     :return: data with missing data - same dimension as data
     """
+    if rng is None:
+        rng = np.random.default_rng(1002031)
+
     mask = np.zeros(data.shape, dtype=bool)
 
     # add missing for each column
@@ -87,7 +90,7 @@ def simulate_nan_mnar_sigmoid(
 ########################################################################################################################
 def simulate_nan_mnar_quantile(
         data: np.ndarray, cols: list, missing_ratio: Union[str, list, dict], missing_func: Union[str, list, dict],
-        strict: bool = True, rng: np.random.Generator = np.random.default_rng(201030)
+        strict: bool = True, rng: np.random.Generator = None
 ) -> np.ndarray:
     """
     Quantile based MNAR missing values
@@ -99,6 +102,9 @@ def simulate_nan_mnar_quantile(
     :param rng: numpy random generator
     :return: data with missing values - same dimension as data
     """
+    if rng is None:
+        rng = np.random.default_rng(201030)
+
     # find the columns that are not to be adding missing values
     mask = np.zeros(data.shape, dtype=bool)
 
@@ -126,8 +132,8 @@ def simulate_nan_mnar_quantile(
         data_corr = data[:, col]
 
         # find the quantile of the most correlated column
-        if missing_func == 'random':
-            missing_func = rng.choice(['left', 'right', 'mid', 'tail'])
+        if missing_func_ == 'random':
+            missing_func_ = rng.choice(['left', 'right', 'mid', 'tail'])
 
         # get mask based on quantile
         mask = mask_quantile(mask, col, data_corr, missing_ratio_, missing_func_, strict, rng)

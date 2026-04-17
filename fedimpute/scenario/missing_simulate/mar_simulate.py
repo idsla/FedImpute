@@ -1,7 +1,6 @@
 from typing import Union
 
 import numpy as np
-import random
 
 from .ms_mech_funcs import mask_sigmoid, mask_quantile
 
@@ -9,7 +8,7 @@ from .ms_mech_funcs import mask_sigmoid, mask_quantile
 ########################################################################################################################
 # Quantile based MAR simulation
 def simulate_nan_mar_quantile(
-        data, cols, missing_ratio, missing_func='left', obs=False, strict=True, rng=np.random.default_rng(201030)
+        data, cols, missing_ratio, missing_func='left', obs=False, strict=True, rng=None
 ):
     """
     Simulate missing values for MAR mechanism using quantile based method
@@ -22,6 +21,9 @@ def simulate_nan_mar_quantile(
     :param rng: random generator
     :return: data with missingness added - same dimension of data
     """
+    if rng is None:
+        rng = np.random.default_rng(201030)
+
     # find the columns that are not to be adding missing values
     mask = np.zeros(data.shape, dtype=bool)
 
@@ -58,7 +60,7 @@ def simulate_nan_mar_quantile(
             missing_func_ = missing_func
 
         if missing_func_ == 'random':
-            missing_func_ = random.choice(['left', 'right', 'mid', 'tail'])
+            missing_func_ = rng.choice(['left', 'right', 'mid', 'tail'])
 
         ##########################################################
         # select one most correlated column
@@ -105,7 +107,7 @@ def simulate_nan_mar_quantile(
 def simulate_nan_mar_sigmoid(
         data: np.ndarray, cols: list, missing_ratio: Union[str, list, dict], missing_func: Union[str, list, dict],
         strict: bool = False, obs: bool = False, mm_feature_option='all', mm_beta_option: str = 'random_uniform',
-        rng: np.random.Generator = np.random.default_rng(1002031)
+        rng: np.random.Generator = None
 ) -> np.ndarray:
     """
     Simulate missing values for MAR mechanism using sigmoid function
@@ -120,6 +122,9 @@ def simulate_nan_mar_sigmoid(
     :param rng: numpy random generator
     :return: data with missingness added - same dimension of data
     """
+    if rng is None:
+        rng = np.random.default_rng(1002031)
+
     mask = np.zeros(data.shape, dtype=bool)
 
     # add missing for each column

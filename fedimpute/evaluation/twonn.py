@@ -8,7 +8,7 @@ import loguru
 from ..utils.nn_utils import EarlyStopping
 #DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 DEVICE = 'cpu'
-from ..utils.reproduce_utils import set_seed
+from ..utils.reproduce_utils import make_torch_generator, set_seed
 
 class TwoLayerNNBase(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -97,7 +97,7 @@ class TwoNNRegressor(nn.Module):
 
     def fit(self, X, y, seed = 0):
 
-        set_seed(0)
+        set_seed(seed)
         X_tensor = torch.tensor(X, dtype=torch.float32)
         y_tensor = torch.tensor(y, dtype=torch.float32).unsqueeze(1)  # Ensure y_tensor is 2D for MSE Loss
 
@@ -106,10 +106,14 @@ class TwoNNRegressor(nn.Module):
             self.dataset = TensorDataset(X_tensor, y_tensor)
 
             if len(X) < self.batch_size:
-                self.dataloader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True)
+                self.dataloader = DataLoader(
+                    self.dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True,
+                    generator=make_torch_generator(seed)
+                )
             else:
                 self.dataloader = DataLoader(
-                    self.dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True, drop_last=True
+                    self.dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True, drop_last=True,
+                    generator=make_torch_generator(seed)
                 )
 
         # Build the network on first call to fit
@@ -286,10 +290,14 @@ class TwoNNClassifier(nn.Module):
             self.dataset = TensorDataset(X_tensor, y_tensor)
 
             if len(X) < self.batch_size:
-                self.dataloader = DataLoader(self.dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True)
+                self.dataloader = DataLoader(
+                    self.dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True,
+                    generator=make_torch_generator(seed)
+                )
             else:
                 self.dataloader = DataLoader(
-                    self.dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True, drop_last=True
+                    self.dataset, batch_size=self.batch_size, shuffle=True, pin_memory=True, drop_last=True,
+                    generator=make_torch_generator(seed)
                 )
 
         # Determine the number of unique classes to set output size

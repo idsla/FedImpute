@@ -401,8 +401,8 @@ class ScenarioBuilder:
                     obs_cols = [ms_cols[-1]]
                 obs_cols.sort()
             elif obs_cols == 'random':
-                np.random.seed(seed)
-                obs_cols = np.random.choice(range(data.shape[1] - 1), size=1, replace=False)
+                obs_rng = np.random.RandomState(seed)
+                obs_cols = obs_rng.choice(range(data.shape[1] - 1), size=1, replace=False)
                 obs_cols.sort()
         elif isinstance(obs_cols, list):
             obs_cols.sort()

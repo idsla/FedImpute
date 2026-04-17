@@ -1,8 +1,10 @@
 import numpy as np
-import random
 
 
-def simulate_nan_mcar(data, cols, missing_ratio, rng=np.random.default_rng(201030)):
+def simulate_nan_mcar(data, cols, missing_ratio, rng=None):
+
+	if rng is None:
+		rng = np.random.default_rng(201030)
 
 	mask = np.zeros_like(data, dtype=bool)
 

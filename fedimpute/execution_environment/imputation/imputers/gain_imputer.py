@@ -11,6 +11,7 @@ from ..base.base_imputer import BaseNNImputer
 from ..base.jm_imputer import JMImputerMixin
 from ..models.gan_models.gain import GainModel
 from ...utils.nn_utils import load_optimizer, load_lr_scheduler
+from ....utils.reproduce_utils import make_torch_generator
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -84,11 +85,13 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
             "schedule_last_epoch": -1
         }
         self.optimizer = optimizer
+        self.seed = 0
 
     def initialize(
             self, X: np.array, missing_mask: np.array, data_utils: dict, params: dict, seed: int
     ) -> None:
 
+        self.seed = seed
         self.model = GainModel(
             dim=data_utils['n_features'],
             h_dim=self.h_dim,
@@ -137,7 +140,10 @@ class GAINImputer(BaseNNImputer, JMImputerMixin):
             train_dataset = torch.utils.data.TensorDataset(
                 torch.from_numpy(X_imp).float(), torch.from_numpy(~X_mask).float()
             )
-            train_dataloader = DataLoader(train_dataset, batch_size=bs, shuffle=True, num_workers=0)
+            train_dataloader = DataLoader(
+                train_dataset, batch_size=bs, shuffle=True, num_workers=0,
+                generator=make_torch_generator(self.seed)
+            )
             self.train_dataloader = train_dataloader
 
             return self.model, train_dataloader

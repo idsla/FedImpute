@@ -18,6 +18,12 @@ def set_seed(seed):
     torch.use_deterministic_algorithms(True)
 
 
+def make_torch_generator(seed):
+    generator = torch.Generator()
+    generator.manual_seed(int(seed))
+    return generator
+
+
 def setup_seeds(seed, n):
     return [seed + i * 1247 for i in range(n)]
 

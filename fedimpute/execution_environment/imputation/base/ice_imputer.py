@@ -24,7 +24,10 @@ class ICEImputerMixin:
         self.max_values = max_values
 
     @staticmethod
-    def get_visit_indices(visit_sequence, missing_mask):
+    def get_visit_indices(visit_sequence, missing_mask, rng=None):
+        if rng is None:
+            rng = np.random.default_rng(0)
+
         frac_of_missing_values = missing_mask.mean(axis=0)
         missing_values_idx = np.flatnonzero(frac_of_missing_values)
 
@@ -34,7 +37,7 @@ class ICEImputerMixin:
             ordered_idx = missing_values_idx[::-1]
         elif visit_sequence == 'random':
             ordered_idx = missing_values_idx.copy()
-            np.random.shuffle(ordered_idx)
+            rng.shuffle(ordered_idx)
         elif visit_sequence == 'ascending':
             n = len(frac_of_missing_values) - len(missing_values_idx)
             ordered_idx = np.argsort(frac_of_missing_values, kind="mergesort")[n:]

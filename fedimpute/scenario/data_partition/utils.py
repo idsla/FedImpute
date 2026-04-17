@@ -104,7 +104,7 @@ def calculate_data_partition_stats(
 
 def noniid_sample_dirichlet(
         num_population, n_clients, alpha, min_samples, max_samples, max_repeat_times=5e6,
-        rng: np.random.Generator = np.random.default_rng(42)
+        rng: np.random.Generator = None
 ):
     """
     Perform non-iid sampling using dirichlet distribution non-iidness control by alpha,
@@ -118,6 +118,9 @@ def noniid_sample_dirichlet(
     :param max_repeat_times: maximum number of times to repeat the sampling
     :return: list of number of samples in each client
     """
+
+    if rng is None:
+        rng = np.random.default_rng(42)
 
     min_size = 0
     max_size = np.inf
@@ -155,8 +158,8 @@ def generate_samples_iid(
     if sample_iid_direct:  # directly sampling without iid based on target
         ret = []
         for idx, sample_frac in enumerate(sample_fracs):
-            np.random.seed(seeds[idx])
-            sampled_indices = np.random.choice(
+            rng = np.random.RandomState(seeds[idx])
+            sampled_indices = rng.choice(
                 data.shape[0], size=math.ceil(data.shape[0] * sample_frac), replace=False
             )
             sampled_data = data[sampled_indices]

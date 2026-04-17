@@ -89,7 +89,7 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
             else:
                 estimator = self.estimator_cat
 
-            estimator = load_sklearn_model(estimator)
+            estimator = load_sklearn_model(estimator, seed=seed)
             X_train = X[:, np.arange(X.shape[1]) != i][0:10]
             y_train = X[:, i][0:10]
             estimator.fit(X_train, y_train)

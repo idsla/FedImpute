@@ -10,6 +10,7 @@ from collections import OrderedDict
 import torch
 
 from ...utils.nn_utils import load_optimizer, load_lr_scheduler
+from ....utils.reproduce_utils import make_torch_generator
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 from ..base import BaseNNImputer
@@ -149,7 +150,10 @@ class ICEGradImputer(BaseNNImputer, ICEImputerMixin):
         X_train = torch.tensor(X_train, dtype=torch.float32)
         y_train = torch.tensor(y_train, dtype=torch.float32)
         train_data = torch.utils.data.TensorDataset(X_train, y_train)
-        train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+        train_loader = torch.utils.data.DataLoader(
+            train_data, batch_size=batch_size, shuffle=True,
+            generator=make_torch_generator(self.seed)
+        )
         #     self.data_loaders['feature_idx'] = train_loader
         # else:
         #     train_loader = self.data_loaders['feature_idx']

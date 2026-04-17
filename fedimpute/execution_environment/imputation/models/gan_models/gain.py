@@ -59,9 +59,11 @@ class GainModel(nn.Module):
 
         self.hint_rate = hint_rate
         self.loss_alpha = loss_alpha
+        self.rng = np.random.default_rng(0)
 
     def init(self, seed):
         set_seed(seed)
+        self.rng = np.random.default_rng(seed)
         self.generator_layer.apply(lambda x: weights_init(x, self.initializer))
         self.discriminator_layer.apply(lambda x: weights_init(x, self.initializer))
 
@@ -103,7 +105,7 @@ class GainModel(nn.Module):
         x = X.clone()
 
         # Imputed data
-        z = sample_Z(no, dim)
+        z = sample_Z(no, dim, rng=self.rng)
         x = mask * x + (1 - mask) * z
         imputed_data = self.generator(x, mask)
 
@@ -132,8 +134,8 @@ class GainModel(nn.Module):
         # x_mb, h_mb, m_mb = sample(256, x_mb.size(0), x_mb, m_mb, x_mb.size(1), self.hint_rate)
 
         # if optimizer_idx == 0:
-        z_mb = sample_Z(mb_size, dim)
-        h_mb = sample_M(mb_size, dim, 1 - self.hint_rate)
+        z_mb = sample_Z(mb_size, dim, rng=self.rng)
+        h_mb = sample_M(mb_size, dim, 1 - self.hint_rate, rng=self.rng)
         h_mb = m_mb * h_mb
         x_mb = m_mb * x_mb + (1 - m_mb) * z_mb
 
@@ -168,7 +170,7 @@ class GainModel(nn.Module):
         #     return G_loss.item(), {}
 
 
-def sample_Z(m: int, n: int) -> torch.Tensor:
+def sample_Z(m: int, n: int, rng=None) -> torch.Tensor:
     """Random sample generator for Z.
 
     Args:
@@ -178,12 +180,14 @@ def sample_Z(m: int, n: int) -> torch.Tensor:
     Returns:
         np.ndarray: generated random values
     """
-    res = np.random.uniform(0.0, 0.01, size=[m, n])
+    if rng is None:
+        rng = np.random.default_rng(0)
+    res = rng.uniform(0.0, 0.01, size=[m, n])
     #res = np.random.normal(0.0, 0.001, size=[m, n])
     return torch.from_numpy(res).to(DEVICE)
 
 
-def sample_M(m: int, n: int, p: float) -> torch.Tensor:
+def sample_M(m: int, n: int, p: float, rng=None) -> torch.Tensor:
     """Hint Vector Generation
 
     Args:
@@ -194,14 +198,16 @@ def sample_M(m: int, n: int, p: float) -> torch.Tensor:
     Returns:
         np.ndarray: generated random values
     """
-    unif_prob = np.random.uniform(0.0, 1.0, size=[m, n])
+    if rng is None:
+        rng = np.random.default_rng(0)
+    unif_prob = rng.uniform(0.0, 1.0, size=[m, n])
     M = unif_prob > p
     M = 1.0 * M
 
     return torch.from_numpy(M).to(DEVICE)
 
 
-def sample_idx(m: int, n: int) -> torch.Tensor:
+def sample_idx(m: int, n: int, rng=None) -> torch.Tensor:
     """Mini-batch generation
 
     Args:
@@ -211,7 +217,9 @@ def sample_idx(m: int, n: int) -> torch.Tensor:
     Returns:
         np.ndarray: generated random indices
     """
-    idx = np.random.permutation(m)
+    if rng is None:
+        rng = np.random.default_rng(0)
+    idx = rng.permutation(m)
     idx = idx[:n]
     return idx
 

@@ -132,10 +132,10 @@ def eval_fed_pred_rf(
     ############################################################################################################
     # Server Sampling Trees based on weights and Fit Global Model
     global_trees = []
-    np.random.seed(seed)
+    rng = np.random.RandomState(seed)
     for tree in trees:
         # sample trees based on weights
-        sample_trees = np.random.choice(tree, size=int(len(tree) * weights[idx]), replace=False)
+        sample_trees = rng.choice(tree, size=int(len(tree) * weights[idx]), replace=False)
         global_trees.extend(sample_trees)
     
     global_model.fit(X_global_val, y_global_val)

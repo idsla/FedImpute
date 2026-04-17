@@ -13,6 +13,7 @@ from ..base import JMImputerMixin, BaseNNImputer
 
 from ...utils.nn_utils import load_optimizer, load_lr_scheduler
 from ..models.vae_models.notmiwae import NOTMIWAE
+from ....utils.reproduce_utils import make_torch_generator
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -140,7 +141,10 @@ class NotMIWAEImputer(BaseNNImputer, JMImputerMixin):
         train_dataset = torch.utils.data.TensorDataset(
             torch.from_numpy(X_imp).float(), torch.from_numpy(~X_mask).float()
         )
-        train_dataloader = DataLoader(train_dataset, batch_size=bs, shuffle=True, num_workers=0, pin_memory=False)
+        train_dataloader = DataLoader(
+            train_dataset, batch_size=bs, shuffle=True, num_workers=0, pin_memory=False,
+            generator=make_torch_generator(self.seed)
+        )
 
         return self.model, train_dataloader
 
@@ -185,7 +189,9 @@ class NotMIWAEImputer(BaseNNImputer, JMImputerMixin):
         train_dataset = torch.utils.data.TensorDataset(
             torch.from_numpy(X_imp).float(), torch.from_numpy(~X_mask).float()
         )
-        train_dataloader = DataLoader(train_dataset, batch_size=bs, shuffle=True)
+        train_dataloader = DataLoader(
+            train_dataset, batch_size=bs, shuffle=True, generator=make_torch_generator(self.seed)
+        )
         # training
         final_loss = 0
         rmses = []

@@ -13,6 +13,15 @@ MR_RANGE_BANK = {
     'extra-large': (0.8, 0.9),
 }
 
+
+def _get_discrete_ratio_values(lower: float, upper: float) -> np.ndarray:
+    if lower == upper:
+        return np.array([lower])
+
+    step = round((upper - lower) / 0.1) + 1
+    return np.linspace(lower, upper, step, endpoint=True)
+
+
 def _validate_missing_ratio(value: Any) -> float:
     
     if not (isinstance(value, Real) and not isinstance(value, bool)):
@@ -117,22 +126,14 @@ def generate_missing_ratios(
         raise ValueError('In cross silo settings - num_clients should be less than 100')
 
     # distribution
-    np.random.seed(seed)
+    rng = np.random.RandomState(seed)
     missing_ratios = np.empty((num_clients, num_cols))
     for client_idx, (lower, upper) in enumerate(ms_range):
         if dist == 'random':
-            missing_ratios[client_idx] = np.random.uniform(lower, upper, num_cols)
+            missing_ratios[client_idx] = rng.uniform(lower, upper, num_cols)
         elif dist == 'random-int':
-            
-            def _get_discrete_ratio_values(lower: float, upper: float) -> np.ndarray:
-                if lower == upper:
-                    return np.array([lower])
-
-                step = round((upper - lower) / 0.1) + 1
-                return np.linspace(lower, upper, step, endpoint=True)
-            
             mr_list = _get_discrete_ratio_values(lower, upper)
-            missing_ratios[client_idx] = np.random.choice(mr_list, num_cols)
+            missing_ratios[client_idx] = rng.choice(mr_list, num_cols)
         elif dist == 'normal':
             if lower == upper:
                 missing_ratios[client_idx] = np.ones(num_cols) * lower
@@ -142,7 +143,7 @@ def generate_missing_ratios(
                 trunc_norm_dist = stats.truncnorm(
                     (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma
                 )
-                missing_ratios[client_idx] = trunc_norm_dist.rvs(size=num_cols)
+                missing_ratios[client_idx] = trunc_norm_dist.rvs(size=num_cols, random_state=rng)
         elif dist == 'normal-int':
             mr_list = _get_discrete_ratio_values(lower, upper)
             if len(mr_list) == 1:
@@ -153,7 +154,7 @@ def generate_missing_ratios(
                 probs = stats.truncnorm.pdf(
                     mr_list, (lower - mu) / sigma, (upper - mu) / sigma, loc=mu, scale=sigma
                 )
-                missing_ratios[client_idx] = np.random.choice(mr_list, num_cols, p=probs / probs.sum())
+                missing_ratios[client_idx] = rng.choice(mr_list, num_cols, p=probs / probs.sum())
         else:
             raise ValueError('Strategy not found')
 
@@ -172,7 +173,6 @@ def generate_missing_mech(mm_mech: str, num_clients: int, num_cols: int, seed: i
     :param seed: random seed
     :return: List[List[str]] - missing mechanism for each client and each feature - (num_clients, num_cols)
     """
-    np.random.seed(seed)
     MECH_MAPPING = {
         'mcar': 'mcar',
         'marq': 'mar_quantile',
@@ -239,16 +239,16 @@ def generate_missing_mech_funcs(
     """
 
     mm_list = generate_missing_funcs_list(mm_funcs)
-    np.random.seed(seed)
+    rng = np.random.RandomState(seed)
     # homogenous missing mechanism distribution
     if mm_dist == "identity":
-        missing_mechanism_dist_cols = np.random.choice(mm_list, (num_cols,))
+        missing_mechanism_dist_cols = rng.choice(mm_list, (num_cols,))
         missing_mechanism_dist = [list(missing_mechanism_dist_cols.copy()) for _ in range(num_clients)]
     # random missing mechanism distribution
     elif mm_dist == 'random':
         if len(mm_list) == 1:
             raise ValueError('mm funcs have multiple functions in random case, please use homo in this case.')
-        missing_mechanism_dist = np.random.choice(mm_list, (num_clients, num_cols)).tolist()
+        missing_mechanism_dist = rng.choice(mm_list, (num_clients, num_cols)).tolist()
     # random missing mechanism by shuffling
     elif mm_dist == 'random2':
         if len(mm_list) == 1:
@@ -260,7 +260,7 @@ def generate_missing_mech_funcs(
             col_funcs = np.array([mm_list[0]] * N1 + [mm_list[1]] * N2)
             ret = np.empty((num_clients, num_cols), dtype='U5')
             for col in range(num_cols):
-                np.random.shuffle(col_funcs)
+                rng.shuffle(col_funcs)
                 ret[:, col] = col_funcs.copy()
 
             missing_mechanism_dist = ret.tolist()

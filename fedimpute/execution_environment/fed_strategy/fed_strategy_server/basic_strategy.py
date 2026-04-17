@@ -233,12 +233,12 @@ class FedTreeStrategyServer(RawBaseStrategyServer):
         sample_sizes = [item['sample_size'] for item in fit_res]
         sample_fracs = [size / sum(sample_sizes) for size in sample_sizes]
 
-        np.random.seed(1203401)
+        rng = np.random.RandomState(1203401)
         # all local trees
         global_trees = []
         for local_model_state_dict, sample_frac in zip(local_model_parameters, sample_fracs):
             local_trees = local_model_state_dict['estimators']
-            sampled_trees = np.random.choice(local_trees, int(len(local_trees) * sample_frac), replace=False)
+            sampled_trees = rng.choice(local_trees, int(len(local_trees) * sample_frac), replace=False)
             global_trees.extend(sampled_trees)
 
         global_params = OrderedDict({"estimators": global_trees})

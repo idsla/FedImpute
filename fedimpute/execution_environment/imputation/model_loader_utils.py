@@ -29,50 +29,50 @@ from .models.ml_models.nn_model import TwoNNRegressor, TwoNNClassifier
 from .models.ml_models.linear_model import RidgeRegression, Logistic
 
 
-def load_sklearn_model(estimator_name) -> BaseEstimator:
-    # TODO: ADD SEEDED RANDOM STATE
+def load_sklearn_model(estimator_name, seed=0) -> BaseEstimator:
+    seed = int(seed)
     if estimator_name == "bayesian_ridge":
         return BayesianRidge()
     elif estimator_name == "linear_regression":
         return LinearRegression(n_jobs=-1)
     elif estimator_name == "ridge":
-        return Ridge(alpha=1.0, random_state=0, solver="sag")
+        return Ridge(alpha=1.0, random_state=seed, solver="sag")
     elif estimator_name == "bayesian_ridge":
         return BayesianRidge()
     elif estimator_name == "lasso":
-        return Lasso(alpha=0.1, random_state=0)
+        return Lasso(alpha=0.1, random_state=seed)
     elif estimator_name == "theilsen":
-        return TheilSenRegressor(random_state=0, n_jobs=-1)
+        return TheilSenRegressor(random_state=seed, n_jobs=-1)
     elif estimator_name == "huber":
         return HuberRegressor()
     elif estimator_name == "ridge_cv":
         return RidgeCV(alphas=[0.001, 0.01, 0.1, 1.0, 10, 50])
     elif estimator_name == "lasso_cv":
-        return LassoCV(alphas=[0.0001, 0.001, 0.01, 0.1, 1.0, 10.0], random_state=0)
+        return LassoCV(alphas=[0.0001, 0.001, 0.01, 0.1, 1.0, 10.0], random_state=seed)
     elif estimator_name == "lasso":
-        return Lasso(alpha=0.0001, random_state=0)
+        return Lasso(alpha=0.0001, random_state=seed)
     elif estimator_name == "ridge":
-        return Ridge(alpha=0.001, random_state=0)
+        return Ridge(alpha=0.001, random_state=seed)
     elif estimator_name == "logistic":
-        return LogisticRegression(penalty="l1", solver="liblinear", random_state=0)
+        return LogisticRegression(penalty="l1", solver="liblinear", random_state=seed)
     elif estimator_name == "logistic_cv":
-        return LogisticRegressionCV(Cs=[0.1, 1.0, 10.0], penalty="l1", solver="saga")
+        return LogisticRegressionCV(Cs=[0.1, 1.0, 10.0], penalty="l1", solver="saga", random_state=seed)
     elif estimator_name == "mlp_reg":
-        return MLPRegressor(hidden_layer_sizes=(16, 16), max_iter=1000, random_state=0)
+        return MLPRegressor(hidden_layer_sizes=(16, 16), max_iter=1000, random_state=seed)
     elif estimator_name == "mlp_clf":
-        return MLPClassifier(hidden_layer_sizes=(16, 16), max_iter=1000, random_state=0)
+        return MLPClassifier(hidden_layer_sizes=(16, 16), max_iter=1000, random_state=seed)
     elif estimator_name == "dt_reg":
-        return DecisionTreeRegressor(random_state=0)
+        return DecisionTreeRegressor(random_state=seed)
     elif estimator_name == "dt_clf":
-        return DecisionTreeClassifier(random_state=0)
+        return DecisionTreeClassifier(random_state=seed)
     elif estimator_name == "rf_reg":
-        return RandomForestRegressor(n_estimators=100, random_state=0, n_jobs=-1)
+        return RandomForestRegressor(n_estimators=100, random_state=seed, n_jobs=-1)
     elif estimator_name == "rf_clf":
-        return RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=-1)
+        return RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=-1)
     elif estimator_name == "hist_reg":
-        return HistGradientBoostingRegressor(random_state=0)
+        return HistGradientBoostingRegressor(random_state=seed)
     elif estimator_name == "hist_clf":
-        return HistGradientBoostingClassifier(random_state=0)
+        return HistGradientBoostingClassifier(random_state=seed)
     elif estimator_name == "xgboost_reg":
         raise NotImplementedError
     elif estimator_name == "xgboost_clf":

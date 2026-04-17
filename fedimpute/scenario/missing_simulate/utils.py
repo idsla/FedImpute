@@ -9,23 +9,25 @@ def pick_coeffs(
 		idxs_obs=None,
 		idxs_nas=None,
 		self_mask: bool = False,
-		seed=201030
+		seed=201030,
+		rng=None,
 ) -> np.ndarray:
+	if rng is None:
+		rng = np.random.default_rng(seed)
 	if idxs_nas is None:
 		idxs_nas = []
 	if idxs_obs is None:
 		idxs_obs = []
 
 	n, d = X.shape
-	np.random.seed(seed)
 	if self_mask:
-		coeffs = -np.random.rand(d)
+		coeffs = -rng.random(d)
 		Wx = X * coeffs
 		coeffs /= np.std(Wx, 0)
 	else:
 		d_obs = len(idxs_obs)
 		d_na = len(idxs_nas)
-		coeffs = np.random.rand(d_obs, d_na)
+		coeffs = rng.random((d_obs, d_na))
 		Wx = X[:, idxs_obs] @ coeffs
 		coeffs /= np.std(Wx, 0, keepdims=True)
 	return coeffs
