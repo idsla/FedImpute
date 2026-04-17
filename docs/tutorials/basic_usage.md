@@ -248,7 +248,7 @@ evaluator.tsne_visualization(
 
 
     
-![png](output_21_1.png)
+![png](basic_usage_files/output_21_1.png)
     
 
 
