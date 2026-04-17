@@ -11,7 +11,11 @@ from fedimpute.execution_environment import FedImputeEnv
 from fedimpute.scenario import ScenarioBuilder
 
 
-pytestmark = [pytest.mark.real_data, pytest.mark.slow]
+pytestmark = [
+    pytest.mark.real_data,
+    pytest.mark.slow,
+    pytest.mark.filterwarnings("ignore::sklearn.exceptions.ConvergenceWarning"),
+]
 
 GLOBAL_SEED = 100330201
 MODEL_RTOL = 5e-3
