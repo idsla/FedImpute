@@ -1,230 +1,327 @@
-# Constructing Distributed (Federated) Missing Data Scenarios
+# Constructing Distributed Missing Data Scenarios
 
-In this section, we will demonstrate how to construct federated missing data scenarios using the `fedimpute.scenario.ScenarioBuilder` module. 
+This page describes how to build federated missing-data scenarios with
+`fedimpute.scenario.ScenarioBuilder`.
 
-## What is Distributed Missing Data Scenario
+## What a Scenario Contains
 
-Distributed Missing Data Scenario represents a distributed network with a number of clients. Each client has its local dataset (we consider horizontal setting, which means these datasets contain same feature space). There are missing values inside local dataset of these clients. Our `fedimpute.scenario.ScenarioBuilder` module will construct all necessary components for the distributed missing data scenario (e.g., client-specific training and test data, missing data, etc.), which will be used in other modules for conducting federated imputation and prediction. 
+A distributed missing-data scenario represents a horizontal federated setting:
+each client owns rows from the same feature space, and each local training
+dataset can contain missing feature values. `ScenarioBuilder` prepares the
+standard data components used by the rest of FedImpute:
 
-<img src="../../img/fmiss_new.png" width="600" height="380">
+- `clients_train_data`: complete client training datasets, including target.
+- `clients_train_data_ms`: client training feature matrices with missing values.
+  The target column is not included.
+- `clients_test_data`: client test datasets, including target.
+- `global_test_data`: global test dataset for federated evaluation.
+- `clients_seeds`: per-client random seeds generated from the global seed.
+- `data_config`: the data configuration used for scenario construction.
+- `stats`: partition statistics returned by the data-partition step.
 
-The input to this module is a `<np.ndarray>` or `<pd.DataFrame>` dataset or datasets (real federated datasets) and a data configuration dictionary `data_config`. 
-Details on how to preparing the dataset and the data configuration dictionary are provided in the [Data Preparation](../user-guide/data_prep.md) section.
+The input can be either a centralized `numpy.ndarray` or `pandas.DataFrame` for
+simulation-based scenarios, or a list of naturally partitioned client datasets
+for real scenarios. The data configuration should include at least
+`task_type` and the target-column information described in
+[Data Preparation](../user-guide/data_prep.md).
 
-`fedimpute.scenario.ScenarioBuilder` provides two approaches for scenario construction that cover the most common research settings in distributed imputation: (1) **simulation-based scenarios**, where data partitioning and missing values are systematically simulated according to user-specified parameters, and (2) **real-world scenarios**, where data is naturally partitioned across silos with existing missing values. 
+<img src="../img/fmiss_new.png" width="600" height="380">
 
-Both approaches output standard formats of data components (1) `clients_train_data`: client-specific training datasets, (2) `clients_train_data_ms`: client-specific training datasets
-with simulated or existed missing values, (3) `clients_test_data`: client-specific test datasets for local evaluation, and (4) `global_test_data`: global test dataset for federated evaluation. These structured outputs serve as consistent building blocks for subsequent steps in the fedimpute workflow, including distributed environment initialization, algorithm execution, and performance evaluation.
+## Simulated Scenarios
 
-## Scenario Construction Interface
-
-### Constructing Simulated Scenario
-
-The `fedimpute.scenario.ScenarioBuilder` module include the following core functionalities for constructing a simulated scenario: (1) **Data Partition**: Partition the dataset horizontally into multiple clients. (2) **Missing Data Simulation**: Introduce missing values in the dataset of each client. It takes the a centralized `<np.ndarray>` or `<pd.DataFrame>` data and data configuration as input and perform data partition and missing data simulation logic based on the parameters specified by the user and output the client-specific data components (clients' local training data, test etc.)
-
-The following example shows how to construct a simulated scenario. Firstly, initialize the `fedimpute.scenario.ScenarioBuilder` class and call the `create_simulated_scenario` method to simulate the federated missing data scenario.
+Use `create_simulated_scenario()` when you want FedImpute to split a centralized
+dataset into clients and then simulate missing values in each client's training
+data.
 
 ```python
 from fedimpute.scenario import ScenarioBuilder
 
 scenario_builder = ScenarioBuilder()
 scenario_data = scenario_builder.create_simulated_scenario(
-    data, data_config, num_clients = 4, dp_strategy='iid-even', ms_scenario='mnar-heter'
+    data,
+    data_config,
+    num_clients=4,
+    dp_strategy="iid-even",
+    ms_scenario="mnar-heter",
+    seed=100330201,
 )
-print('Results Structure (Dict Keys):')
+
 print(list(scenario_data.keys()))
 scenario_builder.summarize_scenario()
 ```
 
-#### Supported Data Partition Strategies
-Data partition can be set by  `dp_strategy` parameter, which takes following options
+### Data Partitioning
 
-- `iid-even`: iid partition with even sample sizes
-- `iid-dir@<alpha>`： iid parititon with sample sizes following dirichlet distribution with parameter `alpha` to control sample size heterogeneity e.g. `iid-dir@0.1`
-- `niid-dir@<alpha>`: non-iid partition based on some columns with dirichlet ditribution with parameter `alpha` to control data heterogneity e.g. `niid-dir@0.1`
-- `niid-path@<n>`: non-iid partition based on some columns with pathological distribution (shard partition) with parameter `n` control heterogeneity `niid-path@2`, each client own 2 classes of a column values.
+Set the data partition through `dp_strategy`.
 
-#### Other Parameters for Data Partition
+| Strategy | Description |
+| --- | --- |
+| `iid-even` | IID partition with equal expected client sizes. |
+| `iid-dir@<alpha>` | IID feature/label distribution with heterogeneous client sizes sampled from a Dirichlet distribution. Smaller `alpha` gives stronger size heterogeneity. |
+| `niid-dir@<alpha>` | Non-IID partition based on `dp_split_cols`, using a Dirichlet distribution. Smaller `alpha` gives stronger distribution heterogeneity. |
+| `niid-path@<n>` | Parsed by the builder but not implemented yet. It currently raises `NotImplementedError`. |
 
-- **num_clients** (int) - Number of clients to partition the dataset.
-- **dp_split_cols** (Union[str, int, List[int]]) - Column index or name to split the data samples. If the column is continuous, it will be binned into categories by `dp_reg_bins`.
-    - `target`: Split the data samples based on the target column.
-    - `feature`: Split the data samples based on the first feature column.
-- **dp_min_samples** (int) - Minimum number of samples in each client.
-- **dp_max_samples** (int) - Maximum number of samples in each client.
-- **dp_sample_iid_direct** (bool) -  Instead of partition data i.i.d, sample data i.i.d from global population (original data) for each client.
-- **dp_local_test_size** (float) = 0.1 - The size of local test set for each client for downstream local federated prediction evaluation. 
-- **dp_global_test_size** (float) = 0.1 - The size of global test set for the downstream federated prediction evaluation.
-- **dp_local_backup_size** (float) = 0.05 - backup sample size to avoid all samples in data to be missing
-- **dp_reg_bins** (int) = 50 - Used for non-i.i.d data partitioning, if column for non-i.i.d partition is continuous, binning it into categories for meaningful non-i.i.d partiton.
+Other partition parameters:
 
-#### Supported Missing Data Mechanism Type
+- `num_clients`: number of clients.
+- `dp_split_cols`: split basis for `niid-dir`. Supported values in
+  `ScenarioBuilder` are `target`, `feature`, or an integer feature index.
+  `target` uses the target column; `feature` uses the first feature column.
+- `dp_min_samples`: minimum samples required for each client during non-IID
+  allocation.
+- `dp_max_samples`: maximum samples for heterogeneous-size IID allocation.
+- `dp_sample_iid_direct`: when `True`, IID clients are sampled directly from the
+  global population.
+- `dp_local_test_size`: local test split ratio for each client.
+- `dp_global_test_size`: global test split ratio before client partitioning.
+- `dp_local_backup_size`: fraction of local backup rows appended to training
+  outputs without simulated missing values.
+- `dp_reg_bins`: number of bins used when a continuous target or split feature
+  must be discretized for partitioning.
 
-Missing mechansim can be set by `ms_mech_type` parameter, which supports all commonly used three types of general missing mechanism. The options are shown as below. Refer to [how to create missingness in python?](https://rmisstastic.netlify.app/how-to/python/generate_html/how%20to%20generate%20missing%20values) for more details.
+### Missing Mechanisms
 
-- **MCAR Missing Mechanism** 
-    - `mcar` missing completely at random implemented using purely random mask.
-- **MAR Missing Mechanism**
-    - `mar_quantile`: missing at random based on quantile of values of other features.
-    - `mar_logit` missing at random created based on logit regressoin on values of other features.
-- **MNAR Missing Mechanism**
-    - `mnar_logit`: missingness based on values of feature itself and other features.
-    - `mnar_sm_logit`: self-masking missingness logit regression based on values of feature itself.
-    - `mnar_sm_quantile`: self-masking missingness based on quantile of values of feature itself.
+Set the mechanism with `ms_mech_type` when not using a predefined
+`ms_scenario`.
 
-#### Missing Data Simulation Parameters
+| Mechanism | Description |
+| --- | --- |
+| `mcar` | Missing completely at random. |
+| `mar_quantile` | MAR using quantile-based masking from observed features. |
+| `mar_logit` | MAR using logistic masking from observed features. |
+| `mnar_quantile` | MNAR using quantile-based masking. |
+| `mnar_logit` | MNAR using logistic masking from the feature itself and related features. |
+| `mnar_sm_logit` | Self-masking MNAR using logistic masking from the feature itself. |
 
-The missing data simulation component is used to simulate missing data in the dataset of each client. 
-The core concept here is the **missing data heterogeneity** which means the each client can have a different missing data characteristics in terms of missing ratio, missing feature and missing mechanisms.
+Use `obs_cols` for MAR settings:
 
-The core parameters for missing data simulation are:
+- `random`: choose one observed feature with the scenario seed.
+- `rest`: use all non-missing columns as observed features. If `ms_cols="all"`,
+  the builder keeps one missing column as the observed feature fallback.
+- `List[int]`: explicit observed feature indices.
 
-- **ms_cols** (Union[str, List[int]]) - features to introduce missing values.
-    - `all`: introduce missing values in all features (*default*).
-    - `all-num`: introduce missing values in all numerical features.
+For non-MAR mechanisms, `mm_obs` is forced to `False` internally.
 
-- **ms_global_mechanism** (bool) - If True, all clients have the same missing data mechanism. If False, each client has a different missing data mechanism. This is used for control **homogenous** or **heterogeneous** missing data scenario.
-- **ms_mr_dist_clients** (str) - Missing ratio distribution across clients. The available options:
-    - `fixed`: Missing ratio is the same for all clients.
-    - `randu`: Random uniform missing ratio with random float value for each client. 
-    - `randn`: Random normal missing ratio with random float value for each client.
-- **ms_mf_dist_clients** (str) - Missing feature distribution across clients. 
-    - `identity`: Each client has the same missing features.
-- **ms_mm_dist_clients** (str) - Missing mechanism distribution across clients. 
-    - `identity`: Each client has the same missing mechanism.
-    - `random`: Random missing mechanism function for each client.
+### Missing Feature Selection
 
-We have another parameter `ms_scenario` which simplify the missing data heterogeneity simulation by providing 5 predefined homogeneous and heterogeneous mechanism settings. It has the following options (**Note:** by setting this parameter, you don't need to specify the parameter above for missing mechanism heterogeneity):
-- `mcar`: MCAR setting
-- `mar-heter`: heterogeneous MAR setting
-- `mar-homo`: homogeneous MAR setting
-- `mnar-heter`: heterogeneous MNAR setting
-- `mnar-homo`: homogenous MNAR setting
+Use `ms_cols` to choose which feature columns may receive missing values:
 
+- `all`: all feature columns.
+- `all-num`: the first `data_config["num_cols"]` feature columns.
+- `List[int]`: explicit zero-based feature indices.
 
+`ms_missing_features` controls the missing-feature strategy passed to the lower
+level simulator. The current implemented strategy is `all`, meaning every
+feature selected by `ms_cols` is eligible for missingness for each client.
 
-Other Parameters
+### Missing Ratios
 
-- **ms_mr_lower** (float) = 0.3 - Lower bound of missing ratio 
-- **ms_mr_upper** (float) = 0.7 - Upper bound of missing ratio
-- **ms_mm_funcs_bank** (str) = 'lr' - missing mechanism function direction bank for MAR, MNAR mechanism. It is a string with any of `l`, `r`, `m`, `t` four types of functions.
-    - `l`: left side missing
-    - `r`: right side missing
-    - `m`: middle missing
-    - `t`: two sides missing
-- **ms_mm_strictness** (bool) - If True, the missing mechanism function is strict, otherwise it is probabilistic.
-- **ms_mm_obs** (bool) = False - This is for MAR mechanism, if True, the missing data is related to some fully observed variables.
-- **ms_mm_feature_option** (str) = 'allk=0.2' - This is for MAR, MNAR mechanism, strategies for selecting features which missing value is correlated. 
-`allk=<ratio>` means select k (determined by ratio) highly correlated features from all features. 
-- **ms_mm_beta_option** (str) = None, strategies set coefficient of logistic function for `mar_logit` and `mnar_sm_logit`, `mnar_logit` mechanism type.
+Missing ratios are controlled by two parameters:
 
-### Constructing Real Scenario
+- `ms_mr_clients`: the target ratio or ratio range for each client.
+- `ms_mr_dist_clients`: how feature-level ratios are sampled from those ranges.
 
-In certain cases, we have real data available with naturally occurring missing values and has well-defined partitions for distribution. To handle such cases, the module provides the `create_real_scenario()` method to construct distributed missing data scenario corresponding to the given data. Unlike simulation-based construction,
-this method expects input data as a Python `List of <pandas.DataFrame>` datasets, where each
-dataframe represents a client-specific local dataset. The method processes these distributed
-datasets to generate scenario components in the same standardized format described earlier (e.g. split training and test data for each client's local data and construct a global test dataset for federated prediction), ensuring consistent interfaces for subsequent distributed imputation and evaluation.
+Supported `ms_mr_dist_clients` values are:
 
-**Parameters**:
+| Value | Behavior |
+| --- | --- |
+| `random` | Uniformly sample ratios inside each client's range. |
+| `random-int` | Sample discrete ratios inside each client's range using 0.1-spaced values. |
+| `normal` | Sample from a truncated normal distribution inside each client's range. |
 
-- `datas` (List[pd.DataFrame]): input list of datasets
-- `data_config` (Dict): data configuration
-- `seed` (int): random seed for train-test splitting
-- `verbose` (int): show processing information
+`ms_mr_clients` accepts these forms:
 
-**Usage**:
+```python
+# Same fixed ratio for every client
+ms_mr_clients = 0.4
 
-```{python}
-from fedimpute.data_prep import load_data, display_data, column_check
+# Same ratio range for every client
+ms_mr_clients = (0.2, 0.6)
+
+# Per-client settings; list length must equal num_clients
+ms_mr_clients = [0.2, (0.3, 0.5), "large"]
+```
+
+Predefined ratio buckets are:
+
+| Bucket | Range |
+| --- | --- |
+| `extra-small` | `(0.1, 0.2)` |
+| `small` | `(0.2, 0.4)` |
+| `moderate` | `(0.4, 0.6)` |
+| `large` | `(0.6, 0.8)` |
+| `extra-large` | `(0.8, 0.9)` |
+
+`ms_mr_lower` and `ms_mr_upper` are hard clipping bounds applied after ratios
+are sampled. Both must be between 0 and 1, and `ms_mr_lower <= ms_mr_upper`.
+
+When `ms_global_mechanism=True`, missingness is simulated once on the combined
+training data and then split back to clients. In that mode, use a scalar, tuple,
+or bucket string for `ms_mr_clients`; per-client lists are rejected.
+
+### Missing Function Heterogeneity
+
+For quantile and logistic mechanisms, `ms_mm_funcs_bank` defines the function
+directions available to the simulator:
+
+| Value | Function directions |
+| --- | --- |
+| `None` | No direction function. |
+| `l` | left |
+| `r` | right |
+| `m` | middle |
+| `t` | tail |
+| `lr` | left, right |
+| `mt` | middle, tail |
+| `all` | left, right, middle, tail |
+
+`ms_mm_dist_clients` controls how these functions are assigned:
+
+- `identity`: each feature uses the same sampled function across clients.
+- `random`: each client-feature pair samples a function independently. The
+  function bank must contain at least two options.
+- `random2`: shuffles two function options across clients for each feature.
+
+Additional mechanism parameters:
+
+- `ms_mm_strictness`: if `True`, masking is deterministic after the mechanism
+  score is computed; otherwise it is probabilistic.
+- `ms_mm_obs`: for MAR, use observed features to drive missingness.
+- `ms_mm_feature_option`: related-feature strategy for logistic mechanisms,
+  such as `self`, `all`, or `allk=0.2`.
+- `ms_mm_beta_option`: logistic coefficient strategy. Common values are
+  `fixed` or `randu` for MAR, and `self` or `randu` for MNAR.
+
+### Predefined Missing Scenarios
+
+`ms_scenario` provides common mechanism presets. When this argument is set, it
+overrides `ms_mech_type`, `ms_global_mechanism`, `ms_mr_dist_clients`,
+`ms_mm_dist_clients`, `ms_mm_beta_option`, and `ms_mm_obs`.
+
+| `ms_scenario` | Mechanism | Global mechanism | Ratio distribution | Function distribution | Beta option | Observed-feature mode |
+| --- | --- | --- | --- | --- | --- | --- |
+| `mcar` | `mcar` | `False` | `random` | `identity` | `None` | `False` |
+| `mar-homo` | `mar_logit` | `True` | `random` | `identity` | `fixed` | `True` |
+| `mar-heter` | `mar_logit` | `False` | `random` | `random` | `randu` | `True` |
+| `mnar-homo` | `mnar_sm_logit` | `True` | `random` | `identity` | `self` | `False` |
+| `mnar-heter` | `mnar_sm_logit` | `False` | `random` | `random` | `self` | `False` |
+
+Example with explicit per-client missing-ratio settings:
+
+```python
+scenario_data = scenario_builder.create_simulated_scenario(
+    data,
+    data_config,
+    num_clients=3,
+    dp_strategy="iid-even",
+    ms_scenario="mcar",
+    ms_mr_clients=[0.2, (0.4, 0.6), "large"],
+    ms_mr_lower=0.1,
+    ms_mr_upper=0.9,
+    seed=123,
+)
+```
+
+## Real Scenarios
+
+Use `create_real_scenario()` when your data is already partitioned by client and
+already contains the missing values you want to study. The input is a list of
+client datasets. Each item can be a `pandas.DataFrame` or `numpy.ndarray`.
+
+```python
+from fedimpute.data_prep import load_data
 from fedimpute.scenario import ScenarioBuilder
-data, data_config = load_data("fed_heart_disease")
+
+datas, data_config = load_data("fed_heart_disease")
+
 scenario_builder = ScenarioBuilder()
 scenario_data = scenario_builder.create_real_scenario(
-    data, data_config,
+    datas,
+    data_config,
+    seed=100330201,
 )
+
 scenario_builder.summarize_scenario()
 ```
 
-## Scenario Exploration and Summary
+Parameters:
 
-The module also provides comprehensive tools for analyzing scenario-specific
-data for any given distributed missing data scenario through a collection of visualization and
-analysis interfaces, example of these functions can be found in the tutorials. It includes the following APIs:
+- `datas`: list of client datasets.
+- `data_config`: data configuration.
+- `seed`: random seed for client seeds and train-test splitting.
+- `verbose`: print progress information when greater than 0.
 
-- **`summarize_scenario(log_to_file, file_path)`** provides a summary report of the scenario data components, user can choose whether show the summary to save summary report to the disk.
+## Scenario Summary and Visualization
 
-- **`visualize_missing_pattern(client_ids: List[int], data_type: str = 'train')`** visualizes the missing data pattern for client-specific local data.
-    
-    - `client_ids` (List[int]): client ids to show the pattern
-    - `data_type` (str): `train` or `test` to show pattern for training data or test data.
+`ScenarioBuilder` keeps the latest scenario on the builder instance, so the
+summary and visualization methods can be called after scenario construction.
 
-    ```{python}
-    scenario_builder.visualize_missing_pattern(client_ids=[0, 1, 2, 3])
-    ```
+### `summarize_scenario()`
 
-- **`visualize_missing_distribution(client_ids: List[int], feature_ids: List[int])`** visualizes the distribution of missing and observed values for features within client-specific local data.
-    
-    - `client_ids` (List[int]): client ids to show the missing distribution.
-    - `feature_ids` (List[int]): feature indices to set for which feature the missing data distribution to be shown.
+Prints a table with client train/test/missing-data shapes, total missing ratio,
+number of missing features, and client seed.
 
-    ```{python}
-    scenario_builder.visualize_missing_distribution(client_ids = [0, 1], feature_ids = [0, 1, 2, 3, 4])
-    ```
-
-- **`visualize_data_heterogeneity(client_ids: List[int], distance_method: str = 'swd',)`** visualizes the heatmap to assess cross-client local data heterogeneity.
-    
-    - `client_ids` (List[int]): client ids to show the information.
-    - `distance_method` (str): method to calculate pair-wise client distance. `swd` - sliced wasserstein distance over local data. `correlation` - euclidean distance caculated on feature correlation matrix. 
-
-    ```{python}
-    scenario_builder.visualize_data_heterogeneity(client_ids=[0, 1, 2, 3],  distance_method='swd')
-    ```
-
-
-## predefined setting `ms_scenario` - parameters mapping:
-
-- **`mcar`** - Missing Completely At Random (MCAR) mechanism.
 ```python
-    ms_mech_type = 'mcar'
-    ms_global_mechanism = False
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = None
-    ms_mm_obs = False
+scenario_builder.summarize_scenario()
+
+summary = scenario_builder.summarize_scenario(return_summary=True)
 ```
-- **`mar-heter`** - Missing At Random (MAR) mechanism with heterogeneous missing data scenario.
+
+Optional parameters:
+
+- `log_to_file`: write the summary to disk.
+- `file_path`: output path used when `log_to_file=True`.
+- `return_summary`: return the summary string instead of printing it.
+
+### `visualize_missing_pattern()`
+
+Visualizes the missing-value mask for selected clients.
+
 ```python
-    ms_mech_type = 'mar_sigmoid'
-    ms_global_mechanism = False
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = 'randu'
-    ms_mm_obs = True
+scenario_builder.visualize_missing_pattern(
+    client_ids=[0, 1, 2, 3],
+    data_type="train",
+)
 ```
-- **`mar-homo`** - Missing At Random (MAR) mechanism with homogeneous missing data scenario.
+
+Useful parameters:
+
+- `client_ids`: zero-based client ids.
+- `data_type`: `train` or `test`.
+- `save_path`: save the plot instead of showing it.
+
+### `visualize_missing_distribution()`
+
+Compares observed and missing-value distributions for selected features and
+clients.
+
 ```python
-    ms_mech_type = 'mar_sigmoid'
-    ms_global_mechanism = True
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = 'fixed'
-    ms_mm_obs = True
+scenario_builder.visualize_missing_distribution(
+    client_ids=[0, 1],
+    feature_ids=[0, 1, 2, 3, 4],
+)
 ```
-- **`mnar-heter`** - Missing Not At Random (MNAR) mechanism with heterogeneous missing data scenario.
+
+Useful parameters:
+
+- `client_ids`: zero-based client ids.
+- `feature_ids`: zero-based feature ids.
+- `bins`, `stat`, `kde`: histogram controls passed to seaborn.
+- `data_type`: `train` or `test`.
+- `save_path`: save the plot instead of showing it.
+
+### `visualize_data_heterogeneity()`
+
+Computes and visualizes pairwise client distance matrices.
+
 ```python
-    ms_mech_type = 'mnar_sigmoid'
-    ms_global_mechanism = False
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = 'self'
-    ms_mm_obs = False
+scenario_builder.visualize_data_heterogeneity(
+    client_ids=[0, 1, 2, 3],
+    distance_method="swd",
+)
 ```
-- **`mnar-homo`** - Missing Not At Random (MNAR) mechanism with homogeneous missing data scenario.
-```python
-    ms_mech_type = 'mnar_sigmoid'
-    ms_global_mechanism = True
-    ms_mr_dist_clients = 'randu-int'
-    ms_mm_dist_clients = 'identity'
-    ms_mm_beta_option = 'self'
-    ms_mm_obs = False
-```
+
+Supported distance methods:
+
+- `swd`: sliced Wasserstein distance.
+- `correlation`: distance based on feature-correlation matrices.
