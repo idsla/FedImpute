@@ -1,4 +1,4 @@
-name: Smoke Test - Benchmark
+name: Integration Tests - Smoke
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  smoke-benchmark:
-    name: benchmark
+  integration-smoke:
+    name: smoke
     runs-on: ubuntu-latest
 
     steps:
@@ -28,5 +28,5 @@ jobs:
           python -m pip install -e .
           python -m pip install pytest
 
-      - name: Run benchmark smoke test
-        run: python -m pytest -q tests/integration/smoke/test_benchmark_small.py
+      - name: Run smoke integration tests
+        run: python -m pytest -q tests/integration/smoke

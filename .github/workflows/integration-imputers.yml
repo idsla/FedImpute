@@ -1,4 +1,4 @@
-name: Smoke Test - Real Scenario
+name: Integration Tests - Imputers
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  smoke-real-scenario:
-    name: real scenario
+  integration-imputers:
+    name: imputers
     runs-on: ubuntu-latest
 
     steps:
@@ -28,5 +28,5 @@ jobs:
           python -m pip install -e .
           python -m pip install pytest
 
-      - name: Run real scenario smoke test
-        run: python -m pytest -q tests/integration/smoke/test_real_scenario_synthetic.py
+      - name: Run imputer integration tests
+        run: python -m pytest -q tests/integration/imputers
