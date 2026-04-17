@@ -9,15 +9,17 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
-        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-material.css" rel="stylesheet" />
         <link href="../../css/mkdocstrings.css" rel="stylesheet" />
         <link href="../../css/custom.css" rel="stylesheet" />
         <link href="../../css/mkapi.css" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" />
     
       <script>
         // Current page data
         var mkdocs_page_name = "Developing Customized Methods";
-        var mkdocs_page_input_path = "tutorials\\develop_new_method.md";
+        var mkdocs_page_input_path = "tutorials/develop_new_method.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -113,7 +115,7 @@
 <p>We first load <code>codrna</code> dataset from fedimpute.</p>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span> <span class="nn">fedimpute.data_prep</span> <span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.data_prep</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
 <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;codrna&quot;</span><span class="p">)</span>
 <span class="n">display_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Dimensions: &quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -139,7 +141,7 @@
 <p>We then construct a distributed data scenario with 4 clients and heterogenous MNAR missingness.</p>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span> <span class="nn">fedimpute.scenario</span> <span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.scenario</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
 
 <span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
 <span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
@@ -172,14 +174,14 @@
 
 <h1 id="build-new-imputer">Build New Imputer</h1>
 <p>In the following example, we develop a new imputer MICE imputation with a 2 layer neural network as underlying machine learning model for imputation, it should inherit the abstract class <code>BaseMLImputer</code> and implement all its abstract methods. It also inherit <code>ICEImputerMixin</code> class which contains some helper function for ICE imputation. We add comment in class to give more instructions on how we implement it.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.execution_environment.imputation.base</span> <span class="kn">import</span> <span class="n">BaseMLImputer</span><span class="p">,</span> <span class="n">ICEImputerMixin</span>
-<span class="kn">from</span> <span class="nn">sklearn.neural_network</span> <span class="kn">import</span> <span class="n">MLPRegressor</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.execution_environment.imputation.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseMLImputer</span><span class="p">,</span> <span class="n">ICEImputerMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neural_network</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLPRegressor</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedDict</span>
 
-<span class="k">class</span> <span class="nc">MLPICEImputer</span><span class="p">(</span><span class="n">BaseMLImputer</span><span class="p">,</span> <span class="n">ICEImputerMixin</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MLPICEImputer</span><span class="p">(</span><span class="n">BaseMLImputer</span><span class="p">,</span> <span class="n">ICEImputerMixin</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;mlp_mice&#39;</span><span class="p">,</span> <span class="n">model_persistable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># it needs two parameters: name of imputer and whether the model is persistable (can be saved to disk), we set it to False because ICE imptutation is not persistable</span>
 
@@ -189,7 +191,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># seed for randomization</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fit_res_history</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># fit results history</span>
 
-    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">missing_mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">data_utils</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -216,7 +218,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">min_values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_clip_thresholds</span><span class="p">(</span><span class="n">data_utils</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
 
-    <span class="k">def</span> <span class="nf">get_imp_model_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedDict</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_imp_model_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderedDict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return model parameters</span>
 
@@ -243,7 +245,7 @@
 
         <span class="k">return</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">set_imp_model_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updated_model_dict</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_imp_model_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updated_model_dict</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set model parameters</span>
 
@@ -265,7 +267,7 @@
         <span class="n">imp_model</span><span class="o">.</span><span class="n">coefs_</span> <span class="o">=</span> <span class="n">coefs</span>
         <span class="n">imp_model</span><span class="o">.</span><span class="n">intercepts_</span> <span class="o">=</span> <span class="n">intercepts</span>
 
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">missing_mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">missing_mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fit imputer to train local imputation models</span>
 
@@ -297,7 +299,7 @@
             <span class="s1">&#39;sample_size&#39;</span><span class="p">:</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">impute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">missing_mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">impute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">missing_mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Impute missing values using an imputation model</span>
 
@@ -326,7 +328,7 @@
 
         <span class="k">return</span> <span class="n">X</span>
 
-    <span class="k">def</span> <span class="nf">get_fit_res</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_fit_res</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 
         <span class="c1"># This method is used to get fit results for a given feature from the fit history</span>
         <span class="k">try</span><span class="p">:</span>
@@ -340,7 +342,7 @@
 <p>Once finishing develop new imputer, it needs to be registered into fedimpute, so it can be used by constructed environment. We need to call <code>register_imputer</code> method from <code>env.register</code> object. It takes name of imputer, class of imputer, workflow associated with imputer and a list of supported federated strategy of imputer.</p>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span> <span class="nn">fedimpute.execution_environment</span> <span class="kn">import</span> <span class="n">FedImputeEnv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.execution_environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">FedImputeEnv</span>
 
 <span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">env</span><span class="o">.</span><span class="n">register</span><span class="o">.</span><span class="n">register_imputer</span><span class="p">(</span>
@@ -488,6 +490,7 @@
     <script>var base_url = "../..";</script>
     <script src="../../js/theme_extra.js"></script>
     <script src="../../js/theme.js"></script>
+      <script src="../../javascript/mkapi.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
       <script src="../../search/main.js"></script>
     <script>

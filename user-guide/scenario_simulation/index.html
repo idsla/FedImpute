@@ -9,15 +9,17 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
-        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-material.css" rel="stylesheet" />
         <link href="../../css/mkdocstrings.css" rel="stylesheet" />
         <link href="../../css/custom.css" rel="stylesheet" />
         <link href="../../css/mkapi.css" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" />
     
       <script>
         // Current page data
         var mkdocs_page_name = "Distributed Missing Data Scenario Builder";
-        var mkdocs_page_input_path = "user-guide\\scenario_simulation.md";
+        var mkdocs_page_input_path = "user-guide/scenario_simulation.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -56,29 +58,37 @@
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Distributed Missing Data Scenario Builder</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#what-is-distributed-missing-data-scenario">What is Distributed Missing Data Scenario</a>
+    <li class="toctree-l2"><a class="reference internal" href="#what-a-scenario-contains">What a Scenario Contains</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#scenario-construction-interface">Scenario Construction Interface</a>
+    <li class="toctree-l2"><a class="reference internal" href="#simulated-scenarios">Simulated Scenarios</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#constructing-simulated-scenario">Constructing Simulated Scenario</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#supported-data-partition-strategies">Supported Data Partition Strategies</a>
+    <li class="toctree-l3"><a class="reference internal" href="#data-partitioning">Data Partitioning</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#other-parameters-for-data-partition">Other Parameters for Data Partition</a>
+    <li class="toctree-l3"><a class="reference internal" href="#missing-mechanisms">Missing Mechanisms</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#supported-missing-data-mechanism-type">Supported Missing Data Mechanism Type</a>
+    <li class="toctree-l3"><a class="reference internal" href="#missing-feature-selection">Missing Feature Selection</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#missing-data-simulation-parameters">Missing Data Simulation Parameters</a>
+    <li class="toctree-l3"><a class="reference internal" href="#missing-ratios">Missing Ratios</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#missing-function-heterogeneity">Missing Function Heterogeneity</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#predefined-missing-scenarios">Predefined Missing Scenarios</a>
     </li>
         </ul>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#constructing-real-scenario">Constructing Real Scenario</a>
+    <li class="toctree-l2"><a class="reference internal" href="#real-scenarios">Real Scenarios</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#scenario-summary-and-visualization">Scenario Summary and Visualization</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#summarize_scenario">summarize_scenario()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#visualize_missing_pattern">visualize_missing_pattern()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#visualize_missing_distribution">visualize_missing_distribution()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#visualize_data_heterogeneity">visualize_data_heterogeneity()</a>
     </li>
         </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#scenario-exploration-and-summary">Scenario Exploration and Summary</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#predefined-setting-ms_scenario-parameters-mapping">predefined setting ms_scenario - parameters mapping:</a>
     </li>
     </ul>
                   </li>
@@ -133,227 +143,445 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="constructing-distributed-federated-missing-data-scenarios">Constructing Distributed (Federated) Missing Data Scenarios</h1>
-<p>In this section, we will demonstrate how to construct federated missing data scenarios using the <code>fedimpute.scenario.ScenarioBuilder</code> module. </p>
-<h2 id="what-is-distributed-missing-data-scenario">What is Distributed Missing Data Scenario</h2>
-<p>Distributed Missing Data Scenario represents a distributed network with a number of clients. Each client has its local dataset (we consider horizontal setting, which means these datasets contain same feature space). There are missing values inside local dataset of these clients. Our <code>fedimpute.scenario.ScenarioBuilder</code> module will construct all necessary components for the distributed missing data scenario (e.g., client-specific training and test data, missing data, etc.), which will be used in other modules for conducting federated imputation and prediction. </p>
-<p><img src="../../img/fmiss_new.png" width="600" height="380"></p>
-<p>The input to this module is a <code>&lt;np.ndarray&gt;</code> or <code>&lt;pd.DataFrame&gt;</code> dataset or datasets (real federated datasets) and a data configuration dictionary <code>data_config</code>. 
-Details on how to preparing the dataset and the data configuration dictionary are provided in the <a href="../data_prep/">Data Preparation</a> section.</p>
-<p><code>fedimpute.scenario.ScenarioBuilder</code> provides two approaches for scenario construction that cover the most common research settings in distributed imputation: (1) <strong>simulation-based scenarios</strong>, where data partitioning and missing values are systematically simulated according to user-specified parameters, and (2) <strong>real-world scenarios</strong>, where data is naturally partitioned across silos with existing missing values. </p>
-<p>Both approaches output standard formats of data components (1) <code>clients_train_data</code>: client-specific training datasets, (2) <code>clients_train_data_ms</code>: client-specific training datasets
-with simulated or existed missing values, (3) <code>clients_test_data</code>: client-specific test datasets for local evaluation, and (4) <code>global_test_data</code>: global test dataset for federated evaluation. These structured outputs serve as consistent building blocks for subsequent steps in the fedimpute workflow, including distributed environment initialization, algorithm execution, and performance evaluation.</p>
-<h2 id="scenario-construction-interface">Scenario Construction Interface</h2>
-<h3 id="constructing-simulated-scenario">Constructing Simulated Scenario</h3>
-<p>The <code>fedimpute.scenario.ScenarioBuilder</code> module include the following core functionalities for constructing a simulated scenario: (1) <strong>Data Partition</strong>: Partition the dataset horizontally into multiple clients. (2) <strong>Missing Data Simulation</strong>: Introduce missing values in the dataset of each client. It takes the a centralized <code>&lt;np.ndarray&gt;</code> or <code>&lt;pd.DataFrame&gt;</code> data and data configuration as input and perform data partition and missing data simulation logic based on the parameters specified by the user and output the client-specific data components (clients' local training data, test etc.)</p>
-<p>The following example shows how to construct a simulated scenario. Firstly, initialize the <code>fedimpute.scenario.ScenarioBuilder</code> class and call the <code>create_simulated_scenario</code> method to simulate the federated missing data scenario.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.scenario</span> <span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+                <h1 id="constructing-distributed-missing-data-scenarios">Constructing Distributed Missing Data Scenarios</h1>
+<p>This page describes how to build federated missing-data scenarios with
+<code>fedimpute.scenario.ScenarioBuilder</code>.</p>
+<h2 id="what-a-scenario-contains">What a Scenario Contains</h2>
+<p>A distributed missing-data scenario represents a horizontal federated setting:
+each client owns rows from the same feature space, and each local training
+dataset can contain missing feature values. <code>ScenarioBuilder</code> prepares the
+standard data components used by the rest of FedImpute:</p>
+<ul>
+<li><code>clients_train_data</code>: complete client training datasets, including target.</li>
+<li><code>clients_train_data_ms</code>: client training feature matrices with missing values.
+  The target column is not included.</li>
+<li><code>clients_test_data</code>: client test datasets, including target.</li>
+<li><code>global_test_data</code>: global test dataset for federated evaluation.</li>
+<li><code>clients_seeds</code>: per-client random seeds generated from the global seed.</li>
+<li><code>data_config</code>: the data configuration used for scenario construction.</li>
+<li><code>stats</code>: partition statistics returned by the data-partition step.</li>
+</ul>
+<p>The input can be either a centralized <code>numpy.ndarray</code> or <code>pandas.DataFrame</code> for
+simulation-based scenarios, or a list of naturally partitioned client datasets
+for real scenarios. The data configuration should include at least
+<code>task_type</code> and the target-column information described in
+<a href="../data_prep/">Data Preparation</a>.</p>
+<p><img src="../img/fmiss_new.png" width="600" height="380"></p>
+<h2 id="simulated-scenarios">Simulated Scenarios</h2>
+<p>Use <code>create_simulated_scenario()</code> when you want FedImpute to split a centralized
+dataset into clients and then simulate missing values in each client's training
+data.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.scenario</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
 
 <span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
 <span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;iid-even&#39;</span><span class="p">,</span> <span class="n">ms_scenario</span><span class="o">=</span><span class="s1">&#39;mnar-heter&#39;</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">data_config</span><span class="p">,</span>
+    <span class="n">num_clients</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">dp_strategy</span><span class="o">=</span><span class="s2">&quot;iid-even&quot;</span><span class="p">,</span>
+    <span class="n">ms_scenario</span><span class="o">=</span><span class="s2">&quot;mnar-heter&quot;</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">100330201</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Results Structure (Dict Keys):&#39;</span><span class="p">)</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">scenario_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 <span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
 </code></pre></div>
-<h4 id="supported-data-partition-strategies">Supported Data Partition Strategies</h4>
-<p>Data partition can be set by  <code>dp_strategy</code> parameter, which takes following options</p>
+<h3 id="data-partitioning">Data Partitioning</h3>
+<p>Set the data partition through <code>dp_strategy</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>iid-even</code></td>
+<td>IID partition with equal expected client sizes.</td>
+</tr>
+<tr>
+<td><code>iid-dir@&lt;alpha&gt;</code></td>
+<td>IID feature/label distribution with heterogeneous client sizes sampled from a Dirichlet distribution. Smaller <code>alpha</code> gives stronger size heterogeneity.</td>
+</tr>
+<tr>
+<td><code>niid-dir@&lt;alpha&gt;</code></td>
+<td>Non-IID partition based on <code>dp_split_cols</code>, using a Dirichlet distribution. Smaller <code>alpha</code> gives stronger distribution heterogeneity.</td>
+</tr>
+<tr>
+<td><code>niid-path@&lt;n&gt;</code></td>
+<td>Parsed by the builder but not implemented yet. It currently raises <code>NotImplementedError</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Other partition parameters:</p>
 <ul>
-<li><code>iid-even</code>: iid partition with even sample sizes</li>
-<li><code>iid-dir@&lt;alpha&gt;</code>： iid parititon with sample sizes following dirichlet distribution with parameter <code>alpha</code> to control sample size heterogeneity e.g. <code>iid-dir@0.1</code></li>
-<li><code>niid-dir@&lt;alpha&gt;</code>: non-iid partition based on some columns with dirichlet ditribution with parameter <code>alpha</code> to control data heterogneity e.g. <code>niid-dir@0.1</code></li>
-<li><code>niid-path@&lt;n&gt;</code>: non-iid partition based on some columns with pathological distribution (shard partition) with parameter <code>n</code> control heterogeneity <code>niid-path@2</code>, each client own 2 classes of a column values.</li>
+<li><code>num_clients</code>: number of clients.</li>
+<li><code>dp_split_cols</code>: split basis for <code>niid-dir</code>. Supported values in
+  <code>ScenarioBuilder</code> are <code>target</code>, <code>feature</code>, or an integer feature index.
+  <code>target</code> uses the target column; <code>feature</code> uses the first feature column.</li>
+<li><code>dp_min_samples</code>: minimum samples required for each client during non-IID
+  allocation.</li>
+<li><code>dp_max_samples</code>: maximum samples for heterogeneous-size IID allocation.</li>
+<li><code>dp_sample_iid_direct</code>: when <code>True</code>, IID clients are sampled directly from the
+  global population.</li>
+<li><code>dp_local_test_size</code>: local test split ratio for each client.</li>
+<li><code>dp_global_test_size</code>: global test split ratio before client partitioning.</li>
+<li><code>dp_local_backup_size</code>: fraction of local backup rows appended to training
+  outputs without simulated missing values.</li>
+<li><code>dp_reg_bins</code>: number of bins used when a continuous target or split feature
+  must be discretized for partitioning.</li>
 </ul>
-<h4 id="other-parameters-for-data-partition">Other Parameters for Data Partition</h4>
+<h3 id="missing-mechanisms">Missing Mechanisms</h3>
+<p>Set the mechanism with <code>ms_mech_type</code> when not using a predefined
+<code>ms_scenario</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mcar</code></td>
+<td>Missing completely at random.</td>
+</tr>
+<tr>
+<td><code>mar_quantile</code></td>
+<td>MAR using quantile-based masking from observed features.</td>
+</tr>
+<tr>
+<td><code>mar_logit</code></td>
+<td>MAR using logistic masking from observed features.</td>
+</tr>
+<tr>
+<td><code>mnar_quantile</code></td>
+<td>MNAR using quantile-based masking.</td>
+</tr>
+<tr>
+<td><code>mnar_logit</code></td>
+<td>MNAR using logistic masking from the feature itself and related features.</td>
+</tr>
+<tr>
+<td><code>mnar_sm_logit</code></td>
+<td>Self-masking MNAR using logistic masking from the feature itself.</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>obs_cols</code> for MAR settings:</p>
 <ul>
-<li><strong>num_clients</strong> (int) - Number of clients to partition the dataset.</li>
-<li><strong>dp_split_cols</strong> (Union[str, int, List[int]]) - Column index or name to split the data samples. If the column is continuous, it will be binned into categories by <code>dp_reg_bins</code>.<ul>
-<li><code>target</code>: Split the data samples based on the target column.</li>
-<li><code>feature</code>: Split the data samples based on the first feature column.</li>
+<li><code>random</code>: choose one observed feature with the scenario seed.</li>
+<li><code>rest</code>: use all non-missing columns as observed features. If <code>ms_cols="all"</code>,
+  the builder keeps one missing column as the observed feature fallback.</li>
+<li><code>List[int]</code>: explicit observed feature indices.</li>
 </ul>
-</li>
-<li><strong>dp_min_samples</strong> (int) - Minimum number of samples in each client.</li>
-<li><strong>dp_max_samples</strong> (int) - Maximum number of samples in each client.</li>
-<li><strong>dp_sample_iid_direct</strong> (bool) -  Instead of partition data i.i.d, sample data i.i.d from global population (original data) for each client.</li>
-<li><strong>dp_local_test_size</strong> (float) = 0.1 - The size of local test set for each client for downstream local federated prediction evaluation. </li>
-<li><strong>dp_global_test_size</strong> (float) = 0.1 - The size of global test set for the downstream federated prediction evaluation.</li>
-<li><strong>dp_local_backup_size</strong> (float) = 0.05 - backup sample size to avoid all samples in data to be missing</li>
-<li><strong>dp_reg_bins</strong> (int) = 50 - Used for non-i.i.d data partitioning, if column for non-i.i.d partition is continuous, binning it into categories for meaningful non-i.i.d partiton.</li>
-</ul>
-<h4 id="supported-missing-data-mechanism-type">Supported Missing Data Mechanism Type</h4>
-<p>Missing mechansim can be set by <code>ms_mech_type</code> parameter, which supports all commonly used three types of general missing mechanism. The options are shown as below. Refer to <a href="https://rmisstastic.netlify.app/how-to/python/generate_html/how%20to%20generate%20missing%20values">how to create missingness in python?</a> for more details.</p>
+<p>For non-MAR mechanisms, <code>mm_obs</code> is forced to <code>False</code> internally.</p>
+<h3 id="missing-feature-selection">Missing Feature Selection</h3>
+<p>Use <code>ms_cols</code> to choose which feature columns may receive missing values:</p>
 <ul>
-<li><strong>MCAR Missing Mechanism</strong> <ul>
-<li><code>mcar</code> missing completely at random implemented using purely random mask.</li>
+<li><code>all</code>: all feature columns.</li>
+<li><code>all-num</code>: the first <code>data_config["num_cols"]</code> feature columns.</li>
+<li><code>List[int]</code>: explicit zero-based feature indices.</li>
 </ul>
-</li>
-<li><strong>MAR Missing Mechanism</strong><ul>
-<li><code>mar_quantile</code>: missing at random based on quantile of values of other features.</li>
-<li><code>mar_logit</code> missing at random created based on logit regressoin on values of other features.</li>
-</ul>
-</li>
-<li><strong>MNAR Missing Mechanism</strong><ul>
-<li><code>mnar_logit</code>: missingness based on values of feature itself and other features.</li>
-<li><code>mnar_sm_logit</code>: self-masking missingness logit regression based on values of feature itself.</li>
-<li><code>mnar_sm_quantile</code>: self-masking missingness based on quantile of values of feature itself.</li>
-</ul>
-</li>
-</ul>
-<h4 id="missing-data-simulation-parameters">Missing Data Simulation Parameters</h4>
-<p>The missing data simulation component is used to simulate missing data in the dataset of each client. 
-The core concept here is the <strong>missing data heterogeneity</strong> which means the each client can have a different missing data characteristics in terms of missing ratio, missing feature and missing mechanisms.</p>
-<p>The core parameters for missing data simulation are:</p>
+<p><code>ms_missing_features</code> controls the missing-feature strategy passed to the lower
+level simulator. The current implemented strategy is <code>all</code>, meaning every
+feature selected by <code>ms_cols</code> is eligible for missingness for each client.</p>
+<h3 id="missing-ratios">Missing Ratios</h3>
+<p>Missing ratios are controlled by two parameters:</p>
 <ul>
-<li>
-<p><strong>ms_cols</strong> (Union[str, List[int]]) - features to introduce missing values.</p>
-<ul>
-<li><code>all</code>: introduce missing values in all features (<em>default</em>).</li>
-<li><code>all-num</code>: introduce missing values in all numerical features.</li>
+<li><code>ms_mr_clients</code>: the target ratio or ratio range for each client.</li>
+<li><code>ms_mr_dist_clients</code>: how feature-level ratios are sampled from those ranges.</li>
 </ul>
-</li>
-<li>
-<p><strong>ms_global_mechanism</strong> (bool) - If True, all clients have the same missing data mechanism. If False, each client has a different missing data mechanism. This is used for control <strong>homogenous</strong> or <strong>heterogeneous</strong> missing data scenario.</p>
-</li>
-<li><strong>ms_mr_dist_clients</strong> (str) - Missing ratio distribution across clients. The available options:<ul>
-<li><code>fixed</code>: Missing ratio is the same for all clients.</li>
-<li><code>randu</code>: Random uniform missing ratio with random float value for each client. </li>
-<li><code>randn</code>: Random normal missing ratio with random float value for each client.</li>
-</ul>
-</li>
-<li><strong>ms_mf_dist_clients</strong> (str) - Missing feature distribution across clients. <ul>
-<li><code>identity</code>: Each client has the same missing features.</li>
-</ul>
-</li>
-<li><strong>ms_mm_dist_clients</strong> (str) - Missing mechanism distribution across clients. <ul>
-<li><code>identity</code>: Each client has the same missing mechanism.</li>
-<li><code>random</code>: Random missing mechanism function for each client.</li>
-</ul>
-</li>
-</ul>
-<p>We have another parameter <code>ms_scenario</code> which simplify the missing data heterogeneity simulation by providing 5 predefined homogeneous and heterogeneous mechanism settings. It has the following options (<strong>Note:</strong> by setting this parameter, you don't need to specify the parameter above for missing mechanism heterogeneity):
-- <code>mcar</code>: MCAR setting
-- <code>mar-heter</code>: heterogeneous MAR setting
-- <code>mar-homo</code>: homogeneous MAR setting
-- <code>mnar-heter</code>: heterogeneous MNAR setting
-- <code>mnar-homo</code>: homogenous MNAR setting</p>
-<p>Other Parameters</p>
-<ul>
-<li><strong>ms_mr_lower</strong> (float) = 0.3 - Lower bound of missing ratio </li>
-<li><strong>ms_mr_upper</strong> (float) = 0.7 - Upper bound of missing ratio</li>
-<li><strong>ms_mm_funcs_bank</strong> (str) = 'lr' - missing mechanism function direction bank for MAR, MNAR mechanism. It is a string with any of <code>l</code>, <code>r</code>, <code>m</code>, <code>t</code> four types of functions.<ul>
-<li><code>l</code>: left side missing</li>
-<li><code>r</code>: right side missing</li>
-<li><code>m</code>: middle missing</li>
-<li><code>t</code>: two sides missing</li>
-</ul>
-</li>
-<li><strong>ms_mm_strictness</strong> (bool) - If True, the missing mechanism function is strict, otherwise it is probabilistic.</li>
-<li><strong>ms_mm_obs</strong> (bool) = False - This is for MAR mechanism, if True, the missing data is related to some fully observed variables.</li>
-<li><strong>ms_mm_feature_option</strong> (str) = 'allk=0.2' - This is for MAR, MNAR mechanism, strategies for selecting features which missing value is correlated. 
-<code>allk=&lt;ratio&gt;</code> means select k (determined by ratio) highly correlated features from all features. </li>
-<li><strong>ms_mm_beta_option</strong> (str) = None, strategies set coefficient of logistic function for <code>mar_logit</code> and <code>mnar_sm_logit</code>, <code>mnar_logit</code> mechanism type.</li>
-</ul>
-<h3 id="constructing-real-scenario">Constructing Real Scenario</h3>
-<p>In certain cases, we have real data available with naturally occurring missing values and has well-defined partitions for distribution. To handle such cases, the module provides the <code>create_real_scenario()</code> method to construct distributed missing data scenario corresponding to the given data. Unlike simulation-based construction,
-this method expects input data as a Python <code>List of &lt;pandas.DataFrame&gt;</code> datasets, where each
-dataframe represents a client-specific local dataset. The method processes these distributed
-datasets to generate scenario components in the same standardized format described earlier (e.g. split training and test data for each client's local data and construct a global test dataset for federated prediction), ensuring consistent interfaces for subsequent distributed imputation and evaluation.</p>
-<p><strong>Parameters</strong>:</p>
-<ul>
-<li><code>datas</code> (List[pd.DataFrame]): input list of datasets</li>
-<li><code>data_config</code> (Dict): data configuration</li>
-<li><code>seed</code> (int): random seed for train-test splitting</li>
-<li><code>verbose</code> (int): show processing information</li>
-</ul>
-<p><strong>Usage</strong>:</p>
-<div class="highlight"><pre><span></span><code>from fedimpute.data_prep import load_data, display_data, column_check
-from fedimpute.scenario import ScenarioBuilder
-data, data_config = load_data(&quot;fed_heart_disease&quot;)
-scenario_builder = ScenarioBuilder()
-scenario_data = scenario_builder.create_real_scenario(
-    data, data_config,
-)
-scenario_builder.summarize_scenario()
+<p>Supported <code>ms_mr_dist_clients</code> values are:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>random</code></td>
+<td>Uniformly sample ratios inside each client's range.</td>
+</tr>
+<tr>
+<td><code>random-int</code></td>
+<td>Sample discrete ratios inside each client's range using 0.1-spaced values.</td>
+</tr>
+<tr>
+<td><code>normal</code></td>
+<td>Sample from a truncated normal distribution inside each client's range.</td>
+</tr>
+</tbody>
+</table>
+<p><code>ms_mr_clients</code> accepts these forms:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Same fixed ratio for every client</span>
+<span class="n">ms_mr_clients</span> <span class="o">=</span> <span class="mf">0.4</span>
+
+<span class="c1"># Same ratio range for every client</span>
+<span class="n">ms_mr_clients</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">)</span>
+
+<span class="c1"># Per-client settings; list length must equal num_clients</span>
+<span class="n">ms_mr_clients</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="s2">&quot;large&quot;</span><span class="p">]</span>
 </code></pre></div>
-<h2 id="scenario-exploration-and-summary">Scenario Exploration and Summary</h2>
-<p>The module also provides comprehensive tools for analyzing scenario-specific
-data for any given distributed missing data scenario through a collection of visualization and
-analysis interfaces, example of these functions can be found in the tutorials. It includes the following APIs:</p>
+<p>Predefined ratio buckets are:</p>
+<table>
+<thead>
+<tr>
+<th>Bucket</th>
+<th>Range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>extra-small</code></td>
+<td><code>(0.1, 0.2)</code></td>
+</tr>
+<tr>
+<td><code>small</code></td>
+<td><code>(0.2, 0.4)</code></td>
+</tr>
+<tr>
+<td><code>moderate</code></td>
+<td><code>(0.4, 0.6)</code></td>
+</tr>
+<tr>
+<td><code>large</code></td>
+<td><code>(0.6, 0.8)</code></td>
+</tr>
+<tr>
+<td><code>extra-large</code></td>
+<td><code>(0.8, 0.9)</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>ms_mr_lower</code> and <code>ms_mr_upper</code> are hard clipping bounds applied after ratios
+are sampled. Both must be between 0 and 1, and <code>ms_mr_lower &lt;= ms_mr_upper</code>.</p>
+<p>When <code>ms_global_mechanism=True</code>, missingness is simulated once on the combined
+training data and then split back to clients. In that mode, use a scalar, tuple,
+or bucket string for <code>ms_mr_clients</code>; per-client lists are rejected.</p>
+<h3 id="missing-function-heterogeneity">Missing Function Heterogeneity</h3>
+<p>For quantile and logistic mechanisms, <code>ms_mm_funcs_bank</code> defines the function
+directions available to the simulator:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Function directions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>None</code></td>
+<td>No direction function.</td>
+</tr>
+<tr>
+<td><code>l</code></td>
+<td>left</td>
+</tr>
+<tr>
+<td><code>r</code></td>
+<td>right</td>
+</tr>
+<tr>
+<td><code>m</code></td>
+<td>middle</td>
+</tr>
+<tr>
+<td><code>t</code></td>
+<td>tail</td>
+</tr>
+<tr>
+<td><code>lr</code></td>
+<td>left, right</td>
+</tr>
+<tr>
+<td><code>mt</code></td>
+<td>middle, tail</td>
+</tr>
+<tr>
+<td><code>all</code></td>
+<td>left, right, middle, tail</td>
+</tr>
+</tbody>
+</table>
+<p><code>ms_mm_dist_clients</code> controls how these functions are assigned:</p>
 <ul>
-<li>
-<p><strong><code>summarize_scenario(log_to_file, file_path)</code></strong> provides a summary report of the scenario data components, user can choose whether show the summary to save summary report to the disk.</p>
-</li>
-<li>
-<p><strong><code>visualize_missing_pattern(client_ids: List[int], data_type: str = 'train')</code></strong> visualizes the missing data pattern for client-specific local data.</p>
-<ul>
-<li><code>client_ids</code> (List[int]): client ids to show the pattern</li>
-<li><code>data_type</code> (str): <code>train</code> or <code>test</code> to show pattern for training data or test data.</li>
+<li><code>identity</code>: each feature uses the same sampled function across clients.</li>
+<li><code>random</code>: each client-feature pair samples a function independently. The
+  function bank must contain at least two options.</li>
+<li><code>random2</code>: shuffles two function options across clients for each feature.</li>
 </ul>
-<div class="highlight"><pre><span></span><code>scenario_builder.visualize_missing_pattern(client_ids=[0, 1, 2, 3])
+<p>Additional mechanism parameters:</p>
+<ul>
+<li><code>ms_mm_strictness</code>: if <code>True</code>, masking is deterministic after the mechanism
+  score is computed; otherwise it is probabilistic.</li>
+<li><code>ms_mm_obs</code>: for MAR, use observed features to drive missingness.</li>
+<li><code>ms_mm_feature_option</code>: related-feature strategy for logistic mechanisms,
+  such as <code>self</code>, <code>all</code>, or <code>allk=0.2</code>.</li>
+<li><code>ms_mm_beta_option</code>: logistic coefficient strategy. Common values are
+  <code>fixed</code> or <code>randu</code> for MAR, and <code>self</code> or <code>randu</code> for MNAR.</li>
+</ul>
+<h3 id="predefined-missing-scenarios">Predefined Missing Scenarios</h3>
+<p><code>ms_scenario</code> provides common mechanism presets. When this argument is set, it
+overrides <code>ms_mech_type</code>, <code>ms_global_mechanism</code>, <code>ms_mr_dist_clients</code>,
+<code>ms_mm_dist_clients</code>, <code>ms_mm_beta_option</code>, and <code>ms_mm_obs</code>.</p>
+<table>
+<thead>
+<tr>
+<th><code>ms_scenario</code></th>
+<th>Mechanism</th>
+<th>Global mechanism</th>
+<th>Ratio distribution</th>
+<th>Function distribution</th>
+<th>Beta option</th>
+<th>Observed-feature mode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mcar</code></td>
+<td><code>mcar</code></td>
+<td><code>False</code></td>
+<td><code>random</code></td>
+<td><code>identity</code></td>
+<td><code>None</code></td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>mar-homo</code></td>
+<td><code>mar_logit</code></td>
+<td><code>True</code></td>
+<td><code>random</code></td>
+<td><code>identity</code></td>
+<td><code>fixed</code></td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>mar-heter</code></td>
+<td><code>mar_logit</code></td>
+<td><code>False</code></td>
+<td><code>random</code></td>
+<td><code>random</code></td>
+<td><code>randu</code></td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>mnar-homo</code></td>
+<td><code>mnar_sm_logit</code></td>
+<td><code>True</code></td>
+<td><code>random</code></td>
+<td><code>identity</code></td>
+<td><code>self</code></td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>mnar-heter</code></td>
+<td><code>mnar_sm_logit</code></td>
+<td><code>False</code></td>
+<td><code>random</code></td>
+<td><code>random</code></td>
+<td><code>self</code></td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p>Example with explicit per-client missing-ratio settings:</p>
+<div class="highlight"><pre><span></span><code><span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">data_config</span><span class="p">,</span>
+    <span class="n">num_clients</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">dp_strategy</span><span class="o">=</span><span class="s2">&quot;iid-even&quot;</span><span class="p">,</span>
+    <span class="n">ms_scenario</span><span class="o">=</span><span class="s2">&quot;mcar&quot;</span><span class="p">,</span>
+    <span class="n">ms_mr_clients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">),</span> <span class="s2">&quot;large&quot;</span><span class="p">],</span>
+    <span class="n">ms_mr_lower</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">ms_mr_upper</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
-</li>
-<li>
-<p><strong><code>visualize_missing_distribution(client_ids: List[int], feature_ids: List[int])</code></strong> visualizes the distribution of missing and observed values for features within client-specific local data.</p>
-<ul>
-<li><code>client_ids</code> (List[int]): client ids to show the missing distribution.</li>
-<li><code>feature_ids</code> (List[int]): feature indices to set for which feature the missing data distribution to be shown.</li>
-</ul>
-<div class="highlight"><pre><span></span><code>scenario_builder.visualize_missing_distribution(client_ids = [0, 1], feature_ids = [0, 1, 2, 3, 4])
+<h2 id="real-scenarios">Real Scenarios</h2>
+<p>Use <code>create_real_scenario()</code> when your data is already partitioned by client and
+already contains the missing values you want to study. The input is a list of
+client datasets. Each item can be a <code>pandas.DataFrame</code> or <code>numpy.ndarray</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.data_prep</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.scenario</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+
+<span class="n">datas</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;fed_heart_disease&quot;</span><span class="p">)</span>
+
+<span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
+<span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_real_scenario</span><span class="p">(</span>
+    <span class="n">datas</span><span class="p">,</span>
+    <span class="n">data_config</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">100330201</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
 </code></pre></div>
-</li>
-<li>
-<p><strong><code>visualize_data_heterogeneity(client_ids: List[int], distance_method: str = 'swd',)</code></strong> visualizes the heatmap to assess cross-client local data heterogeneity.</p>
+<p>Parameters:</p>
 <ul>
-<li><code>client_ids</code> (List[int]): client ids to show the information.</li>
-<li><code>distance_method</code> (str): method to calculate pair-wise client distance. <code>swd</code> - sliced wasserstein distance over local data. <code>correlation</code> - euclidean distance caculated on feature correlation matrix. </li>
+<li><code>datas</code>: list of client datasets.</li>
+<li><code>data_config</code>: data configuration.</li>
+<li><code>seed</code>: random seed for client seeds and train-test splitting.</li>
+<li><code>verbose</code>: print progress information when greater than 0.</li>
 </ul>
-<div class="highlight"><pre><span></span><code>scenario_builder.visualize_data_heterogeneity(client_ids=[0, 1, 2, 3],  distance_method=&#39;swd&#39;)
+<h2 id="scenario-summary-and-visualization">Scenario Summary and Visualization</h2>
+<p><code>ScenarioBuilder</code> keeps the latest scenario on the builder instance, so the
+summary and visualization methods can be called after scenario construction.</p>
+<h3 id="summarize_scenario"><code>summarize_scenario()</code></h3>
+<p>Prints a table with client train/test/missing-data shapes, total missing ratio,
+number of missing features, and client seed.</p>
+<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
+
+<span class="n">summary</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">(</span><span class="n">return_summary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
-</li>
-</ul>
-<h2 id="predefined-setting-ms_scenario-parameters-mapping">predefined setting <code>ms_scenario</code> - parameters mapping:</h2>
+<p>Optional parameters:</p>
 <ul>
-<li><strong><code>mcar</code></strong> - Missing Completely At Random (MCAR) mechanism.
-<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mcar&#39;</span>
-    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
-    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
-    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">False</span>
-</code></pre></div></li>
-<li><strong><code>mar-heter</code></strong> - Missing At Random (MAR) mechanism with heterogeneous missing data scenario.
-<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mar_sigmoid&#39;</span>
-    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
-    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
-    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="s1">&#39;randu&#39;</span>
-    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">True</span>
-</code></pre></div></li>
-<li><strong><code>mar-homo</code></strong> - Missing At Random (MAR) mechanism with homogeneous missing data scenario.
-<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mar_sigmoid&#39;</span>
-    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
-    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
-    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="s1">&#39;fixed&#39;</span>
-    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">True</span>
-</code></pre></div></li>
-<li><strong><code>mnar-heter</code></strong> - Missing Not At Random (MNAR) mechanism with heterogeneous missing data scenario.
-<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mnar_sigmoid&#39;</span>
-    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
-    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
-    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="s1">&#39;self&#39;</span>
-    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">False</span>
-</code></pre></div></li>
-<li><strong><code>mnar-homo</code></strong> - Missing Not At Random (MNAR) mechanism with homogeneous missing data scenario.
-<div class="highlight"><pre><span></span><code>    <span class="n">ms_mech_type</span> <span class="o">=</span> <span class="s1">&#39;mnar_sigmoid&#39;</span>
-    <span class="n">ms_global_mechanism</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">ms_mr_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;randu-int&#39;</span>
-    <span class="n">ms_mm_dist_clients</span> <span class="o">=</span> <span class="s1">&#39;identity&#39;</span>
-    <span class="n">ms_mm_beta_option</span> <span class="o">=</span> <span class="s1">&#39;self&#39;</span>
-    <span class="n">ms_mm_obs</span> <span class="o">=</span> <span class="kc">False</span>
-</code></pre></div></li>
+<li><code>log_to_file</code>: write the summary to disk.</li>
+<li><code>file_path</code>: output path used when <code>log_to_file=True</code>.</li>
+<li><code>return_summary</code>: return the summary string instead of printing it.</li>
+</ul>
+<h3 id="visualize_missing_pattern"><code>visualize_missing_pattern()</code></h3>
+<p>Visualizes the missing-value mask for selected clients.</p>
+<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_pattern</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Useful parameters:</p>
+<ul>
+<li><code>client_ids</code>: zero-based client ids.</li>
+<li><code>data_type</code>: <code>train</code> or <code>test</code>.</li>
+<li><code>save_path</code>: save the plot instead of showing it.</li>
+</ul>
+<h3 id="visualize_missing_distribution"><code>visualize_missing_distribution()</code></h3>
+<p>Compares observed and missing-value distributions for selected features and
+clients.</p>
+<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_distribution</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">feature_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Useful parameters:</p>
+<ul>
+<li><code>client_ids</code>: zero-based client ids.</li>
+<li><code>feature_ids</code>: zero-based feature ids.</li>
+<li><code>bins</code>, <code>stat</code>, <code>kde</code>: histogram controls passed to seaborn.</li>
+<li><code>data_type</code>: <code>train</code> or <code>test</code>.</li>
+<li><code>save_path</code>: save the plot instead of showing it.</li>
+</ul>
+<h3 id="visualize_data_heterogeneity"><code>visualize_data_heterogeneity()</code></h3>
+<p>Computes and visualizes pairwise client distance matrices.</p>
+<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_data_heterogeneity</span><span class="p">(</span>
+    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="n">distance_method</span><span class="o">=</span><span class="s2">&quot;swd&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Supported distance methods:</p>
+<ul>
+<li><code>swd</code>: sliced Wasserstein distance.</li>
+<li><code>correlation</code>: distance based on feature-correlation matrices.</li>
 </ul>
               
             </div>
@@ -394,6 +622,7 @@ analysis interfaces, example of these functions can be found in the tutorials. I
     <script>var base_url = "../..";</script>
     <script src="../../js/theme_extra.js"></script>
     <script src="../../js/theme.js"></script>
+      <script src="../../javascript/mkapi.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
       <script src="../../search/main.js"></script>
     <script>

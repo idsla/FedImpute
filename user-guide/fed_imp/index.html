@@ -9,15 +9,17 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
-        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-material.css" rel="stylesheet" />
         <link href="../../css/mkdocstrings.css" rel="stylesheet" />
         <link href="../../css/custom.css" rel="stylesheet" />
         <link href="../../css/mkapi.css" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" />
     
       <script>
         // Current page data
         var mkdocs_page_name = "Distributed Imputation";
-        var mkdocs_page_input_path = "user-guide\\fed_imp.md";
+        var mkdocs_page_input_path = "user-guide/fed_imp.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -134,7 +136,7 @@ method - what imputer to use, what federated strategy to use, and what fitting m
 Then, use the <code>setup_from_simulator</code> method to set up the environment using the simulated data from <code>simulator</code> class, 
 see <a href="../scenario_simulation/">Scenario Simulation Section</a>. 
 Finally, use the <code>run_fed_imputation</code> method to execute the federated imputation algorithms.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.execution_environment</span> <span class="kn">import</span> <span class="n">FedImputeEnv</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.execution_environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">FedImputeEnv</span>
 
 <span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedmice&#39;</span><span class="p">)</span>
@@ -338,7 +340,7 @@ class by using <code>env.setup_from_simulator(simulator)</code> method.
 </code></pre></div></p>
 <p>The second way is to setup the environment by using <code>env.setup_from_data()</code> method. It can be used
 in the scenario where user have their own data that not simulated from simulator class. Example:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">clients_train_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
 <span class="n">clients_train_data_ms</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
@@ -416,6 +418,7 @@ in the scenario where user have their own data that not simulated from simulator
     <script>var base_url = "../..";</script>
     <script src="../../js/theme_extra.js"></script>
     <script src="../../js/theme.js"></script>
+      <script src="../../javascript/mkapi.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
       <script src="../../search/main.js"></script>
     <script>

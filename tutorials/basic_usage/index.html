@@ -9,15 +9,17 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
-        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-material.css" rel="stylesheet" />
         <link href="../../css/mkdocstrings.css" rel="stylesheet" />
         <link href="../../css/custom.css" rel="stylesheet" />
         <link href="../../css/mkapi.css" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" />
     
       <script>
         // Current page data
         var mkdocs_page_name = "Basic Usage";
-        var mkdocs_page_input_path = "tutorials\\basic_usage.md";
+        var mkdocs_page_input_path = "tutorials/basic_usage.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -109,10 +111,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">tabulate</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+                <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tabulate</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;arial&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">fonttype</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>
@@ -122,7 +124,7 @@
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
 
-<span class="kn">from</span> <span class="nn">fedimpute.data_prep</span> <span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.data_prep</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
 <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;codrna&quot;</span><span class="p">)</span>
 <span class="n">display_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Dimensions: &quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -146,7 +148,7 @@
 <h2 id="basic-usage">Basic Usage</h2>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span> <span class="nn">fedimpute.scenario</span> <span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.scenario</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
 
 <span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
 <span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
@@ -204,7 +206,7 @@
 <h2 id="basic-usage_1">Basic Usage</h2>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span> <span class="nn">fedimpute.execution_environment</span> <span class="kn">import</span> <span class="n">FedImputeEnv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.execution_environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">FedImputeEnv</span>
 
 <span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedmice&#39;</span><span class="p">)</span>
@@ -246,7 +248,7 @@
 <h3 id="imputation-quality">Imputation Quality</h3>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evaluator</span>
 
 <span class="n">X_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">)</span>
 <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">)</span>
@@ -293,7 +295,7 @@
 <span class="nv">Evaluating</span><span class="w"> </span><span class="nv">TSNE</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span>...
 </code></pre></div>
 
-<p><img alt="png" src="output_21_1.png" /></p>
+<p><img alt="png" src="../basic_usage_files/output_21_1.png" /></p>
 <h3 id="local-prediction">Local Prediction</h3>
 <div class="highlight"><pre><span></span><code><span class="n">X_train_imps</span><span class="p">,</span> <span class="n">y_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">X_tests</span><span class="p">,</span> <span class="n">y_tests</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -311,21 +313,21 @@
 <span class="p">)</span>
 <span class="n">evaluator</span><span class="o">.</span><span class="n">show_local_prediction_results</span><span class="p">()</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">Clients</span><span class="o">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="sr">/4 [00:00&lt;?, ?it/s</span><span class="o">]</span>
+<div class="codehilite"><pre><span></span><code><span class="nx">Clients</span><span class="o">:</span><span class="w">   </span><span class="mf">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mf">0</span><span class="o">/</span><span class="mf">4</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="cp">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
 
 
 <span class="o">==========================================================</span>
-<span class="n">Downstream</span><span class="w"> </span><span class="n">Prediction</span><span class="w"> </span><span class="o">(</span><span class="n">Local</span><span class="o">)</span>
+<span class="nx">Downstream</span> <span class="nx">Prediction</span> <span class="p">(</span><span class="nx">Local</span><span class="p">)</span>
 <span class="o">==========================================================</span>
-<span class="w">             </span><span class="n">accuracy</span><span class="w">       </span><span class="n">f1</span><span class="w">         </span><span class="n">auc</span><span class="w">         </span><span class="n">prc</span>
-<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="w">     </span><span class="mf">0.894</span><span class="w">       </span><span class="mf">0.842</span><span class="w">       </span><span class="mf">0.975</span><span class="w">       </span><span class="mf">0.946</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="w">     </span><span class="mf">0.965</span><span class="w">       </span><span class="mf">0.946</span><span class="w">       </span><span class="mf">0.996</span><span class="w">       </span><span class="mf">0.992</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="w">     </span><span class="mf">0.956</span><span class="w">       </span><span class="mf">0.932</span><span class="w">       </span><span class="mf">0.982</span><span class="w">       </span><span class="mf">0.975</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">4</span><span class="w">     </span><span class="mf">0.920</span><span class="w">       </span><span class="mf">0.873</span><span class="w">       </span><span class="mf">0.961</span><span class="w">       </span><span class="mf">0.924</span>
-<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
-<span class="w"> </span><span class="n">Average</span><span class="w">      </span><span class="mf">0.934</span><span class="w">       </span><span class="mf">0.898</span><span class="w">       </span><span class="mf">0.979</span><span class="w">       </span><span class="mf">0.959</span>
-<span class="w">   </span><span class="n">Std</span><span class="w">        </span><span class="mf">0.028</span><span class="w">       </span><span class="mf">0.042</span><span class="w">       </span><span class="mf">0.013</span><span class="w">       </span><span class="mf">0.026</span>
+             <span class="nx">accuracy</span>       <span class="nx">f1</span>         <span class="nx">auc</span>         <span class="nx">prc</span>
+<span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
+ <span class="nx">Client</span> <span class="mi">1</span>     <span class="mf">0.894</span>       <span class="mf">0.842</span>       <span class="mf">0.975</span>       <span class="mf">0.946</span>
+ <span class="nx">Client</span> <span class="mi">2</span>     <span class="mf">0.965</span>       <span class="mf">0.946</span>       <span class="mf">0.996</span>       <span class="mf">0.992</span>
+ <span class="nx">Client</span> <span class="mi">3</span>     <span class="mf">0.956</span>       <span class="mf">0.932</span>       <span class="mf">0.982</span>       <span class="mf">0.975</span>
+ <span class="nx">Client</span> <span class="mi">4</span>     <span class="mf">0.920</span>       <span class="mf">0.873</span>       <span class="mf">0.961</span>       <span class="mf">0.924</span>
+<span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
+ <span class="nx">Average</span>      <span class="mf">0.934</span>       <span class="mf">0.898</span>       <span class="mf">0.979</span>       <span class="mf">0.959</span>
+   <span class="nx">Std</span>        <span class="mf">0.028</span>       <span class="mf">0.042</span>       <span class="mf">0.013</span>       <span class="mf">0.026</span>
 <span class="o">==========================================================</span>
 </code></pre></div>
 
@@ -340,21 +342,21 @@
 <span class="p">)</span>
 <span class="n">evaluator</span><span class="o">.</span><span class="n">show_local_prediction_results</span><span class="p">()</span>
 </code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">Clients</span><span class="o">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="sr">/4 [00:00&lt;?, ?it/s</span><span class="o">]</span>
+<div class="codehilite"><pre><span></span><code><span class="nx">Clients</span><span class="o">:</span><span class="w">   </span><span class="mf">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mf">0</span><span class="o">/</span><span class="mf">4</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="cp">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
 
 
 <span class="o">==========================================================</span>
-<span class="n">Downstream</span><span class="w"> </span><span class="n">Prediction</span><span class="w"> </span><span class="o">(</span><span class="n">Local</span><span class="o">)</span>
+<span class="nx">Downstream</span> <span class="nx">Prediction</span> <span class="p">(</span><span class="nx">Local</span><span class="p">)</span>
 <span class="o">==========================================================</span>
-<span class="w">             </span><span class="n">accuracy</span><span class="w">       </span><span class="n">f1</span><span class="w">         </span><span class="n">auc</span><span class="w">         </span><span class="n">prc</span>
-<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="w">     </span><span class="mf">0.903</span><span class="w">       </span><span class="mf">0.871</span><span class="w">       </span><span class="mf">0.990</span><span class="w">       </span><span class="mf">0.977</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="w">     </span><span class="mf">0.903</span><span class="w">       </span><span class="mf">0.845</span><span class="w">       </span><span class="mf">0.962</span><span class="w">       </span><span class="mf">0.935</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="w">     </span><span class="mf">0.850</span><span class="w">       </span><span class="mf">0.809</span><span class="w">       </span><span class="mf">0.950</span><span class="w">       </span><span class="mf">0.911</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">4</span><span class="w">     </span><span class="mf">0.823</span><span class="w">       </span><span class="mf">0.778</span><span class="w">       </span><span class="mf">0.973</span><span class="w">       </span><span class="mf">0.968</span>
-<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
-<span class="w"> </span><span class="n">Average</span><span class="w">      </span><span class="mf">0.869</span><span class="w">       </span><span class="mf">0.826</span><span class="w">       </span><span class="mf">0.968</span><span class="w">       </span><span class="mf">0.948</span>
-<span class="w">   </span><span class="n">Std</span><span class="w">        </span><span class="mf">0.034</span><span class="w">       </span><span class="mf">0.035</span><span class="w">       </span><span class="mf">0.015</span><span class="w">       </span><span class="mf">0.027</span>
+             <span class="nx">accuracy</span>       <span class="nx">f1</span>         <span class="nx">auc</span>         <span class="nx">prc</span>
+<span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
+ <span class="nx">Client</span> <span class="mi">1</span>     <span class="mf">0.903</span>       <span class="mf">0.871</span>       <span class="mf">0.990</span>       <span class="mf">0.977</span>
+ <span class="nx">Client</span> <span class="mi">2</span>     <span class="mf">0.903</span>       <span class="mf">0.845</span>       <span class="mf">0.962</span>       <span class="mf">0.935</span>
+ <span class="nx">Client</span> <span class="mi">3</span>     <span class="mf">0.850</span>       <span class="mf">0.809</span>       <span class="mf">0.950</span>       <span class="mf">0.911</span>
+ <span class="nx">Client</span> <span class="mi">4</span>     <span class="mf">0.823</span>       <span class="mf">0.778</span>       <span class="mf">0.973</span>       <span class="mf">0.968</span>
+<span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
+ <span class="nx">Average</span>      <span class="mf">0.869</span>       <span class="mf">0.826</span>       <span class="mf">0.968</span>       <span class="mf">0.948</span>
+   <span class="nx">Std</span>        <span class="mf">0.034</span>       <span class="mf">0.035</span>       <span class="mf">0.015</span>       <span class="mf">0.027</span>
 <span class="o">==========================================================</span>
 </code></pre></div>
 
@@ -423,7 +425,7 @@ Downstream Prediction (Fed)
 <h3 id="all-in-one">All In One</h3>
 <div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
 <span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evaluator</span>
 
 <span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
 <span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_all</span><span class="p">(</span>
@@ -956,6 +958,7 @@ X7             8.6910      0.090     96.851      0.000       8.515       8.867
     <script>var base_url = "../..";</script>
     <script src="../../js/theme_extra.js"></script>
     <script src="../../js/theme.js"></script>
+      <script src="../../javascript/mkapi.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
       <script src="../../search/main.js"></script>
     <script>

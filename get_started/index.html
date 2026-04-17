@@ -9,10 +9,12 @@
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
-        <link href="../mkapi-common.css" rel="stylesheet" />
+        <link href="../css/mkapi-common.css" rel="stylesheet" />
+        <link href="../css/mkapi-material.css" rel="stylesheet" />
         <link href="../css/mkdocstrings.css" rel="stylesheet" />
         <link href="../css/custom.css" rel="stylesheet" />
         <link href="../css/mkapi.css" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" />
     
       <script>
         // Current page data
@@ -134,7 +136,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <h1 id="basic-usage">Basic Usage</h1>
 <hr />
 <h3 id="step-1-prepare-data">Step 1. Prepare Data</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.data_prep</span> <span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.data_prep</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
 
 <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;codrna&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Dimensions: &quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -148,7 +150,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="step-2-build-distributed-missing-data-scenario">Step 2. Build Distributed Missing Data Scenario</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.scenario</span> <span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.scenario</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
 
 <span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
 <span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
@@ -163,7 +165,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <span class="c1"># powershell (windows)</span>
 <span class="nv">$Env</span>:CUBLAS_WORKSPACE_CONFIG<span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;:4096:8&quot;</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.execution_environment</span> <span class="kn">import</span> <span class="n">FedImputeEnv</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.execution_environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">FedImputeEnv</span>
 
 <span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedmice&#39;</span><span class="p">)</span>
@@ -172,7 +174,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
 <span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">()</span>
 </code></pre></div>
 <h3 id="step-4-evaluate-imputation-outcomes">Step 4. Evaluate imputation outcomes</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evaluator</span>
 
 <span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
 <span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_all</span><span class="p">(</span>
@@ -219,6 +221,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </s
     <script>var base_url = "..";</script>
     <script src="../js/theme_extra.js"></script>
     <script src="../js/theme.js"></script>
+      <script src="../javascript/mkapi.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
       <script src="../search/main.js"></script>
     <script>

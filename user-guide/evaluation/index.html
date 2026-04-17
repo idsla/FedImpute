@@ -9,15 +9,17 @@
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
-        <link href="../../mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-common.css" rel="stylesheet" />
+        <link href="../../css/mkapi-material.css" rel="stylesheet" />
         <link href="../../css/mkdocstrings.css" rel="stylesheet" />
         <link href="../../css/custom.css" rel="stylesheet" />
         <link href="../../css/mkapi.css" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet" />
     
       <script>
         // Current page data
         var mkdocs_page_name = "Evaluation";
-        var mkdocs_page_input_path = "user-guide\\evaluation.md";
+        var mkdocs_page_input_path = "user-guide/evaluation.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -66,7 +68,7 @@
         <ul>
     <li class="toctree-l3"><a class="reference internal" href="#imputation-quality">Imputation Quality</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#imputation-quality-via-tsne-visualization">Imputation Quality via tSNE visualization</a>
+    <li class="toctree-l3"><a class="reference internal" href="#imputation-quality-via-dimensionality-reduction-visualization">Imputation Quality via dimensionality reduction visualization</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#local-regression-analysis">Local Regression Analysis</a>
     </li>
@@ -139,7 +141,7 @@ The evaluation can be categorized into the following aspects:</p>
 </ul>
 <h2 id="basic-usage">Basic Usage</h2>
 <p>The <code>Evaluator</code> class is the <code>evaluation</code> module's main class, use its <code>evaluation()</code> function to perform evaluation.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">fedimpute.evaluation</span> <span class="kn">import</span> <span class="n">Evaluator</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evaluator</span>
 
 <span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
 <span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_all</span><span class="p">(</span>
@@ -201,12 +203,25 @@ ret = evaluator.evaluate_imp_quality(
 )
 evaluator.show_imp_results()
 </code></pre></div>
-<h3 id="imputation-quality-via-tsne-visualization">Imputation Quality via tSNE visualization</h3>
-<p><code>Evaluator</code> class also provides a method called <code>tsne_visualization()</code> to give the visualized comparison of similarity between the imputed data and the original data (ground-truth data). It visualizes the t-Distributed Stochastic Neighbor Embedding (t-SNE) of imputed data and original data so that the user can visually assess the effectiveness of the imputation outcome. tsne_visualization() takes parameters including client’s imputation data (<code>X_imp</code>) and original data (ground-truth data) (<code>X_origin</code>) and a random seed (<code>seed</code>) used for calculating t-SNE embedding.</p>
+<h3 id="imputation-quality-via-dimensionality-reduction-visualization">Imputation Quality via dimensionality reduction visualization</h3>
+<p><code>Evaluator</code> class also provides dimensionality reduction visualizations to compare imputed data with original ground-truth data. Use <code>tsne_visualization()</code>, <code>pca_visualization()</code>, or <code>umap_visualization()</code> for method-specific plots, or use <code>dimensionality_visualization(method=...)</code> with <code>method</code> set to <code>"tsne"</code>, <code>"pca"</code>, or <code>"umap"</code>. These methods take client imputation data (<code>X_imps</code>), original data (<code>X_origins</code>), a random seed (<code>seed</code>) where the selected method uses randomness, and optional method-specific settings through <code>method_params</code>.</p>
 <div class="highlight"><pre><span></span><code>X_trains = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train&#39;)
 X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
 
 evaluator.tsne_visualization(
+    X_imps = X_train_imps,
+    X_origins = X_trains,
+    seed = 0,
+    method_params = {&quot;perplexity&quot;: 30}
+)
+
+evaluator.pca_visualization(
+    X_imps = X_train_imps,
+    X_origins = X_trains,
+    seed = 0
+)
+
+evaluator.umap_visualization(
     X_imps = X_train_imps,
     X_origins = X_trains,
     seed = 0
@@ -369,6 +384,7 @@ evaluator.show_fed_prediction_results()
     <script>var base_url = "../..";</script>
     <script src="../../js/theme_extra.js"></script>
     <script src="../../js/theme.js"></script>
+      <script src="../../javascript/mkapi.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML"></script>
       <script src="../../search/main.js"></script>
     <script>
