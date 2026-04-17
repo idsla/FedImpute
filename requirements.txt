@@ -1,21 +1,33 @@
 # Requirements file for exact dependency reproduction
-# Python version: >=3.10,<3.15
+# Python version: >=3.9,<3.15
+--extra-index-url https://download.pytorch.org/whl/cpu
 
-numpy==1.26.4
-pandas==2.2.2
-pot==0.9.5
-scikit-learn==1.6.1
-scipy==1.15.3
+numpy==1.26.4; python_version < "3.11"
+numpy==2.3.5; python_version >= "3.11"
+pandas==2.2.2; python_version < "3.11"
+pandas==2.3.3; python_version >= "3.11"
+pot==0.9.5; python_version < "3.11"
+pot==0.9.6.post1; python_version >= "3.11"
+scikit-learn==1.6.1; python_version < "3.11"
+scikit-learn==1.8.0; python_version >= "3.11"
+scipy==1.13.1; python_version < "3.11"
+scipy==1.17.1; python_version >= "3.11"
 loguru==0.7.3
 n-sphere==1.2.0
 tqdm==4.67.1
 gower==0.1.2
 tabulate==0.9.0
-matplotlib==3.10.1
+matplotlib==3.9.4; python_version < "3.11"
+matplotlib==3.10.8; python_version >= "3.11"
 seaborn==0.13.2
-tensorboard==2.19.0
-torch==2.9.1
+tensorboard==2.18.0; python_version < "3.11"
+tensorboard==2.20.0; python_version >= "3.11"
+torch==2.6.0+cpu; python_version < "3.11"
+torch==2.9.1+cpu; python_version >= "3.11"
 openpyxl==3.1.5
-statsmodels==0.14.4
-xgboost==3.0.0
-requests==2.32.3
+statsmodels==0.14.4; python_version < "3.11"
+statsmodels==0.14.6; python_version >= "3.11"
+xgboost==2.1.4; python_version < "3.11"
+xgboost==3.1.2; python_version >= "3.11"
+requests==2.32.3; python_version < "3.11"
+requests==2.32.5; python_version >= "3.11"

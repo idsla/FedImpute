@@ -57,10 +57,10 @@ def load_data(data_name: str):
         df_label = pd.DataFrame(labels)
         df_label = pd.factorize(df_label[0])[0]
         df_label = pd.DataFrame(df_label, columns=["y"]).astype(int)
-        data = pd.concat([df_pred, df_label], axis=1)
-        data_standard = StandardScaler().fit_transform(data.values)
+        data_standard = StandardScaler().fit_transform(df_pred.values)
         data_minmax = MinMaxScaler().fit_transform(data_standard)
-        data = pd.DataFrame(data_minmax, columns=data.columns)
+        data = pd.DataFrame(data_minmax, columns=df_pred.columns)
+        data = pd.concat([data, df_label], axis=1)
         data_config = {
             "target": "y",
             "task_type": "classification",

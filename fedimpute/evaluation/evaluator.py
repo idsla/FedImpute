@@ -931,6 +931,8 @@ class Evaluator:
             X_test = X_tests[idx]
             y_test = y_tests[idx]
             clf = models[idx]
+            if task_type == 'classification':
+                y_train = np.rint(y_train).astype(np.int64)
             clf.fit(X_train_imp, y_train)
             y_pred = clf.predict(X_test)
             if task_type == 'classification':

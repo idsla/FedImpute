@@ -21,7 +21,21 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+          python - <<'PY'
+          import subprocess
+          import sys
+
+          torch_version = "2.6.0+cpu" if sys.version_info < (3, 11) else "2.9.1+cpu"
+          subprocess.check_call([
+              sys.executable,
+              "-m",
+              "pip",
+              "install",
+              f"torch=={torch_version}",
+              "--index-url",
+              "https://download.pytorch.org/whl/cpu",
+          ])
+          PY
           python -m pip install -r requirements.txt
           python -m pip install -e .
           python -m pip install pytest
