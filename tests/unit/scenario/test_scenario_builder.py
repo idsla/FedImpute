@@ -95,7 +95,7 @@ def test_create_simulated_scenario_forwards_missing_ratio_configuration(monkeypa
         dp_min_samples=2,
         dp_max_samples=4,
         ms_cols="all-num",
-        ms_mr_dist_clients="randu-int",
+        ms_mr_dist_clients="random-int",
         ms_mr_clients=[0.2, (0.4, 0.6)],
         ms_mr_lower=0.1,
         ms_mr_upper=0.8,
@@ -104,7 +104,7 @@ def test_create_simulated_scenario_forwards_missing_ratio_configuration(monkeypa
     )
 
     missing_kwargs = calls["missing"]["kwargs"]
-    assert missing_kwargs["mr_dist"] == "randu-int"
+    assert missing_kwargs["mr_dist"] == "random-int"
     assert missing_kwargs["ms_mr_clients"] == [0.2, (0.4, 0.6)]
     assert missing_kwargs["mr_lower"] == 0.1
     assert missing_kwargs["mr_upper"] == 0.8
@@ -168,7 +168,6 @@ def test_predefined_scenario_overrides_missing_mechanism_parameters(monkeypatch)
         ms_scenario="mar-heter",
         ms_mech_type="mcar",
         ms_global_mechanism=True,
-        ms_mr_dist_clients="randu-int",
         ms_mm_dist_clients="identity",
         ms_mm_beta_option=None,
         ms_mm_obs=False,
@@ -179,7 +178,7 @@ def test_predefined_scenario_overrides_missing_mechanism_parameters(monkeypatch)
     missing_kwargs = calls["missing"]["kwargs"]
     assert missing_kwargs["mm_mech"] == "mar_logit"
     assert missing_kwargs["global_missing"] is False
-    assert missing_kwargs["mr_dist"] == "randu"
+    assert missing_kwargs["mr_dist"] == "random"
     assert missing_kwargs["mm_funcs_dist"] == "random"
     assert missing_kwargs["mm_beta_option"] == "randu"
     assert missing_kwargs["mm_obs"] is True

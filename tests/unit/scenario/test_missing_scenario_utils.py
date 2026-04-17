@@ -23,13 +23,13 @@ def test_generate_missing_cols_rejects_unsupported_strategies(strategy):
 
 
 def test_generate_missing_ratios_randu_equal_bounds_behaves_like_fixed_distribution():
-    ratios = np.array(generate_missing_ratios("randu", [(0.3, 0.3)] * 4, 4, 3, seed=123))
+    ratios = np.array(generate_missing_ratios("random", [(0.3, 0.3)] * 4, 4, 3, seed=123))
 
     assert ratios.shape == (4, 3)
     assert np.allclose(ratios, 0.3)
 
 
-@pytest.mark.parametrize("dist", ["randu", "randn", "randu-int"])
+@pytest.mark.parametrize("dist", ["random", "normal", "random-int"])
 def test_generate_missing_ratios_random_distributions_stay_in_range(dist):
     ratios = np.array(generate_missing_ratios(dist, [(0.2, 0.7)] * 5, 5, 4, seed=123))
 
@@ -76,7 +76,7 @@ def test_resolve_ms_mr_clients_rejects_invalid_inputs(ms_mr_clients):
 
 def test_generate_missing_ratios_respects_per_client_ranges():
     ranges = [(0.1, 0.2), (0.5, 0.6), (0.8, 0.9)]
-    ratios = np.array(generate_missing_ratios("randu", ranges, 3, 5, seed=123))
+    ratios = np.array(generate_missing_ratios("random", ranges, 3, 5, seed=123))
 
     assert ratios.shape == (3, 5)
     for client_idx, (lower, upper) in enumerate(ranges):
@@ -87,7 +87,7 @@ def test_generate_missing_ratios_respects_per_client_ranges():
 def test_generate_missing_ratios_clips_to_hard_bounds():
     ratios = np.array(
         generate_missing_ratios(
-            "randu", [(0.05, 0.05), (0.95, 0.95)], 2, 3, seed=123, mr_lower=0.1, mr_upper=0.9
+            "random", [(0.05, 0.05), (0.95, 0.95)], 2, 3, seed=123, mr_lower=0.1, mr_upper=0.9
         )
     )
 

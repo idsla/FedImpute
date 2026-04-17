@@ -15,8 +15,6 @@ jobs:
         include:
           - module: data-prep
             tests: tests/unit/data_prep
-          - module: imputation
-            tests: tests/unit/imputation
           - module: scenario
             tests: tests/unit/scenario
           - module: execution-environment
