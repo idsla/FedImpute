@@ -47,8 +47,8 @@ tensorboard = [
     { version = "2.20.0", python = ">=3.11" },
 ]
 torch = [
-    { version = "2.6.0+cpu", python = "<3.11", source = "pytorch-cpu" },
-    { version = "2.9.1+cpu", python = ">=3.11", source = "pytorch-cpu" },
+    { version = "2.6.0", python = "<3.11" },
+    { version = "2.9.1", python = ">=3.11" },
 ]
 openpyxl = "3.1.5"
 statsmodels = [
