@@ -150,7 +150,6 @@ expected_means = [
     (0.47049669, 0.45157754), (0.47229554, 0.44379585), 
     (0.47138838, 0.48238528), (0.47045685, 0.47645606)]
 for i in range(4):
-    print(np.nanmean(X_trains[i]).round(8), np.nanmean(X_train_imps[i]).round(8))
     assert X_trains[i].shape == (1125, 8)
     assert X_train_imps[i].shape == (1125, 8)
     assert X_train_masks[i].shape == (1125, 8)
@@ -170,6 +169,16 @@ ret = evaluator.evaluate_imp_quality(
     metrics = ['rmse', 'nrmse', 'sliced-ws']
 )
 evaluator.show_imp_results()
+
+expected_results = {
+    'rmse': [0.18124601, 0.18765093, 0.11695606, 0.1266346],
+    'nrmse': [0.5052173, 0.54373233, 0.32421238, 0.35469661],
+    'sliced-ws': [0.08026755, 0.093476, 0.04535191, 0.05584367]
+}
+for metric in ['rmse', 'nrmse', 'sliced-ws']:
+    assert np.allclose(evaluator.results['imp_quality'][metric], expected_results[metric], rtol=1e-6)
+print("Passed all imputation quality evaluation validation checks!")
+
 
 # %% [markdown]
 # ### Get Imputed Data
@@ -207,9 +216,18 @@ ret = evaluator.run_local_prediction(
 )
 evaluator.show_local_prediction_results()
 
+expected_results = {
+    'accuracy': [0.9026548672566371, 0.8938053097345132, 0.8495575221238938, 0.8141592920353983], 
+    'f1': [0.8705882352941177, 0.8333333333333334, 0.8089887640449438, 0.7692307692307693], 
+    'auc': [0.9886201991465149, 0.9612375533428165, 0.9466571834992887, 0.9719061166429588], 
+    'prc': [0.9743874941483261, 0.9347089758930438, 0.9023237716009502, 0.967838885292267]
+}
+for metric in ['accuracy', 'f1', 'auc', 'prc']:
+    assert np.allclose(evaluator.results['local_pred'][metric], expected_results[metric], rtol=1e-6)
+print("Passed all local prediction evaluation validation checks!")
+
 # %% [markdown]
 # ### Federated Prediction
-
 # %%
 print("Running federated prediction...")
 ret = evaluator.run_fed_prediction(
@@ -225,6 +243,24 @@ ret = evaluator.run_fed_prediction(
 )
 
 evaluator.show_fed_prediction_results()
+expected_results_global = {
+    'accuracy': np.float64(0.908), 
+    'f1': np.float64(0.8736263736263736), 
+    'auc': np.float64(0.978614215793703), 
+    'prc': np.float64(0.952616445725458)
+}
+
+expected_results_personalized = { 
+    'accuracy': [np.float64(0.911504424778761), np.float64(0.9203539823008849), np.float64(0.8938053097345132), np.float64(0.8761061946902655)], 
+    'f1': [np.float64(0.8780487804878049), np.float64(0.891566265060241), np.float64(0.8571428571428571), np.float64(0.8333333333333334)], 
+    'auc': [np.float64(0.980796586059744), np.float64(0.9957325746799431), np.float64(0.9669274537695591), np.float64(0.9719061166429588)], 
+    'prc': [np.float64(0.9531852351975345), np.float64(0.9915268803554507), np.float64(0.9446724031437748), np.float64(0.9599141311832291)]
+}
+
+for metric in ['accuracy', 'f1', 'auc', 'prc']:
+    assert np.isclose(evaluator.results['fed_pred']['global'][metric], expected_results_global[metric], rtol=1e-6)
+    assert np.allclose(evaluator.results['fed_pred']['personalized'][metric], expected_results_personalized[metric], rtol=1e-6)
+print("Passed all federated prediction evaluation validation checks!")
 
 # %% [markdown]
 # # federated regression analysis
