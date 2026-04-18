@@ -63,13 +63,13 @@ def eval_fed_pred_lr(
     # Model Parameters
     model_params_default = {
         'weight_decay': 0.0001,
-        'penalty': 'l2',
         'learning_rate': 'constant',
         'class_weight': 'balanced',
         'lr': 0.01,
     }
     
     model_params = {**model_params_default, **model_params}
+    penalty = model_params.get('penalty', 'l2')
 
     try:
         task_type = data_config['task_type']
@@ -92,7 +92,7 @@ def eval_fed_pred_lr(
         eval_metrics = ['accuracy', 'f1', 'auc', 'prc']
         global_model = SGDClassifier(
             loss='log_loss',
-            penalty=model_params['penalty'],
+            penalty=penalty,
             fit_intercept=True,
             learning_rate=model_params['learning_rate'],
             eta0=model_params['lr'],
@@ -116,7 +116,7 @@ def eval_fed_pred_lr(
         eval_metrics = ['mse', 'mae', 'msle']
         global_model = SGDRegressor(
             loss='squared_error',
-            penalty=model_params['penalty'],
+            penalty=penalty,
             fit_intercept=True,
             learning_rate=model_params['learning_rate'],
             eta0=model_params['lr'],

@@ -864,8 +864,7 @@ class Evaluator:
             if task_type == 'classification':
                 if model_params is None or len(model_params.keys()) == 0:
                     model_params = {
-                        'C': 100,
-                        'penalty': 'l2',
+                        'C': 1.0,
                         'class_weight': 'balanced',
                         'solver': 'liblinear',
                         'max_iter': 5000,

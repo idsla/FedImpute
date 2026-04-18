@@ -36,7 +36,9 @@ def load_sklearn_model(estimator_name, seed=0) -> BaseEstimator:
     elif estimator_name == "linear_regression":
         return LinearRegression(n_jobs=-1)
     elif estimator_name == "ridge":
-        return Ridge(alpha=1.0, random_state=seed, solver="sag")
+        # Use a deterministic closed-form solver for reproducible coefficients
+        # across Python/BLAS runtime variants.
+        return Ridge(alpha=1.0, solver="svd")
     elif estimator_name == "bayesian_ridge":
         return BayesianRidge()
     elif estimator_name == "lasso":
@@ -49,10 +51,6 @@ def load_sklearn_model(estimator_name, seed=0) -> BaseEstimator:
         return RidgeCV(alphas=[0.001, 0.01, 0.1, 1.0, 10, 50])
     elif estimator_name == "lasso_cv":
         return LassoCV(alphas=[0.0001, 0.001, 0.01, 0.1, 1.0, 10.0], random_state=seed)
-    elif estimator_name == "lasso":
-        return Lasso(alpha=0.0001, random_state=seed)
-    elif estimator_name == "ridge":
-        return Ridge(alpha=0.001, random_state=seed)
     elif estimator_name == "logistic":
         return LogisticRegression(penalty="l1", solver="liblinear", random_state=seed)
     elif estimator_name == "logistic_cv":

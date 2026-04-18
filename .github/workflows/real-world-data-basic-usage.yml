@@ -9,6 +9,11 @@ jobs:
   real-world-data-basic-usage:
     name: basic usage / py${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    env:
+      OMP_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      NUMEXPR_NUM_THREADS: "1"
     strategy:
       fail-fast: false
       matrix:
