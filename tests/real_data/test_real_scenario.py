@@ -178,9 +178,9 @@ def _assert_imputed_data(
     expected_test_shapes = [(28, 14), (27, 14), (11, 14), (18, 14)]
     expected_imp_means = [
         0.466516680121054,
-        0.45647820196276623,
-        0.4062527149219099,
-        0.4716062011585653,
+        0.4564782019628209,
+        0.40625271492218656,
+        0.47160620116246793,
     ]
     expected_mask_means = [
         0.0,
@@ -223,7 +223,7 @@ def _assert_imputed_data(
     assert not X_global_test_imp.isna().any().any()
     assert np.isclose(
         np.nanmean(X_global_test_imp.to_numpy(dtype=float)),
-        0.4568590586605899,
+        0.45685905866190746,
         rtol=MODEL_RTOL,
     )
 
@@ -238,26 +238,26 @@ def _assert_fed_regression_results(evaluator: Evaluator) -> None:
 
     result = evaluator.results["fed_regression"]["result"]
     expected_params = {
-        "const": -2.0137025403070856,
-        "age": 1.2148256025689446,
-        "trestbps": 0.7583692102606588,
-        "chol": -0.8222042195380784,
-        "thalach": -1.2272248101643417,
-        "oldpeak": 4.190491768177869,
-        "slope": 0.9588590514933916,
-        "sex_1.0": 1.292184933295992,
-        "cp_2.0": -0.8840528677751718,
-        "cp_3.0": -0.3321566443389046,
-        "cp_4.0": 1.1759056772981387,
-        "fbs_0.0": -1.6317646728767714,
-        "fbs_1.0": -0.669503237528017,
-        "exang_0.0": -0.3232615461377507,
-        "exang_1.0": 0.7179695480895312,
+        "const": -2.013702543280314,
+        "age": 1.2148256024270203,
+        "trestbps": 0.7583692098559088,
+        "chol": -0.8222042186885259,
+        "thalach": -1.2272248092033191,
+        "oldpeak": 4.190491766817677,
+        "slope": 0.9588590516112517,
+        "sex_1.0": 1.2921849333703,
+        "cp_2.0": -0.884052867685576,
+        "cp_3.0": -0.3321566439264118,
+        "cp_4.0": 1.17590567749644,
+        "fbs_0.0": -1.6317646730768172,
+        "fbs_1.0": -0.6695032375559288,
+        "exang_0.0": -0.3232615433374842,
+        "exang_1.0": 0.7179695510407739,
     }
 
     assert int(result.nobs) == 742
-    assert np.isclose(result.llf, -299.7782719701735, rtol=MODEL_RTOL)
-    assert np.isclose(result.prsquared, 0.4121927185597941, rtol=MODEL_RTOL)
+    assert np.isclose(result.llf, -299.7782719783811, rtol=MODEL_RTOL)
+    assert np.isclose(result.prsquared, 0.41219271854370054, rtol=MODEL_RTOL)
     assert set(result.params.index) == set(expected_params)
     for param_name, expected_value in expected_params.items():
         assert np.isclose(result.params[param_name], expected_value, rtol=MODEL_RTOL)
@@ -279,7 +279,11 @@ def test_real_world_heart_disease_real_scenario_end_to_end(tmp_path) -> None:
     env.configuration(
         imputer="mice",
         fed_strategy="fedmice",
-        workflow_params={"early_stopping_metric": "loss"},
+        workflow_params={
+            "imp_iterations": 10,
+            "early_stopping": False,
+            "early_stopping_metric": "loss",
+        },
         seed=GLOBAL_SEED,
         save_dir_path=str(tmp_path / "fedimp"),
     )

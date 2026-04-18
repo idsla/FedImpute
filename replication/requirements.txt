@@ -1,0 +1,21 @@
+# Requirements file for exact dependency reproduction
+# Python version: ^3.12.3 (install Python 3.12.3 or higher)
+
+numpy==2.3.5; python_version >= "3.11"
+pandas==2.3.3; python_version >= "3.11"
+openpyxl==3.1.5
+scikit-learn==1.8.0; python_version >= "3.11"
+scipy==1.17.1; python_version >= "3.11"
+torch==2.9.1; python_version >= "3.11"
+matplotlib==3.10.8; python_version >= "3.11"
+seaborn==0.13.2
+tensorboard==2.20.0; python_version >= "3.11"
+statsmodels==0.14.6; python_version >= "3.11"
+xgboost==3.1.2; python_version >= "3.11"
+gower==0.1.2
+pot==0.9.6.post1; python_version >= "3.11"
+n-sphere==1.2.0
+requests==2.32.5; python_version >= "3.11"
+loguru==0.7.3
+tqdm==4.67.1
+tabulate==0.9.0

@@ -8,3 +8,5 @@ dist/
 plots/
 data/
 plots_guide/
+.tmp_expected_values_basic
+.tmp_expected_values_real
