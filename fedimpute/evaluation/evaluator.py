@@ -867,8 +867,9 @@ class Evaluator:
                         'C': 100,
                         'penalty': 'l2',
                         'class_weight': 'balanced',
-                        'solver': 'newton-cg',
-                        'max_iter': 1000,
+                        'solver': 'liblinear',
+                        'max_iter': 5000,
+                        'tol': 1e-12,
                         'random_state': seed,
                     }
                 clf = LogisticRegression(

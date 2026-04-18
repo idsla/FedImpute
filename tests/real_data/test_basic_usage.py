@@ -19,6 +19,8 @@ pytestmark = [
 
 GLOBAL_SEED = 100330201
 MODEL_RTOL = 5e-3
+LOCAL_PREDICTION_RTOL = 1e-6
+LOCAL_PREDICTION_ATOL = 1e-8
 PREDICTION_RTOL = 2e-2
 PREDICTION_ATOL = 1e-2
 
@@ -179,35 +181,35 @@ def _assert_local_prediction(evaluator: Evaluator) -> None:
     expected_results = {
         "accuracy": [
             0.9026548672566371,
-            0.8938053097345132,
+            0.9026548672566371,
             0.8495575221238938,
-            0.8141592920353983,
+            0.8230088495575221,
         ],
         "f1": [
             0.8705882352941177,
-            0.8333333333333334,
+            0.8493150684931506,
             0.8089887640449438,
-            0.7692307692307693,
+            0.7777777777777778,
         ],
         "auc": [
-            0.9886201991465149,
-            0.9612375533428165,
-            0.9466571834992887,
-            0.9719061166429588,
+            0.9889758179231863,
+            0.9615931721194879,
+            0.947724039829303,
+            0.9711948790896159,
         ],
         "prc": [
-            0.9743874941483261,
-            0.9347089758930438,
-            0.9023237716009502,
-            0.967838885292267,
+            0.9755904395385435,
+            0.9358281990553767,
+            0.9056074346749368,
+            0.9664705546556438,
         ],
     }
     for metric, expected_values in expected_results.items():
         assert np.allclose(
             evaluator.results["local_pred"][metric],
             expected_values,
-            rtol=PREDICTION_RTOL,
-            atol=PREDICTION_ATOL,
+            rtol=LOCAL_PREDICTION_RTOL,
+            atol=LOCAL_PREDICTION_ATOL,
         )
 
 
