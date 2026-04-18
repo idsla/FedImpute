@@ -27,7 +27,7 @@ docker build \
 cleanup
 printf 'Running basic_usage.py...\n'
 docker run --platform="${PLATFORM}" --name temp-container "${IMAGE_NAME}" \
-  sh -c 'PYTHONHASHSEED=0 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 BLIS_NUM_THREADS=1 python scripts/basic_usage.py | tee /app/logs/log1.txt'
+  sh -c 'PYTHONHASHSEED=0 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 BLIS_NUM_THREADS=1 CUBLAS_WORKSPACE_CONFIG=:4096:8 python scripts/basic_usage.py | tee /app/logs/log1.txt'
 docker cp temp-container:/app/logs/log1.txt "${LOCAL_LOG_DIR}/"
 docker rm temp-container >/dev/null
 
@@ -35,7 +35,7 @@ docker rm temp-container >/dev/null
 cleanup
 printf 'Running real_scenario.py...\n'
 docker run --platform="${PLATFORM}" --name temp-container "${IMAGE_NAME}" \
-  sh -c 'PYTHONHASHSEED=0 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 BLIS_NUM_THREADS=1 python scripts/real_scenario.py | tee /app/logs/log3.txt'
+  sh -c 'PYTHONHASHSEED=0 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 BLIS_NUM_THREADS=1 CUBLAS_WORKSPACE_CONFIG=:4096:8 python scripts/real_scenario.py | tee /app/logs/log3.txt'
 docker cp temp-container:/app/logs/log3.txt "${LOCAL_LOG_DIR}/"
 docker rm temp-container >/dev/null
 
