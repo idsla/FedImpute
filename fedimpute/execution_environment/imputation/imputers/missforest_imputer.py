@@ -163,7 +163,7 @@ class MissForestImputer(BaseMLImputer, ICEImputerMixin):
         estimator = self.imp_models[feature_idx]
         imputed_values = estimator.predict(X_test)
         if feature_idx >= self.data_utils_info['num_cols']:
-            imputed_values = (imputed_values >= 0.5).float()
+            imputed_values = (imputed_values >= 0.5).astype(float)
         imputed_values = np.clip(imputed_values, min_values[feature_idx], max_values[feature_idx])
         X[row_mask, feature_idx] = np.squeeze(imputed_values)
 

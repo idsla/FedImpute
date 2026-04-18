@@ -15,7 +15,7 @@ class ICEImputerMixin:
                 max_values[i] = data_utils['col_stats'][i]['max']
             else:
                 min_values[i] = 0
-                max_values[i] = data_utils['col_stats'][i]['num_class']
+                max_values[i] = 1
 
         return min_values, max_values
 

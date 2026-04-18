@@ -17,7 +17,10 @@ def setup_clients(
     clients = []
     for client_id, (client_data, client_seed) in enumerate(zip(clients_data, clients_seeds)):
         client = Client(
-            client_id, train_data=client_data[0].values, test_data=client_data[1].values, X_train_ms=client_data[2].values,
+            client_id,
+            train_data=client_data[0].to_numpy(dtype=float),
+            test_data=client_data[1].to_numpy(dtype=float),
+            X_train_ms=client_data[2].to_numpy(dtype=float),
             data_config=data_config, imp_model_name=imp_model_name, imp_model_params=imp_model_params,
             fed_strategy=fed_strategy, fed_strategy_params=fed_strategy_client_params, seed=client_seed,
             client_config=client_config, columns=client_data[0].columns.tolist(), register=register
@@ -34,7 +37,7 @@ def setup_server(
 ) -> Server:
 
     server = Server(
-        fed_strategy, fed_strategy_params, imputer_name, imputer_params, global_test.values, data_config,
+        fed_strategy, fed_strategy_params, imputer_name, imputer_params, global_test.to_numpy(dtype=float), data_config,
         server_config, seed=seed, columns=global_test.columns.tolist(), register=register
     )
     return server

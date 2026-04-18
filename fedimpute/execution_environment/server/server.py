@@ -58,7 +58,9 @@ class Server:
 
         # iniitalize imputer
         self.global_imputer = register.initialize_imputer(imputer_name, imputer_params)
-        self.global_imputer.initialize(self.X_test, np.isnan(self.X_test), self.data_utils, {}, self.seed)
+        self.global_imputer.initialize(
+            self._get_initial_imputer_data(), self.X_test_mask, self.data_utils, {}, self.seed
+        )
 
         if isinstance(self.fed_strategy, NNStrategyBaseServer):
             self.fed_strategy.initialization(self.global_imputer.model, {})
@@ -86,6 +88,24 @@ class Server:
 
         # initialize global imputer after local imputation
         self.imputer.initialize(self.X_test_imp, self.X_test_mask, self.data_utils, {}, self.seed)
+
+    def _get_initial_imputer_data(self) -> np.ndarray:
+        X_init = self.X_test.copy()
+        for i in range(self.data_utils['n_features']):
+            row_mask = np.isnan(X_init[:, i])
+            if not row_mask.any():
+                continue
+
+            if i < self.data_utils['num_cols']:
+                fill_value = self.data_utils['col_stats'][i]['mean']
+            else:
+                fill_value = self.data_utils['col_stats'][i]['mode']
+
+            if np.isnan(fill_value):
+                fill_value = 0.0
+            X_init[row_mask, i] = fill_value
+
+        return X_init
 
     def local_imputation(self, params: dict) -> Union[None, np.ndarray]:
         """

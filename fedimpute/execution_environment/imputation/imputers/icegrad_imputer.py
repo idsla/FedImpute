@@ -287,9 +287,9 @@ class ICEGradImputer(BaseNNImputer, ICEImputerMixin):
         model.eval()
         imputed_values = model(X_test_tensor).detach().cpu().numpy()
 
-        # convert to binary if categorical
+        # convert one-hot/binary feature predictions back to binary values
         if feature_idx >= self.data_utils_info['num_cols']:
-            imputed_values = (imputed_values >= 0.5).float()
+            imputed_values = (imputed_values >= 0.5).astype(float)
 
         imputed_values = np.clip(imputed_values, min_values[feature_idx], max_values[feature_idx])
         X[row_mask, feature_idx] = np.squeeze(imputed_values)

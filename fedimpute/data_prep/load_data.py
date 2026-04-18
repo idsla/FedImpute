@@ -120,7 +120,9 @@ def load_data(data_name: str):
         for col in cat_cols:
             df_features[col] = df_features[col].fillna(-1)
 
-        df_features = pd.get_dummies(df_features, columns=cat_cols, drop_first=True)
+        df_features = pd.get_dummies(
+            df_features, columns=cat_cols, drop_first=True, dtype=float
+        )
         df_target = df[target_col].copy()
         df_target = df_target.apply(lambda x: 0 if x == 0 else 1)
 

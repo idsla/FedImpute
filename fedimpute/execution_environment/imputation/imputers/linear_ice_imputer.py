@@ -34,7 +34,7 @@ class LinearICEImputer(BaseMLImputer, ICEImputerMixin):
     def __init__(
         self,
         estimator_num: str = "ridge_cv",
-        estimator_cat: str = "logistic",
+        estimator_cat: str = "ridge",
         mm_model: str = "logistic",
         mm_model_params=None,
         clip: bool = True,

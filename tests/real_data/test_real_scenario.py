@@ -279,7 +279,6 @@ def test_real_world_heart_disease_real_scenario_end_to_end(tmp_path) -> None:
     env.configuration(
         imputer="mice",
         fed_strategy="fedmice",
-        imputer_params={"estimator_cat": "ridge"},
         workflow_params={"early_stopping_metric": "loss"},
         seed=GLOBAL_SEED,
         save_dir_path=str(tmp_path / "fedimp"),
