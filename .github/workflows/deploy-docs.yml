@@ -16,7 +16,7 @@ concurrency:
 jobs:
   deploy-docs:
     name: deploy docs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out repository

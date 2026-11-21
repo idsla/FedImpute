@@ -11,7 +11,7 @@ permissions:
 jobs:
   test:
     name: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out repository
@@ -50,7 +50,7 @@ jobs:
 
   publish:
     name: publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: test
 
     permissions:
