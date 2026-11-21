@@ -409,9 +409,11 @@ from fedimpute.evaluation import Evaluator
 
 evaluator = Evaluator()
 ret = evaluator.evaluate_all(
-    env, metrics = ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed']
+    env, metrics = ['imp_quality', 'local_pred', 'fed_pred']
 )
-evaluator.show_results_all()
+evaluator.show_imp_results()
+evaluator.show_local_prediction_results()
+evaluator.show_fed_prediction_results()
 ```
 
     [1mEvaluating imputation quality...[0m
@@ -774,7 +776,7 @@ ret['imp_quality']
 
 ```python
 ret = evaluator.export_results(format = 'dict-dataframe')
-ret['pred_downstream_fed']
+ret['fed_pred']
 ```
 
 

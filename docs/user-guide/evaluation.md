@@ -17,19 +17,21 @@ from fedimpute.evaluation import Evaluator
 
 evaluator = Evaluator()
 ret = evaluator.evaluate_all(
-    env, metrics = ['imp_quality', 'pred_downstream_local', 'pred_downstream_fed']
+    env, metrics = ['imp_quality', 'local_pred', 'fed_pred']
 )
-evaluator.show_results_all()
+evaluator.show_imp_results()
+evaluator.show_local_prediction_results()
+evaluator.show_fed_prediction_results()
 ```
 
 The `Evaluator.evaluate_all()` method is used to evaluate the imputation outcomes. It takes the `FedImpEnv` object (see [Federated Imputaton](../user-guide/fed_imp.md) and a list of evaluation aspects as input.
 The evaluation aspects can be one or more of the following:
 
 - `imp_quality`: Evaluate the quality of imputed data.
-- `pred_downstream_local`: Evaluate the performance of downstream prediction tasks using imputed data in a local setting.
-- `pred_downstream_fed`: Evaluate the performance of downstream prediction tasks using imputed data in a federated setting.
+- `local_pred`: Evaluate the performance of downstream prediction tasks using imputed data in a local setting.
+- `fed_pred`: Evaluate the performance of downstream prediction tasks using imputed data in a federated setting.
 
-The `Evaluator.show_results_all()` method is used to display the evaluation results. It prints the evaluation results for each evaluation aspect.
+The `show_imp_results()`, `show_local_prediction_results()`, and `show_fed_prediction_results()` methods display the evaluation results for each evaluation aspect as formatted tables.
 
 
 ## Supported Evaluation

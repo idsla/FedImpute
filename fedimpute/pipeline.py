@@ -256,7 +256,7 @@ class FedImputePipeline:
                 'round_id': result.round_id,
             }
             
-            # For each evaluation aspect (e.g., imp_quality, pred_downstream_local)
+            # For each evaluation aspect (e.g., imp_quality, local_pred)
             for aspect, df in result.results.items():
                 # Each column is a metric
                 for metric_name in df.columns:

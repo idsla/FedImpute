@@ -33,7 +33,11 @@ markdown_extensions:
     - tables
     - fenced_code
     - admonition
-    - codehilite
+    # Emit <code class="language-xxx"> and let the theme's highlight.js colour it.
+    # (Pygments + highlight.js auto-detection together mis-detected some blocks.)
+    - pymdownx.superfences
+    - pymdownx.highlight:
+        use_pygments: false
     #- mkautodoc
 extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_HTML

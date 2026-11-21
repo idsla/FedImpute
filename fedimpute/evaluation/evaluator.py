@@ -509,7 +509,7 @@ class Evaluator:
         """
         Example:
         {
-            'pred_downstream_local': {
+            'local_pred': {
                 'accuracy': [0.8, 0.8, 0.8],
                 'f1': [0.7, 0.7, 0.7],
                 'auc': [0.6, 0.6, 0.6],
