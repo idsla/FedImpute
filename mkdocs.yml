@@ -45,4 +45,6 @@ extra_css:
   - css/mkdocstrings.css
   - css/custom.css
   - css/mkapi.css
-theme: readthedocs
+theme:
+  name: readthedocs
+  hljs_style: xcode   # highlight.js color scheme for code blocks
