@@ -171,21 +171,20 @@ for real scenarios. The data configuration should include at least
 <p>Use <code>create_simulated_scenario()</code> when you want FedImpute to split a centralized
 dataset into clients and then simulate missing values in each client's training
 data.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.scenario</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+<pre class="highlight"><code class="language-python">from fedimpute.scenario import ScenarioBuilder
 
-<span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
-<span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">data_config</span><span class="p">,</span>
-    <span class="n">num_clients</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-    <span class="n">dp_strategy</span><span class="o">=</span><span class="s2">&quot;iid-even&quot;</span><span class="p">,</span>
-    <span class="n">ms_scenario</span><span class="o">=</span><span class="s2">&quot;mnar-heter&quot;</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">100330201</span><span class="p">,</span>
-<span class="p">)</span>
+scenario_builder = ScenarioBuilder()
+scenario_data = scenario_builder.create_simulated_scenario(
+    data,
+    data_config,
+    num_clients=4,
+    dp_strategy="iid-even",
+    ms_scenario="mnar-heter",
+    seed=100330201,
+)
 
-<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">scenario_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-<span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
-</code></pre></div>
+print(list(scenario_data.keys()))
+scenario_builder.summarize_scenario()</code></pre>
 <h3 id="data-partitioning">Data Partitioning</h3>
 <p>Set the data partition through <code>dp_strategy</code>.</p>
 <table>
@@ -317,15 +316,14 @@ feature selected by <code>ms_cols</code> is eligible for missingness for each cl
 </tbody>
 </table>
 <p><code>ms_mr_clients</code> accepts these forms:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Same fixed ratio for every client</span>
-<span class="n">ms_mr_clients</span> <span class="o">=</span> <span class="mf">0.4</span>
+<pre class="highlight"><code class="language-python"># Same fixed ratio for every client
+ms_mr_clients = 0.4
 
-<span class="c1"># Same ratio range for every client</span>
-<span class="n">ms_mr_clients</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">)</span>
+# Same ratio range for every client
+ms_mr_clients = (0.2, 0.6)
 
-<span class="c1"># Per-client settings; list length must equal num_clients</span>
-<span class="n">ms_mr_clients</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="s2">&quot;large&quot;</span><span class="p">]</span>
-</code></pre></div>
+# Per-client settings; list length must equal num_clients
+ms_mr_clients = [0.2, (0.3, 0.5), "large"]</code></pre>
 <p>Predefined ratio buckets are:</p>
 <table>
 <thead>
@@ -489,36 +487,34 @@ overrides <code>ms_mech_type</code>, <code>ms_global_mechanism</code>, <code>ms_
 </tbody>
 </table>
 <p>Example with explicit per-client missing-ratio settings:</p>
-<div class="highlight"><pre><span></span><code><span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">data_config</span><span class="p">,</span>
-    <span class="n">num_clients</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-    <span class="n">dp_strategy</span><span class="o">=</span><span class="s2">&quot;iid-even&quot;</span><span class="p">,</span>
-    <span class="n">ms_scenario</span><span class="o">=</span><span class="s2">&quot;mcar&quot;</span><span class="p">,</span>
-    <span class="n">ms_mr_clients</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">),</span> <span class="s2">&quot;large&quot;</span><span class="p">],</span>
-    <span class="n">ms_mr_lower</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-    <span class="n">ms_mr_upper</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
-<span class="p">)</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">scenario_data = scenario_builder.create_simulated_scenario(
+    data,
+    data_config,
+    num_clients=3,
+    dp_strategy="iid-even",
+    ms_scenario="mcar",
+    ms_mr_clients=[0.2, (0.4, 0.6), "large"],
+    ms_mr_lower=0.1,
+    ms_mr_upper=0.9,
+    seed=123,
+)</code></pre>
 <h2 id="real-scenarios">Real Scenarios</h2>
 <p>Use <code>create_real_scenario()</code> when your data is already partitioned by client and
 already contains the missing values you want to study. The input is a list of
 client datasets. Each item can be a <code>pandas.DataFrame</code> or <code>numpy.ndarray</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.data_prep</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.scenario</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+<pre class="highlight"><code class="language-python">from fedimpute.data_prep import load_data
+from fedimpute.scenario import ScenarioBuilder
 
-<span class="n">datas</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;fed_heart_disease&quot;</span><span class="p">)</span>
+datas, data_config = load_data("fed_heart_disease")
 
-<span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
-<span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_real_scenario</span><span class="p">(</span>
-    <span class="n">datas</span><span class="p">,</span>
-    <span class="n">data_config</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">100330201</span><span class="p">,</span>
-<span class="p">)</span>
+scenario_builder = ScenarioBuilder()
+scenario_data = scenario_builder.create_real_scenario(
+    datas,
+    data_config,
+    seed=100330201,
+)
 
-<span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
-</code></pre></div>
+scenario_builder.summarize_scenario()</code></pre>
 <p>Parameters:</p>
 <ul>
 <li><code>datas</code>: list of client datasets.</li>
@@ -532,10 +528,9 @@ summary and visualization methods can be called after scenario construction.</p>
 <h3 id="summarize_scenario"><code>summarize_scenario()</code></h3>
 <p>Prints a table with client train/test/missing-data shapes, total missing ratio,
 number of missing features, and client seed.</p>
-<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
+<pre class="highlight"><code class="language-python">scenario_builder.summarize_scenario()
 
-<span class="n">summary</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">(</span><span class="n">return_summary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</code></pre></div>
+summary = scenario_builder.summarize_scenario(return_summary=True)</code></pre>
 <p>Optional parameters:</p>
 <ul>
 <li><code>log_to_file</code>: write the summary to disk.</li>
@@ -544,11 +539,10 @@ number of missing features, and client seed.</p>
 </ul>
 <h3 id="visualize_missing_pattern"><code>visualize_missing_pattern()</code></h3>
 <p>Visualizes the missing-value mask for selected clients.</p>
-<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_pattern</span><span class="p">(</span>
-    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-    <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">scenario_builder.visualize_missing_pattern(
+    client_ids=[0, 1, 2, 3],
+    data_type="train",
+)</code></pre>
 <p>Useful parameters:</p>
 <ul>
 <li><code>client_ids</code>: zero-based client ids.</li>
@@ -558,11 +552,10 @@ number of missing features, and client seed.</p>
 <h3 id="visualize_missing_distribution"><code>visualize_missing_distribution()</code></h3>
 <p>Compares observed and missing-value distributions for selected features and
 clients.</p>
-<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_distribution</span><span class="p">(</span>
-    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-    <span class="n">feature_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
-<span class="p">)</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">scenario_builder.visualize_missing_distribution(
+    client_ids=[0, 1],
+    feature_ids=[0, 1, 2, 3, 4],
+)</code></pre>
 <p>Useful parameters:</p>
 <ul>
 <li><code>client_ids</code>: zero-based client ids.</li>
@@ -573,11 +566,10 @@ clients.</p>
 </ul>
 <h3 id="visualize_data_heterogeneity"><code>visualize_data_heterogeneity()</code></h3>
 <p>Computes and visualizes pairwise client distance matrices.</p>
-<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_data_heterogeneity</span><span class="p">(</span>
-    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
-    <span class="n">distance_method</span><span class="o">=</span><span class="s2">&quot;swd&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">scenario_builder.visualize_data_heterogeneity(
+    client_ids=[0, 1, 2, 3],
+    distance_method="swd",
+)</code></pre>
 <p>Supported distance methods:</p>
 <ul>
 <li><code>swd</code>: sliced Wasserstein distance.</li>

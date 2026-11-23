@@ -141,22 +141,23 @@ The evaluation can be categorized into the following aspects:</p>
 </ul>
 <h2 id="basic-usage">Basic Usage</h2>
 <p>The <code>Evaluator</code> class is the <code>evaluation</code> module's main class, use its <code>evaluation()</code> function to perform evaluation.</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evaluator</span>
+<pre class="highlight"><code class="language-python">from fedimpute.evaluation import Evaluator
 
-<span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
-<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_all</span><span class="p">(</span>
-    <span class="n">env</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_local&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">]</span>
-<span class="p">)</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_results_all</span><span class="p">()</span>
-</code></pre></div>
+evaluator = Evaluator()
+ret = evaluator.evaluate_all(
+    env, metrics = ['imp_quality', 'local_pred', 'fed_pred']
+)
+evaluator.show_imp_results()
+evaluator.show_local_prediction_results()
+evaluator.show_fed_prediction_results()</code></pre>
 <p>The <code>Evaluator.evaluate_all()</code> method is used to evaluate the imputation outcomes. It takes the <code>FedImpEnv</code> object (see <a href="../fed_imp/">Federated Imputaton</a> and a list of evaluation aspects as input.
 The evaluation aspects can be one or more of the following:</p>
 <ul>
 <li><code>imp_quality</code>: Evaluate the quality of imputed data.</li>
-<li><code>pred_downstream_local</code>: Evaluate the performance of downstream prediction tasks using imputed data in a local setting.</li>
-<li><code>pred_downstream_fed</code>: Evaluate the performance of downstream prediction tasks using imputed data in a federated setting.</li>
+<li><code>local_pred</code>: Evaluate the performance of downstream prediction tasks using imputed data in a local setting.</li>
+<li><code>fed_pred</code>: Evaluate the performance of downstream prediction tasks using imputed data in a federated setting.</li>
 </ul>
-<p>The <code>Evaluator.show_results_all()</code> method is used to display the evaluation results. It prints the evaluation results for each evaluation aspect.</p>
+<p>The <code>show_imp_results()</code>, <code>show_local_prediction_results()</code>, and <code>show_fed_prediction_results()</code> methods display the evaluation results for each evaluation aspect as formatted tables.</p>
 <h2 id="supported-evaluation">Supported Evaluation</h2>
 <p>The following evaluation metrics are supported for each evaluation aspect:</p>
 <h3 id="imputation-quality">Imputation Quality</h3>
@@ -188,31 +189,30 @@ A smaller Wasserstein distance indicates a higher similarity between the imputed
 </li>
 </ul>
 <p>User can use <code>show_imp_results()</code> to get the formatted results of evaluation.</p>
-<div class="highlight"><pre><span></span><code>from fedimpute.evaluation import Evaluator
+<pre class="highlight"><code python="None">from fedimpute.evaluation import Evaluator
 
-X_trains = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train&#39;)
-X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
-X_train_masks = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_mask&#39;)
+X_trains = env.get_data(client_ids='all', data_type = 'train')
+X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
+X_train_masks = env.get_data(client_ids='all', data_type = 'train_mask')
 
 evaluator = Evaluator()
 ret = evaluator.evaluate_imp_quality(
     X_train_imps = X_train_imps,
     X_train_origins = X_trains,
     X_train_masks = X_train_masks,
-    metrics = [&#39;rmse&#39;, &#39;nrmse&#39;, &#39;sliced-ws&#39;]
+    metrics = ['rmse', 'nrmse', 'sliced-ws']
 )
-evaluator.show_imp_results()
-</code></pre></div>
+evaluator.show_imp_results()</code></pre>
 <h3 id="imputation-quality-via-dimensionality-reduction-visualization">Imputation Quality via dimensionality reduction visualization</h3>
 <p><code>Evaluator</code> class also provides dimensionality reduction visualizations to compare imputed data with original ground-truth data. Use <code>tsne_visualization()</code>, <code>pca_visualization()</code>, or <code>umap_visualization()</code> for method-specific plots, or use <code>dimensionality_visualization(method=...)</code> with <code>method</code> set to <code>"tsne"</code>, <code>"pca"</code>, or <code>"umap"</code>. These methods take client imputation data (<code>X_imps</code>), original data (<code>X_origins</code>), a random seed (<code>seed</code>) where the selected method uses randomness, and optional method-specific settings through <code>method_params</code>.</p>
-<div class="highlight"><pre><span></span><code>X_trains = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train&#39;)
-X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
+<pre class="highlight"><code python="None">X_trains = env.get_data(client_ids='all', data_type = 'train')
+X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
 
 evaluator.tsne_visualization(
     X_imps = X_train_imps,
     X_origins = X_trains,
     seed = 0,
-    method_params = {&quot;perplexity&quot;: 30}
+    method_params = {"perplexity": 30}
 )
 
 evaluator.pca_visualization(
@@ -225,8 +225,7 @@ evaluator.umap_visualization(
     X_imps = X_train_imps,
     X_origins = X_trains,
     seed = 0
-)
-</code></pre></div>
+)</code></pre>
 <h3 id="local-regression-analysis">Local Regression Analysis</h3>
 <p>The <code>run_local_regression_analysis()</code> method in the evaluation.Evaluator class provides functionality for evaluation via local regression analysis tasks. It accepts several parameters: </p>
 <ul>
@@ -236,17 +235,16 @@ evaluator.umap_visualization(
 </ul>
 <p>The method returns a Dict containing evaluation results. Users can utilize the <code>show_local_regression_results(client_idx)</code> method
 in the evaluation.Evaluator class to print a formatted output of the evaluation results.</p>
-<div class="highlight"><pre><span></span><code>X_trains, y_trains = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train&#39;, include_y=True)
-X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
-data_config = env.get_data(data_type = &#39;config&#39;)
+<pre class="highlight"><code python="None">X_trains, y_trains = env.get_data(client_ids='all', data_type = 'train', include_y=True)
+X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
+data_config = env.get_data(data_type = 'config')
 
 ret = evaluator.run_local_regression_analysis(
     X_train_imps = X_train_imps,
     y_trains = y_trains,
     data_config = data_config
 )
-evaluator.show_local_regression_results()
-</code></pre></div>
+evaluator.show_local_regression_results()</code></pre>
 <h3 id="local-prediction">Local Prediction</h3>
 <p>After missing data are imputed,  the downstream task prediction can be performed on imputed data.  During the data partition stage, we retain a local test dataset for each client and a global test dataset for global data.  These test datasets can be used to evaluate downstream prediction models trained on clients' local imputed datasets to measure  the goodness of imputation and how it influences the prediction.  </p>
 <p>The <code>run_local_prediction()</code> method in the evaluation.Evaluator class provides functionality for evaluation via local prediction tasks. It accepts several parameters: </p>
@@ -259,10 +257,10 @@ evaluator.show_local_regression_results()
 <p>The method trains prediction models for each client using the imputed training data and evaluates performance on the corresponding test data. For classification tasks, the evaluation metrics include accuracy, F1-score, Area Under the Receiver Operating Characteristic Curve (AUROC), and Area Under
 the Precision-Recall Curve (AUPRC). Mean squared error and R2 score are computed for regression tasks.</p>
 <p><code>show_local_prediction_results()</code> will give a formatted result summary for the evaluation.</p>
-<div class="highlight"><pre><span></span><code>X_trains, y_trains = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train&#39;, include_y=True)
-X_tests, y_tests = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;test&#39;, include_y=True)
-X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
-data_config = env.get_data(data_type = &#39;config&#39;)
+<pre class="highlight"><code python="None">X_trains, y_trains = env.get_data(client_ids='all', data_type = 'train', include_y=True)
+X_tests, y_tests = env.get_data(client_ids='all', data_type = 'test', include_y=True)
+X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
+data_config = env.get_data(data_type = 'config')
 
 ret = evaluator.evaluate_local_pred(
     X_train_imps = X_train_imps,
@@ -271,11 +269,10 @@ ret = evaluator.evaluate_local_pred(
     X_tests = X_tests,
     y_tests = y_tests,
     data_config = data_config,
-    model = &#39;nn&#39;,
+    model = 'nn',
     seed= 0
 )
-evaluator.show_local_prediction_results()
-</code></pre></div>
+evaluator.show_local_prediction_results()</code></pre>
 <h3 id="federated-regression-analysis">Federated Regression Analysis</h3>
 <p>The <code>run_fed_regression_analysis()</code> method in the evaluation.Evaluator class provides functionality for evaluation via federated regression analysis tasks. It accepts several parameters: </p>
 <ul>
@@ -284,19 +281,18 @@ evaluator.show_local_prediction_results()
 </ul>
 <p>The method returns a Dict containing evaluation results. Users can utilize the <code>show_fed_regression_results()</code> method
 in the evaluation.Evaluator class to print a formatted output of the evaluation results.</p>
-<div class="highlight"><pre><span></span><code>X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
+<pre class="highlight"><code python="None">X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
 X_trains, y_trains = env.get_data(
-    client_ids=&#39;all&#39;, data_type = &#39;train&#39;, include_y=True
+    client_ids='all', data_type = 'train', include_y=True
 )
-data_config = env.get_data(data_type = &#39;config&#39;)
+data_config = env.get_data(data_type = 'config')
 
 ret = evaluator.run_fed_regression_analysis(
     X_train_imps = X_train_imps,
     y_trains = y_trains,
     data_config = data_config
 )
-evaluator.show_fed_regression_results()
-</code></pre></div>
+evaluator.show_fed_regression_results()</code></pre>
 <h3 id="federated-prediction">Federated Prediction</h3>
 <p>We implement federated prediction functionality by <code>run_fed_prediction()</code> method. The current implementation supports federated prediction using a two-layer neural network with Federated Averaging (FedAvg) as the federated learning strategy. We will include more federated models in the future. Similarly, it uses accuracy, F1-Score, AUROC, AUPRC for classification tasks, and mean square error, R2 score for regression tasks. </p>
 <p>It accepts multiple parameters: </p>
@@ -311,17 +307,17 @@ evaluator.show_fed_regression_results()
 </ul>
 <p>The method returns a Dict containing evaluation results. Users can utilize the <code>show_fed_pred_result()</code> method
 in the evaluation.Evaluator class to print a formatted output of the evaluation results.</p>
-<div class="highlight"><pre><span></span><code>X_train_imps = env.get_data(client_ids=&#39;all&#39;, data_type = &#39;train_imp&#39;)
+<pre class="highlight"><code python="None">X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
 X_trains, y_trains = env.get_data(
-    client_ids=&#39;all&#39;, data_type = &#39;train&#39;, include_y=True
+    client_ids='all', data_type = 'train', include_y=True
 )
 X_tests, y_tests = env.get_data(
-    client_ids=&#39;all&#39;, data_type = &#39;test&#39;, include_y=True
+    client_ids='all', data_type = 'test', include_y=True
 )
 X_global_test, y_global_test = env.get_data(
-    data_type = &#39;global_test&#39;, include_y = True
+    data_type = 'global_test', include_y = True
 )
-data_config = env.get_data(data_type = &#39;config&#39;)
+data_config = env.get_data(data_type = 'config')
 
 ret = evaluator.run_fed_prediction(
     X_train_imps = X_train_imps,
@@ -333,15 +329,14 @@ ret = evaluator.run_fed_prediction(
     y_test_global = y_global_test,
     data_config = data_config,
     train_params = {
-        &#39;global_epoch&#39;: 100,
-        &#39;local_epoch&#39;: 10,
-        &#39;fine_tune_epoch&#39;: 200,
+        'global_epoch': 100,
+        'local_epoch': 10,
+        'fine_tune_epoch': 200,
     },
     seed= 0
 )
 
-evaluator.show_fed_prediction_results()
-</code></pre></div>
+evaluator.show_fed_prediction_results()</code></pre>
 <h2 id="save-evaluation-results">Save Evaluation Results</h2>
 <p>The evaluation module provides convenient interfaces for presenting and exporting the results. All evaluation functions return results in a dictionary format, which can be formatted into readable tables through dedicated display functions, including <code>show_imp_results()</code>,
 <code>show_local_prediction_results()</code>, <code>show_fed_prediction_results()</code> for each evaluation aspects. For further analysis and reporting, the <code>export_results()</code> method supports exporting results to different formats, including <code>pandas.DataFrame</code> and structured dictionaries.</p>

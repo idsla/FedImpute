@@ -111,271 +111,243 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">tabulate</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+                <pre class="highlight"><code class="language-python">import numpy as np
+import pandas as pd
+import tabulate
+import matplotlib.pyplot as plt
 
-<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">family</span><span class="o">=</span><span class="s1">&#39;arial&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;pdf&#39;</span><span class="p">,</span> <span class="n">fonttype</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;ps&#39;</span><span class="p">,</span> <span class="n">fonttype</span> <span class="o">=</span> <span class="mi">42</span><span class="p">)</span>
-</code></pre></div>
+plt.rc('font', family='arial')
+plt.rc('pdf', fonttype = 42)
+plt.rc('ps', fonttype = 42)</code></pre>
 <h1 id="load-data">Load Data</h1>
-<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<pre class="highlight"><code class="language-python">%load_ext autoreload
+%autoreload 2
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.data_prep</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span>
-<span class="n">data</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;codrna&quot;</span><span class="p">)</span>
-<span class="n">display_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Dimensions: &quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data Config:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">data_config</span><span class="p">)</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="nb">+--------+--------+--------+--------+--------+--------+--------+--------+--------+</span>
-<span class="c">|   X1   |   X2   |   X3   |   X4   |   X5   |   X6   |   X7   |   X8   |   y    |</span>
-<span class="c">|</span><span class="nb">--------+--------+--------+--------+--------+--------+--------+--------+--------</span><span class="c">|</span>
-<span class="c">| 0</span><span class="nt">.</span><span class="c">7554 | 0</span><span class="nt">.</span><span class="c">1364 | 0</span><span class="nt">.</span><span class="c">0352 | 0</span><span class="nt">.</span><span class="c">4132 | 0</span><span class="nt">.</span><span class="c">6937 | 0</span><span class="nt">.</span><span class="c">1591 | 0</span><span class="nt">.</span><span class="c">3329 | 0</span><span class="nt">.</span><span class="c">7154 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
-<span class="c">| 0</span><span class="nt">.</span><span class="c">7334 | 0</span><span class="nt">.</span><span class="c">7879 | 0</span><span class="nt">.</span><span class="c">3819 | 0</span><span class="nt">.</span><span class="c">3693 | 0</span><span class="nt">.</span><span class="c">5619 | 0</span><span class="nt">.</span><span class="c">4830 | 0</span><span class="nt">.</span><span class="c">4351 | 0</span><span class="nt">.</span><span class="c">5160 | 0</span><span class="nt">.</span><span class="c">0000 |</span>
-<span class="c">| 0</span><span class="nt">.</span><span class="c">7752 | 0</span><span class="nt">.</span><span class="c">1364 | 0</span><span class="nt">.</span><span class="c">1761 | 0</span><span class="nt">.</span><span class="c">3290 | 0</span><span class="nt">.</span><span class="c">7410 | 0</span><span class="nt">.</span><span class="c">4259 | 0</span><span class="nt">.</span><span class="c">4644 | 0</span><span class="nt">.</span><span class="c">5268 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
-<span class="c">| 0</span><span class="nt">.</span><span class="c">5905 | 0</span><span class="nt">.</span><span class="c">7424 | 0</span><span class="nt">.</span><span class="c">2720 | 0</span><span class="nt">.</span><span class="c">2898 | 0</span><span class="nt">.</span><span class="c">6920 | 0</span><span class="nt">.</span><span class="c">3205 | 0</span><span class="nt">.</span><span class="c">4019 | 0</span><span class="nt">.</span><span class="c">6290 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
-<span class="c">| 0</span><span class="nt">.</span><span class="c">7366 | 0</span><span class="nt">.</span><span class="c">1212 | 0</span><span class="nt">.</span><span class="c">2465 | 0</span><span class="nt">.</span><span class="c">3290 | 0</span><span class="nt">.</span><span class="c">7410 | 0</span><span class="nt">.</span><span class="c">3249 | 0</span><span class="nt">.</span><span class="c">5086 | 0</span><span class="nt">.</span><span class="c">5631 | 1</span><span class="nt">.</span><span class="c">0000 |</span>
-<span class="nb">+--------+--------+--------+--------+--------+--------+--------+--------+--------+</span>
-<span class="c">Data Dimensions:  (5000</span><span class="nt">,</span><span class="c"> 9)</span>
-<span class="c">Data Config:</span>
-<span class="c"> {&#39;target&#39;: &#39;y&#39;</span><span class="nt">,</span><span class="c"> &#39;task_type&#39;: &#39;classification&#39;</span><span class="nt">,</span><span class="c"> &#39;natural_partition&#39;: False}</span>
-</code></pre></div>
-
+from fedimpute.data_prep import load_data, display_data
+data, data_config = load_data("codrna")
+display_data(data)
+print("Data Dimensions: ", data.shape)
+print("Data Config:\n", data_config)</code></pre>
+<pre class="highlight"><code>+--------+--------+--------+--------+--------+--------+--------+--------+--------+
+|   X1   |   X2   |   X3   |   X4   |   X5   |   X6   |   X7   |   X8   |   y    |
+|--------+--------+--------+--------+--------+--------+--------+--------+--------|
+| 0.7554 | 0.1364 | 0.0352 | 0.4132 | 0.6937 | 0.1591 | 0.3329 | 0.7154 | 1.0000 |
+| 0.7334 | 0.7879 | 0.3819 | 0.3693 | 0.5619 | 0.4830 | 0.4351 | 0.5160 | 0.0000 |
+| 0.7752 | 0.1364 | 0.1761 | 0.3290 | 0.7410 | 0.4259 | 0.4644 | 0.5268 | 1.0000 |
+| 0.5905 | 0.7424 | 0.2720 | 0.2898 | 0.6920 | 0.3205 | 0.4019 | 0.6290 | 1.0000 |
+| 0.7366 | 0.1212 | 0.2465 | 0.3290 | 0.7410 | 0.3249 | 0.5086 | 0.5631 | 1.0000 |
++--------+--------+--------+--------+--------+--------+--------+--------+--------+
+Data Dimensions:  (5000, 9)
+Data Config:
+ {'target': 'y', 'task_type': 'classification', 'natural_partition': False}</code></pre>
 <h1 id="scenario-simulation">Scenario Simulation</h1>
 <h2 id="basic-usage">Basic Usage</h2>
-<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.scenario</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
+<pre class="highlight"><code class="language-python">%load_ext autoreload
+%autoreload 2
+from fedimpute.scenario import ScenarioBuilder
 
-<span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
-<span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_simulated_scenario</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span> <span class="n">num_clients</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">dp_strategy</span><span class="o">=</span><span class="s1">&#39;iid-even&#39;</span><span class="p">,</span> <span class="n">ms_scenario</span><span class="o">=</span><span class="s1">&#39;mnar-heter&#39;</span>
-<span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Results Structure (Dict Keys):&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">scenario_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-<span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
-<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
-<span class="n">Missing</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="n">simulation</span><span class="p">...</span>
-<span class="n">Results</span><span class="w"> </span><span class="n">Structure</span><span class="w"> </span><span class="p">(</span><span class="n">Dict</span><span class="w"> </span><span class="n">Keys</span><span class="p">)</span><span class="o">:</span>
-<span class="p">[</span><span class="err">&#39;</span><span class="n">clients_train_data</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">clients_test_data</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">clients_train_data_ms</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">clients_seeds</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">global_test_data</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">data_config</span><span class="err">&#39;</span><span class="p">,</span><span class="w"> </span><span class="err">&#39;</span><span class="n">stats</span><span class="err">&#39;</span><span class="p">]</span>
-<span class="o">==================================================================</span>
-<span class="n">Scenario</span><span class="w"> </span><span class="n">Summary</span>
-<span class="o">==================================================================</span>
-<span class="n">Total</span><span class="w"> </span><span class="n">clients</span><span class="o">:</span><span class="w"> </span><span class="mi">4</span>
-<span class="n">Global</span><span class="w"> </span><span class="n">Test</span><span class="w"> </span><span class="n">Data</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">)</span>
-<span class="n">Missing</span><span class="w"> </span><span class="n">Mechanism</span><span class="w"> </span><span class="n">Category</span><span class="o">:</span><span class="w"> </span><span class="n">MNAR</span><span class="w"> </span><span class="p">(</span><span class="n">Self</span><span class="w"> </span><span class="n">Masking</span><span class="w"> </span><span class="n">Logit</span><span class="p">)</span>
-<span class="n">Clients</span><span class="w"> </span><span class="n">Data</span><span class="w"> </span><span class="n">Summary</span><span class="o">:</span>
-<span class="w">     </span><span class="n">Train</span><span class="w">     </span><span class="n">Test</span><span class="w">      </span><span class="n">Miss</span><span class="w">     </span><span class="n">MS</span><span class="w"> </span><span class="n">Ratio</span><span class="w">    </span><span class="n">MS</span><span class="w"> </span><span class="n">Feature</span><span class="w">    </span><span class="n">Seed</span>
-<span class="o">--</span><span class="w">  </span><span class="o">--------</span><span class="w">  </span><span class="o">-------</span><span class="w">  </span><span class="o">--------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">------------</span><span class="w">  </span><span class="o">------</span>
-<span class="n">C1</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.47</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">6077</span>
-<span class="n">C2</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.51</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">577</span>
-<span class="n">C3</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.46</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">7231</span>
-<span class="n">C4</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">113</span><span class="p">,</span><span class="mi">9</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">1125</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span><span class="w">     </span><span class="mf">0.47</span><span class="w">         </span><span class="mi">8</span><span class="o">/</span><span class="mi">8</span><span class="w">        </span><span class="mi">5504</span>
-<span class="o">==================================================================</span>
-</code></pre></div>
-
+scenario_builder = ScenarioBuilder()
+scenario_data = scenario_builder.create_simulated_scenario(
+    data, data_config, num_clients = 4, dp_strategy='iid-even', ms_scenario='mnar-heter'
+)
+print('Results Structure (Dict Keys):')
+print(list(scenario_data.keys()))
+scenario_builder.summarize_scenario()</code></pre>
+<pre class="highlight"><code>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+Missing data simulation...
+Results Structure (Dict Keys):
+['clients_train_data', 'clients_test_data', 'clients_train_data_ms', 'clients_seeds', 'global_test_data', 'data_config', 'stats']
+==================================================================
+Scenario Summary
+==================================================================
+Total clients: 4
+Global Test Data: (500, 9)
+Missing Mechanism Category: MNAR (Self Masking Logit)
+Clients Data Summary:
+     Train     Test      Miss     MS Ratio    MS Feature    Seed
+--  --------  -------  --------  ----------  ------------  ------
+C1  (1125,9)  (113,9)  (1125,8)     0.47         8/8        6077
+C2  (1125,9)  (113,9)  (1125,8)     0.51         8/8        577
+C3  (1125,9)  (113,9)  (1125,8)     0.46         8/8        7231
+C4  (1125,9)  (113,9)  (1125,8)     0.47         8/8        5504
+==================================================================</code></pre>
 <h2 id="exploring-scenario">Exploring Scenario</h2>
 <h3 id="data-heterogeneity">Data Heterogeneity</h3>
-<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_data_heterogeneity</span><span class="p">(</span>
-    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> 
-    <span class="n">distance_method</span><span class="o">=</span><span class="s1">&#39;swd&#39;</span><span class="p">,</span>
-    <span class="n">pca_col_threshold</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
-    <span class="n">fontsize</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
-    <span class="n">title</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/data_heterogeneity.svg&#39;</span>
-<span class="p">)</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">scenario_builder.visualize_data_heterogeneity(
+    client_ids=[0, 1, 2, 3], 
+    distance_method='swd',
+    pca_col_threshold=20,
+    fontsize=18,
+    title=False,
+    save_path='./plots/data_heterogeneity.svg'
+)</code></pre>
 <p><img alt="png" src="../basic_usage_files/output_9_0.png" /></p>
 <h3 id="missing-data-inspection">Missing Data Inspection</h3>
-<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_pattern</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/ms_pattern.pdf&#39;</span><span class="p">)</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">scenario_builder.visualize_missing_pattern(client_ids=[0, 1, 2, 3], save_path='./plots/ms_pattern.pdf')</code></pre>
 <p><img alt="png" src="../basic_usage_files/output_11_0.png" /></p>
-<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_distribution</span><span class="p">(</span>
-    <span class="n">client_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">feature_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
-    <span class="n">stat</span> <span class="o">=</span> <span class="s1">&#39;proportion&#39;</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="n">kde</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/ms_distribution.pdf&#39;</span>
-<span class="p">)</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">scenario_builder.visualize_missing_distribution(
+    client_ids = [0, 1], feature_ids = [0, 1, 2, 3, 4],
+    stat = 'proportion', bins = 20, kde=True,
+    save_path='./plots/ms_distribution.pdf'
+)</code></pre>
 <p><img alt="png" src="../basic_usage_files/output_12_0.png" /></p>
 <h1 id="running-federated-imputation">Running Federated Imputation</h1>
 <h2 id="basic-usage_1">Basic Usage</h2>
-<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.execution_environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">FedImputeEnv</span>
+<pre class="highlight"><code class="language-python">%load_ext autoreload
+%autoreload 2
+from fedimpute.execution_environment import FedImputeEnv
 
-<span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedmice&#39;</span><span class="p">)</span>
-<span class="n">env</span><span class="o">.</span><span class="n">setup_from_scenario_builder</span><span class="p">(</span><span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">env</span><span class="o">.</span><span class="n">show_env_info</span><span class="p">()</span>
-<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
-<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">clients</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">server</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">workflow</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mEnvironment</span><span class="w"> </span><span class="n">setup</span><span class="w"> </span><span class="n">complete</span><span class="p">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="o">============================================================</span>
-<span class="n">Environment</span><span class="w"> </span><span class="n">Information</span><span class="o">:</span>
-<span class="o">============================================================</span>
-<span class="nl">Workflow</span><span class="p">:</span><span class="w"> </span><span class="n">ICE</span><span class="w"> </span><span class="p">(</span><span class="n">Imputation</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="n">Chain</span><span class="w"> </span><span class="n">Equation</span><span class="p">)</span>
-<span class="nl">Clients</span><span class="p">:</span>
-<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="nl">Server</span><span class="p">:</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="o">============================================================</span>
+env = FedImputeEnv(debug_mode=False)
+env.configuration(imputer = 'mice', fed_strategy='fedmice')
+env.setup_from_scenario_builder(scenario_builder = scenario_builder, verbose=1)
+env.show_env_info()
+env.run_fed_imputation(verbose=2)</code></pre>
+<pre class="highlight"><code>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+[1mSetting up clients...[0m
+[1mSetting up server...[0m
+[1mSetting up workflow...[0m
+[1mEnvironment setup complete.[0m
+============================================================
+Environment Information:
+============================================================
+Workflow: ICE (Imputation via Chain Equation)
+Clients:
+ - Client 0: imputer: mice, fed-strategy: fedmice
+ - Client 1: imputer: mice, fed-strategy: fedmice
+ - Client 2: imputer: mice, fed-strategy: fedmice
+ - Client 3: imputer: mice, fed-strategy: fedmice
+Server: fed-strategy: fedmice
+============================================================
 
-<span class="err"></span><span class="p">[</span><span class="mi">32</span><span class="n">m</span><span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mImputation</span><span class="w"> </span><span class="n">Start</span><span class="w"> </span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mInitial</span><span class="o">:</span><span class="w"> </span><span class="n">imp_rmse</span><span class="o">:</span><span class="w"> </span><span class="mf">0.1664</span><span class="w"> </span><span class="n">imp_ws</span><span class="o">:</span><span class="w"> </span><span class="mf">0.0831</span><span class="w"> </span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mEpoch</span><span class="w"> </span><span class="mi">8</span><span class="o">:</span><span class="w"> </span><span class="n">loss</span><span class="o">:</span><span class="w"> </span><span class="mf">0.0026</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mAll</span><span class="w"> </span><span class="n">clients</span><span class="w"> </span><span class="n">converged</span><span class="p">,</span><span class="w"> </span><span class="n">iteration</span><span class="w"> </span><span class="mi">8</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mFinal</span><span class="o">:</span><span class="w"> </span><span class="n">imp_rmse</span><span class="o">:</span><span class="w"> </span><span class="mf">0.1530</span><span class="w"> </span><span class="n">imp_ws</span><span class="o">:</span><span class="w"> </span><span class="mf">0.0687</span><span class="w"> </span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">32</span><span class="n">m</span><span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mFinished</span><span class="p">.</span><span class="w"> </span><span class="n">Running</span><span class="w"> </span><span class="n">time</span><span class="o">:</span><span class="w"> </span><span class="mf">10.4787</span><span class="w"> </span><span class="n">seconds</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-</code></pre></div>
-
+[32m[1mImputation Start ...[0m
+[1mInitial: imp_rmse: 0.1664 imp_ws: 0.0831 [0m
+[1mEpoch 8: loss: 0.0026[0m
+[1mAll clients converged, iteration 8[0m
+[1mFinal: imp_rmse: 0.1530 imp_ws: 0.0687 [0m
+[32m[1mFinished. Running time: 10.4787 seconds[0m</code></pre>
 <h2 id="monitoring-imputation-progress">Monitoring Imputation Progress</h2>
-<div class="highlight"><pre><span></span><code><span class="n">env</span><span class="o">.</span><span class="n">tracker</span><span class="o">.</span><span class="n">visualize_imputation_process</span><span class="p">()</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">env.tracker.visualize_imputation_process()</code></pre>
 <p><img alt="png" src="../basic_usage_files/output_17_0.png" /></p>
 <h1 id="evaluation">Evaluation</h1>
 <h3 id="imputation-quality">Imputation Quality</h3>
-<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evaluator</span>
+<pre class="highlight"><code class="language-python">%load_ext autoreload
+%autoreload 2
+from fedimpute.evaluation import Evaluator
 
-<span class="n">X_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">)</span>
-<span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">)</span>
-<span class="n">X_train_masks</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_mask&#39;</span><span class="p">)</span>
+X_trains = env.get_data(client_ids='all', data_type = 'train')
+X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
+X_train_masks = env.get_data(client_ids='all', data_type = 'train_mask')
 
-<span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
-<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_imp_quality</span><span class="p">(</span>
-    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">X_train_origins</span> <span class="o">=</span> <span class="n">X_trains</span><span class="p">,</span>
-    <span class="n">X_train_masks</span> <span class="o">=</span> <span class="n">X_train_masks</span><span class="p">,</span>
-    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rmse&#39;</span><span class="p">,</span> <span class="s1">&#39;nrmse&#39;</span><span class="p">,</span> <span class="s1">&#39;sliced-ws&#39;</span><span class="p">]</span>
-<span class="p">)</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_imp_results</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
-<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
-<span class="o">================================================</span>
-<span class="n">Imputation</span><span class="w"> </span><span class="n">Quality</span>
-<span class="o">================================================</span>
-<span class="w">               </span><span class="n">rmse</span><span class="w">       </span><span class="n">nrmse</span><span class="w">      </span><span class="n">sliced</span><span class="o">-</span><span class="n">ws</span>
-<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">-----------</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="w">     </span><span class="mf">0.181</span><span class="w">       </span><span class="mf">0.505</span><span class="w">        </span><span class="mf">0.080</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="w">     </span><span class="mf">0.187</span><span class="w">       </span><span class="mf">0.543</span><span class="w">        </span><span class="mf">0.094</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="w">     </span><span class="mf">0.117</span><span class="w">       </span><span class="mf">0.325</span><span class="w">        </span><span class="mf">0.045</span>
-<span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">4</span><span class="w">     </span><span class="mf">0.126</span><span class="w">       </span><span class="mf">0.354</span><span class="w">        </span><span class="mf">0.056</span>
-<span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">----------</span>
-<span class="w"> </span><span class="n">Average</span><span class="w">      </span><span class="mf">0.153</span><span class="w">       </span><span class="mf">0.432</span><span class="w">        </span><span class="mf">0.069</span>
-<span class="w">   </span><span class="n">Std</span><span class="w">        </span><span class="mf">0.032</span><span class="w">       </span><span class="mf">0.094</span><span class="w">        </span><span class="mf">0.019</span>
-<span class="o">================================================</span>
-</code></pre></div>
+evaluator = Evaluator()
+ret = evaluator.evaluate_imp_quality(
+    X_train_imps = X_train_imps,
+    X_train_origins = X_trains,
+    X_train_masks = X_train_masks,
+    metrics = ['rmse', 'nrmse', 'sliced-ws']
+)
+evaluator.show_imp_results()</code></pre>
+<pre class="highlight"><code>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+================================================
+Imputation Quality
+================================================
+               rmse       nrmse      sliced-ws
+----------  ----------  ----------  -----------
+ Client 1     0.181       0.505        0.080
+ Client 2     0.187       0.543        0.094
+ Client 3     0.117       0.325        0.045
+ Client 4     0.126       0.354        0.056
+----------  ----------  ----------  ----------
+ Average      0.153       0.432        0.069
+   Std        0.032       0.094        0.019
+================================================</code></pre>
+<pre class="highlight"><code class="language-python">X_trains = env.get_data(client_ids='all', data_type = 'train')
+X_train_imps = env.get_data(client_ids='all', data_type = 'train_imp')
 
-<div class="highlight"><pre><span></span><code><span class="n">X_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">)</span>
-<span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">)</span>
-
-<span class="n">evaluator</span><span class="o">.</span><span class="n">tsne_visualization</span><span class="p">(</span>
-    <span class="n">X_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">X_origins</span> <span class="o">=</span> <span class="n">X_trains</span><span class="p">,</span>
-    <span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="p">)</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="nv">Evaluating</span><span class="w"> </span><span class="nv">TSNE</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span>...
-<span class="nv">Evaluating</span><span class="w"> </span><span class="nv">TSNE</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span>...
-<span class="nv">Evaluating</span><span class="w"> </span><span class="nv">TSNE</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span>...
-<span class="nv">Evaluating</span><span class="w"> </span><span class="nv">TSNE</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="mi">4</span><span class="w"> </span>...
-</code></pre></div>
-
+evaluator.tsne_visualization(
+    X_imps = X_train_imps,
+    X_origins = X_trains,
+    seed = 0
+)</code></pre>
+<pre class="highlight"><code>Evaluating TSNE for Client 1 ...
+Evaluating TSNE for Client 2 ...
+Evaluating TSNE for Client 3 ...
+Evaluating TSNE for Client 4 ...</code></pre>
 <p><img alt="png" src="../basic_usage_files/output_21_1.png" /></p>
 <h3 id="local-prediction">Local Prediction</h3>
-<div class="highlight"><pre><span></span><code><span class="n">X_train_imps</span><span class="p">,</span> <span class="n">y_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_tests</span><span class="p">,</span> <span class="n">y_tests</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_global_test</span><span class="p">,</span> <span class="n">y_global_test</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;global_test&#39;</span><span class="p">,</span> <span class="n">include_y</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-<span class="n">data_config</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">run_local_prediction</span><span class="p">(</span>
-    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
-    <span class="n">X_tests</span> <span class="o">=</span> <span class="n">X_tests</span><span class="p">,</span>
-    <span class="n">y_tests</span> <span class="o">=</span> <span class="n">y_tests</span><span class="p">,</span>
-    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span><span class="p">,</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;rf&#39;</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span> <span class="mi">0</span>
-<span class="p">)</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_local_prediction_results</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="nx">Clients</span><span class="o">:</span><span class="w">   </span><span class="mf">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mf">0</span><span class="o">/</span><span class="mf">4</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="cp">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+<pre class="highlight"><code class="language-python">X_train_imps, y_trains = env.get_data(client_ids='all', data_type = 'train_imp', include_y=True)
+X_tests, y_tests = env.get_data(client_ids='all', data_type = 'test', include_y=True)
+X_global_test, y_global_test = env.get_data(data_type = 'global_test', include_y = True)
+data_config = env.get_data(data_type = 'config')</code></pre>
+<pre class="highlight"><code class="language-python">ret = evaluator.run_local_prediction(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    X_tests = X_tests,
+    y_tests = y_tests,
+    data_config = data_config,
+    model = 'rf',
+    seed= 0
+)
+evaluator.show_local_prediction_results()</code></pre>
+<pre class="highlight"><code>Clients:   0%|          | 0/4 [00:00&lt;?, ?it/s]
 
 
-<span class="o">==========================================================</span>
-<span class="nx">Downstream</span> <span class="nx">Prediction</span> <span class="p">(</span><span class="nx">Local</span><span class="p">)</span>
-<span class="o">==========================================================</span>
-             <span class="nx">accuracy</span>       <span class="nx">f1</span>         <span class="nx">auc</span>         <span class="nx">prc</span>
-<span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
- <span class="nx">Client</span> <span class="mi">1</span>     <span class="mf">0.894</span>       <span class="mf">0.842</span>       <span class="mf">0.975</span>       <span class="mf">0.946</span>
- <span class="nx">Client</span> <span class="mi">2</span>     <span class="mf">0.965</span>       <span class="mf">0.946</span>       <span class="mf">0.996</span>       <span class="mf">0.992</span>
- <span class="nx">Client</span> <span class="mi">3</span>     <span class="mf">0.956</span>       <span class="mf">0.932</span>       <span class="mf">0.982</span>       <span class="mf">0.975</span>
- <span class="nx">Client</span> <span class="mi">4</span>     <span class="mf">0.920</span>       <span class="mf">0.873</span>       <span class="mf">0.961</span>       <span class="mf">0.924</span>
-<span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
- <span class="nx">Average</span>      <span class="mf">0.934</span>       <span class="mf">0.898</span>       <span class="mf">0.979</span>       <span class="mf">0.959</span>
-   <span class="nx">Std</span>        <span class="mf">0.028</span>       <span class="mf">0.042</span>       <span class="mf">0.013</span>       <span class="mf">0.026</span>
-<span class="o">==========================================================</span>
-</code></pre></div>
-
-<div class="highlight"><pre><span></span><code><span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">run_local_prediction</span><span class="p">(</span>
-    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
-    <span class="n">X_tests</span> <span class="o">=</span> <span class="n">X_tests</span><span class="p">,</span>
-    <span class="n">y_tests</span> <span class="o">=</span> <span class="n">y_tests</span><span class="p">,</span>
-    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span><span class="p">,</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="s1">&#39;lr&#39;</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span> <span class="mi">0</span>
-<span class="p">)</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_local_prediction_results</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="nx">Clients</span><span class="o">:</span><span class="w">   </span><span class="mf">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mf">0</span><span class="o">/</span><span class="mf">4</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="cp">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+==========================================================
+Downstream Prediction (Local)
+==========================================================
+             accuracy       f1         auc         prc
+----------  ----------  ----------  ----------  ----------
+ Client 1     0.894       0.842       0.975       0.946
+ Client 2     0.965       0.946       0.996       0.992
+ Client 3     0.956       0.932       0.982       0.975
+ Client 4     0.920       0.873       0.961       0.924
+----------  ----------  ----------  ----------  ----------
+ Average      0.934       0.898       0.979       0.959
+   Std        0.028       0.042       0.013       0.026
+==========================================================</code></pre>
+<pre class="highlight"><code class="language-python">ret = evaluator.run_local_prediction(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    X_tests = X_tests,
+    y_tests = y_tests,
+    data_config = data_config,
+    model = 'lr',
+    seed= 0
+)
+evaluator.show_local_prediction_results()</code></pre>
+<pre class="highlight"><code>Clients:   0%|          | 0/4 [00:00&lt;?, ?it/s]
 
 
-<span class="o">==========================================================</span>
-<span class="nx">Downstream</span> <span class="nx">Prediction</span> <span class="p">(</span><span class="nx">Local</span><span class="p">)</span>
-<span class="o">==========================================================</span>
-             <span class="nx">accuracy</span>       <span class="nx">f1</span>         <span class="nx">auc</span>         <span class="nx">prc</span>
-<span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
- <span class="nx">Client</span> <span class="mi">1</span>     <span class="mf">0.903</span>       <span class="mf">0.871</span>       <span class="mf">0.990</span>       <span class="mf">0.977</span>
- <span class="nx">Client</span> <span class="mi">2</span>     <span class="mf">0.903</span>       <span class="mf">0.845</span>       <span class="mf">0.962</span>       <span class="mf">0.935</span>
- <span class="nx">Client</span> <span class="mi">3</span>     <span class="mf">0.850</span>       <span class="mf">0.809</span>       <span class="mf">0.950</span>       <span class="mf">0.911</span>
- <span class="nx">Client</span> <span class="mi">4</span>     <span class="mf">0.823</span>       <span class="mf">0.778</span>       <span class="mf">0.973</span>       <span class="mf">0.968</span>
-<span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>  <span class="o">----------</span>
- <span class="nx">Average</span>      <span class="mf">0.869</span>       <span class="mf">0.826</span>       <span class="mf">0.968</span>       <span class="mf">0.948</span>
-   <span class="nx">Std</span>        <span class="mf">0.034</span>       <span class="mf">0.035</span>       <span class="mf">0.015</span>       <span class="mf">0.027</span>
-<span class="o">==========================================================</span>
-</code></pre></div>
-
+==========================================================
+Downstream Prediction (Local)
+==========================================================
+             accuracy       f1         auc         prc
+----------  ----------  ----------  ----------  ----------
+ Client 1     0.903       0.871       0.990       0.977
+ Client 2     0.903       0.845       0.962       0.935
+ Client 3     0.850       0.809       0.950       0.911
+ Client 4     0.823       0.778       0.973       0.968
+----------  ----------  ----------  ----------  ----------
+ Average      0.869       0.826       0.968       0.948
+   Std        0.034       0.035       0.015       0.027
+==========================================================</code></pre>
 <h3 id="federated-prediction">Federated Prediction</h3>
-<div class="highlight"><pre><span></span><code><span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">run_fed_prediction</span><span class="p">(</span>
-    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
-    <span class="n">X_tests</span> <span class="o">=</span> <span class="n">X_tests</span><span class="p">,</span>
-    <span class="n">y_tests</span> <span class="o">=</span> <span class="n">y_tests</span><span class="p">,</span>
-    <span class="n">X_test_global</span> <span class="o">=</span> <span class="n">X_global_test</span><span class="p">,</span>
-    <span class="n">y_test_global</span> <span class="o">=</span> <span class="n">y_global_test</span><span class="p">,</span>
-    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span><span class="p">,</span>
-    <span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;rf&#39;</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span> <span class="mi">0</span>
-<span class="p">)</span>
+<pre class="highlight"><code class="language-python">ret = evaluator.run_fed_prediction(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    X_tests = X_tests,
+    y_tests = y_tests,
+    X_test_global = X_global_test,
+    y_test_global = y_global_test,
+    data_config = data_config,
+    model_name = 'rf',
+    seed= 0
+)
 
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_fed_prediction_results</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code>===============================================================
+evaluator.show_fed_prediction_results()</code></pre>
+<pre class="highlight"><code>===============================================================
 Downstream Prediction (Fed)
 ===============================================================
  Personalized    accuracy       f1         auc         prc
@@ -386,24 +358,21 @@ Downstream Prediction (Fed)
    Client 4       0.876       0.800       0.969       0.943
   ----------    ----------  ----------  ----------  ----------
     Global        0.914       0.862       0.952       0.906
-===============================================================
-</code></pre></div>
+===============================================================</code></pre>
+<pre class="highlight"><code class="language-python">ret = evaluator.run_fed_prediction(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    X_tests = X_tests,
+    y_tests = y_tests,
+    X_test_global = X_global_test,
+    y_test_global = y_global_test,
+    data_config = data_config,
+    model_name = 'lr',
+    seed= 0
+)
 
-<div class="highlight"><pre><span></span><code><span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">run_fed_prediction</span><span class="p">(</span>
-    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
-    <span class="n">X_tests</span> <span class="o">=</span> <span class="n">X_tests</span><span class="p">,</span>
-    <span class="n">y_tests</span> <span class="o">=</span> <span class="n">y_tests</span><span class="p">,</span>
-    <span class="n">X_test_global</span> <span class="o">=</span> <span class="n">X_global_test</span><span class="p">,</span>
-    <span class="n">y_test_global</span> <span class="o">=</span> <span class="n">y_global_test</span><span class="p">,</span>
-    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span><span class="p">,</span>
-    <span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;lr&#39;</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span> <span class="mi">0</span>
-<span class="p">)</span>
-
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_fed_prediction_results</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code>(900, 8) (900,)
+evaluator.show_fed_prediction_results()</code></pre>
+<pre class="highlight"><code>(900, 8) (900,)
 
 
                                                                 3.52it/s]
@@ -419,61 +388,58 @@ Downstream Prediction (Fed)
    Client 4       0.876       0.833       0.972       0.960
   ----------    ----------  ----------  ----------  ----------
     Global        0.912       0.878       0.979       0.953
-===============================================================
-</code></pre></div>
-
+===============================================================</code></pre>
 <h3 id="all-in-one">All In One</h3>
-<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evaluator</span>
+<pre class="highlight"><code class="language-python">%load_ext autoreload
+%autoreload 2
+from fedimpute.evaluation import Evaluator
 
-<span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
-<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_all</span><span class="p">(</span>
-    <span class="n">env</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_local&#39;</span><span class="p">,</span> <span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">]</span>
-<span class="p">)</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_results_all</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="err"></span><span class="p">[</span><span class="mf">1</span><span class="nx">mEvaluating</span><span class="w"> </span><span class="nx">imputation</span><span class="w"> </span><span class="nx">quality</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mf">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mf">1</span><span class="nx">mImputation</span><span class="w"> </span><span class="nx">quality</span><span class="w"> </span><span class="nx">evaluation</span><span class="w"> </span><span class="nx">completed</span><span class="p">.</span><span class="err"></span><span class="p">[</span><span class="mf">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mf">1</span><span class="nx">mEvaluating</span><span class="w"> </span><span class="nx">downstream</span><span class="w"> </span><span class="nx">prediction</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mf">0</span><span class="nx">m</span>
-
-
-
-<span class="nx">Clients</span><span class="o">:</span><span class="w">   </span><span class="mf">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mf">0</span><span class="o">/</span><span class="mf">4</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="cp">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
-
-
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">593</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">287</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">583</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">360</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mDownstream</span> <span class="nx">prediction</span> <span class="nx">evaluation</span> <span class="nx">completed</span><span class="o">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEvaluating</span> <span class="nx">federated</span> <span class="nx">downstream</span> <span class="nx">prediction</span><span class="o">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
+evaluator = Evaluator()
+ret = evaluator.evaluate_all(
+    env, metrics = ['imp_quality', 'local_pred', 'fed_pred']
+)
+evaluator.show_imp_results()
+evaluator.show_local_prediction_results()
+evaluator.show_fed_prediction_results()</code></pre>
+<pre class="highlight"><code>[1mEvaluating imputation quality...[0m
+[1mImputation quality evaluation completed.[0m
+[1mEvaluating downstream prediction...[0m
 
 
 
-<span class="k">Global</span> <span class="nx">Epoch</span><span class="o">:</span>   <span class="mi">0</span><span class="o">%|</span>          <span class="o">|</span> <span class="mi">0</span><span class="o">/</span><span class="mi">100</span> <span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span> <span class="o">?</span><span class="nx">it</span><span class="o">/</span><span class="nx">s</span><span class="p">]</span>
+Clients:   0%|          | 0/4 [00:00&lt;?, ?it/s]
 
 
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">0</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.6716053117724026</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">10</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.5709273157750859</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">20</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.48411076998009406</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">30</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4436344894416192</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">40</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.43356676005265293</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">50</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4266376635607551</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">60</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.4221082873204175</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">65</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">70</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.40617619396424764</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">71</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">74</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEpoch</span> <span class="mi">80</span> <span class="o">-</span> <span class="nx">average</span> <span class="nx">loss</span><span class="o">:</span> <span class="mf">0.3788260501973769</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">81</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">100</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">121</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEarly</span> <span class="nx">stopping</span> <span class="nx">at</span> <span class="nx">epoch</span> <span class="mi">125</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mFederated</span> <span class="nx">downstream</span> <span class="nx">prediction</span> <span class="nx">evaluation</span> <span class="nx">completed</span><span class="o">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="nx">mEvaluation</span> <span class="nx">completed</span><span class="o">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="nx">m</span>
-</code></pre></div>
+[1mEarly stopping at epoch 593[0m
+[1mEarly stopping at epoch 287[0m
+[1mEarly stopping at epoch 583[0m
+[1mEarly stopping at epoch 360[0m
+[1mDownstream prediction evaluation completed.[0m
+[1mEvaluating federated downstream prediction...[0m
 
+
+
+Global Epoch:   0%|          | 0/100 [00:00&lt;?, ?it/s]
+
+
+[1mEpoch 0 - average loss: 0.6716053117724026[0m
+[1mEpoch 10 - average loss: 0.5709273157750859[0m
+[1mEpoch 20 - average loss: 0.48411076998009406[0m
+[1mEpoch 30 - average loss: 0.4436344894416192[0m
+[1mEpoch 40 - average loss: 0.43356676005265293[0m
+[1mEpoch 50 - average loss: 0.4266376635607551[0m
+[1mEpoch 60 - average loss: 0.4221082873204175[0m
+[1mEarly stopping at epoch 65[0m
+[1mEpoch 70 - average loss: 0.40617619396424764[0m
+[1mEarly stopping at epoch 71[0m
+[1mEarly stopping at epoch 74[0m
+[1mEpoch 80 - average loss: 0.3788260501973769[0m
+[1mEarly stopping at epoch 81[0m
+[1mEarly stopping at epoch 100[0m
+[1mEarly stopping at epoch 121[0m
+[1mEarly stopping at epoch 125[0m
+[1mFederated downstream prediction evaluation completed.[0m
+[1mEvaluation completed.[0m</code></pre>
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -593,8 +559,7 @@ Downstream Prediction (Fed)
 </div>
 
 <h3 id="export-evaluation-results-in-different-format">Export Evaluation Results in Different Format</h3>
-<div class="highlight"><pre><span></span><code><span class="n">evaluator</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;dataframe&#39;</span><span class="p">)</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">evaluator.export_results(format = 'dataframe')</code></pre>
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -713,9 +678,8 @@ Downstream Prediction (Fed)
 </table>
 </div>
 
-<div class="highlight"><pre><span></span><code><span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;dict-dataframe&#39;</span><span class="p">)</span>
-<span class="n">ret</span><span class="p">[</span><span class="s1">&#39;imp_quality&#39;</span><span class="p">]</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">ret = evaluator.export_results(format = 'dict-dataframe')
+ret['imp_quality']</code></pre>
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -768,9 +732,8 @@ Downstream Prediction (Fed)
 </table>
 </div>
 
-<div class="highlight"><pre><span></span><code><span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;dict-dataframe&#39;</span><span class="p">)</span>
-<span class="n">ret</span><span class="p">[</span><span class="s1">&#39;pred_downstream_fed&#39;</span><span class="p">]</span>
-</code></pre></div>
+<pre class="highlight"><code class="language-python">ret = evaluator.export_results(format = 'dict-dataframe')
+ret['fed_pred']</code></pre>
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -849,19 +812,18 @@ Downstream Prediction (Fed)
 </div>
 
 <h1 id="regression-analysis">regression analysis</h1>
-<div class="highlight"><pre><span></span><code><span class="n">X_trains</span><span class="p">,</span> <span class="n">y_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">data_config</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
-<span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;task_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;classification&#39;</span>
+<pre class="highlight"><code class="language-python">X_trains, y_trains = env.get_data(client_ids='all', data_type = 'train', include_y=True)
+data_config = env.get_data(data_type = 'config')
+data_config['task_type'] = 'classification'
 
-<span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">run_local_regression_analysis</span><span class="p">(</span>
-    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
-    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span>
-<span class="p">)</span>
+ret = evaluator.run_local_regression_analysis(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    data_config = data_config
+)
 
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_local_regression_results</span><span class="p">(</span><span class="n">client_idx</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code>                  Local Logit Regression Results (client 1)                   
+evaluator.show_local_regression_results(client_idx = 0)</code></pre>
+<pre class="highlight"><code>                  Local Logit Regression Results (client 1)                   
 ==============================================================================
 Dep. Variable:                      y   No. Observations:                 1125
 Model:                          Logit   Df Residuals:                     1116
@@ -869,8 +831,8 @@ Method:                           MLE   Df Model:                            8
 Date:                Mon, 21 Apr 2025   Pseudo R-squ.:                  0.2545
 Time:                        16:28:07   Log-Likelihood:                -528.54
 converged:                       True   LL-Null:                       -708.95
-<span class="gh">Covariance Type:            nonrobust   LLR p-value:                 4.432e-73</span>
-<span class="gh">==============================================================================</span>
+Covariance Type:            nonrobust   LLR p-value:                 4.432e-73
+==============================================================================
                  coef    std err          z      P&gt;|z|      [0.025      0.975]
 ------------------------------------------------------------------------------
 const         47.6797      4.807      9.919      0.000      38.258      57.101
@@ -881,22 +843,19 @@ X4             8.6467      4.951      1.747      0.081      -1.056      18.350
 X5             4.8074      6.234      0.771      0.441      -7.411      17.026
 X6            15.6919      4.340      3.616      0.000       7.187      24.197
 X7            11.8661      4.610      2.574      0.010       2.831      20.901
-<span class="gh">X8             5.4795      6.139      0.893      0.372      -6.553      17.512</span>
-<span class="gh">==============================================================================</span>
-</code></pre></div>
+X8             5.4795      6.139      0.893      0.372      -6.553      17.512
+==============================================================================</code></pre>
+<pre class="highlight"><code class="language-python">X_trains, y_trains = env.get_data(client_ids='all', data_type = 'train', include_y=True)
+data_config = env.get_data(data_type = 'config')
+data_config['task_type'] = 'classification'
 
-<div class="highlight"><pre><span></span><code><span class="n">X_trains</span><span class="p">,</span> <span class="n">y_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">data_config</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
-<span class="n">data_config</span><span class="p">[</span><span class="s1">&#39;task_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;classification&#39;</span>
-
-<span class="n">evaluator</span><span class="o">.</span><span class="n">run_fed_regression_analysis</span><span class="p">(</span>
-    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
-    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span>
-<span class="p">)</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_fed_regression_results</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code>                      Federated Logit Regression Result                       
+evaluator.run_fed_regression_analysis(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    data_config = data_config
+)
+evaluator.show_fed_regression_results()</code></pre>
+<pre class="highlight"><code>                      Federated Logit Regression Result                       
 ==============================================================================
 Dep. Variable:                      y   No. Observations:                 4500
 Model:                          Logit   Df Residuals:                     4491
@@ -904,8 +863,8 @@ Method:                           MLE   Df Model:                            8
 Date:                Mon, 21 Apr 2025   Pseudo R-squ.:                  0.2478
 Time:                        16:28:24   Log-Likelihood:                -2133.1
 converged:                       True   LL-Null:                       -2835.8
-<span class="gh">Covariance Type:            nonrobust   LLR p-value:                4.035e-298</span>
-<span class="gh">==============================================================================</span>
+Covariance Type:            nonrobust   LLR p-value:                4.035e-298
+==============================================================================
                  coef    std err          z      P&gt;|z|      [0.025      0.975]
 ------------------------------------------------------------------------------
 const         30.4160      0.129    235.463      0.000      30.163      30.669
@@ -916,9 +875,8 @@ X4            11.3237      0.084    134.553      0.000      11.159      11.489
 X5            10.7434      0.103    103.972      0.000      10.541      10.946
 X6            10.6433      0.083    128.952      0.000      10.482      10.805
 X7             8.6910      0.090     96.851      0.000       8.515       8.867
-<span class="gh">X8             1.0197      0.114      8.956      0.000       0.797       1.243</span>
-<span class="gh">==============================================================================</span>
-</code></pre></div>
+X8             1.0197      0.114      8.956      0.000       0.797       1.243
+==============================================================================</code></pre>
               
             </div>
           </div><footer>

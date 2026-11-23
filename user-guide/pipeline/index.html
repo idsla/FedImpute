@@ -128,30 +128,29 @@ aggregation strategies, and their parameters. </li>
 </ul>
 <p>Finally, the pipeline execution is via the <code>run_pipeline()</code> method, which takes a scenario object as input. It executes all configured algorithms on the input scenario, performs evaluations, and stores the results.</p>
 <p>We also have a <code>pipeline_setup_summary()</code> function to provide a summary of constructed pipeline.</p>
-<div class="highlight"><pre><span></span><code>from fedimpute.pipeline import FedImputePipeline
+<pre class="highlight"><code python="None">from fedimpute.pipeline import FedImputePipeline
 
 pipeline = FedImputePipeline()
 pipeline.setup(
-    id = &#39;benchmark_demo&#39;,
+    id = 'benchmark_demo',
     fed_imp_configs = [
-        (&#39;em&#39;, [&#39;local&#39;, &#39;fedem&#39;], {}, [{}, {}]),
-        (&#39;mice&#39;, [&#39;local&#39;, &#39;fedmice&#39;], {}, [{}, {}]),
-        (&#39;gain&#39;, [&#39;local&#39;, &#39;fedavg&#39;], {}, [{}, {}]),
+        ('em', ['local', 'fedem'], {}, [{}, {}]),
+        ('mice', ['local', 'fedmice'], {}, [{}, {}]),
+        ('gain', ['local', 'fedavg'], {}, [{}, {}]),
     ],
     evaluation_params = {
-        &#39;metrics&#39;: [&#39;imp_quality&#39;, &#39;local_pred&#39;, &#39;fed_pred&#39;],
-        &#39;model&#39;: &#39;lr&#39;,
+        'metrics': ['imp_quality', 'local_pred', 'fed_pred'],
+        'model': 'lr',
     },
     persist_data = False,
-    description = &#39;benchmark demonstration&#39;
+    description = 'benchmark demonstration'
 )
 
 pipeline.pipeline_setup_summary()
 
 pipeline.run_pipeline(
     scenario_builder, repeats = 5, verbose = 0
-)
-</code></pre></div>
+)</code></pre>
 <h2 id="result-analysis-and-visualization">Result Analysis and Visualization</h2>
 <p>The pipeline provides two key functions for helping analyze the pipeline execution results:</p>
 <ul>
@@ -162,8 +161,7 @@ pipeline.run_pipeline(
 <p><code>plot_pipeline_results()</code> which creates comparative visualizations of performance metrics across different imputation and federated aggregation strategies.</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>pipeline.plot_pipeline_results(metric_aspect = &#39;fed_pred_personalized&#39;, plot_type = &#39;bar&#39;)
-</code></pre></div>
+<pre class="highlight"><code python="None">pipeline.plot_pipeline_results(metric_aspect = 'fed_pred_personalized', plot_type = 'bar')</code></pre>
               
             </div>
           </div><footer>

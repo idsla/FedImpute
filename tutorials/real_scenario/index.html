@@ -111,147 +111,134 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">tabulate</span>
-</code></pre></div>
+                <pre class="highlight"><code class="language-python">import numpy as np
+import pandas as pd
+import tabulate</code></pre>
 <h1 id="load-data">Load Data</h1>
-<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
+<pre class="highlight"><code class="language-python">%load_ext autoreload
+%autoreload 2
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.data_prep</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_data</span><span class="p">,</span> <span class="n">display_data</span><span class="p">,</span> <span class="n">column_check</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.scenario</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScenarioBuilder</span>
-<span class="n">data</span><span class="p">,</span> <span class="n">data_config</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s2">&quot;fed_heart_disease&quot;</span><span class="p">)</span>
-<span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">ScenarioBuilder</span><span class="p">()</span>
-<span class="n">scenario_data</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="o">.</span><span class="n">create_real_scenario</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span> <span class="n">data_config</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">scenario_builder</span><span class="o">.</span><span class="n">summarize_scenario</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
-<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
-<span class="o">==================================================================</span>
-<span class="n">Scenario</span><span class="w"> </span><span class="n">Summary</span>
-<span class="o">==================================================================</span>
-<span class="n">Total</span><span class="w"> </span><span class="n">clients</span><span class="o">:</span><span class="w"> </span><span class="mi">4</span>
-<span class="n">Global</span><span class="w"> </span><span class="n">Test</span><span class="w"> </span><span class="n">Data</span><span class="o">:</span><span class="w"> </span><span class="p">(</span><span class="mi">94</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">)</span>
-<span class="n">Missing</span><span class="w"> </span><span class="n">Mechanism</span><span class="w"> </span><span class="n">Category</span><span class="o">:</span><span class="w"> </span><span class="n">MCAR</span>
-<span class="n">Clients</span><span class="w"> </span><span class="n">Data</span><span class="w"> </span><span class="n">Summary</span><span class="o">:</span>
-<span class="w">     </span><span class="n">Train</span><span class="w">     </span><span class="n">Test</span><span class="w">      </span><span class="n">Miss</span><span class="w">     </span><span class="n">MS</span><span class="w"> </span><span class="n">Ratio</span><span class="w">    </span><span class="n">MS</span><span class="w"> </span><span class="n">Feature</span><span class="w">    </span><span class="n">Seed</span>
-<span class="o">--</span><span class="w">  </span><span class="o">--------</span><span class="w">  </span><span class="o">-------</span><span class="w">  </span><span class="o">--------</span><span class="w">  </span><span class="o">----------</span><span class="w">  </span><span class="o">------------</span><span class="w">  </span><span class="o">------</span>
-<span class="n">C1</span><span class="w">  </span><span class="p">(</span><span class="mi">244</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">28</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">244</span><span class="p">,</span><span class="mi">14</span><span class="p">)</span><span class="w">     </span><span class="mf">0.00</span><span class="w">         </span><span class="mi">0</span><span class="o">/</span><span class="mi">14</span><span class="w">       </span><span class="mi">6077</span>
-<span class="n">C2</span><span class="w">  </span><span class="p">(</span><span class="mi">237</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">27</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">237</span><span class="p">,</span><span class="mi">14</span><span class="p">)</span><span class="w">     </span><span class="mf">0.05</span><span class="w">         </span><span class="mi">4</span><span class="o">/</span><span class="mi">14</span><span class="w">       </span><span class="mi">577</span>
-<span class="n">C3</span><span class="w">  </span><span class="p">(</span><span class="mi">99</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span><span class="w">   </span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">99</span><span class="p">,</span><span class="mi">14</span><span class="p">)</span><span class="w">      </span><span class="mf">0.01</span><span class="w">         </span><span class="mi">3</span><span class="o">/</span><span class="mi">14</span><span class="w">       </span><span class="mi">7231</span>
-<span class="n">C4</span><span class="w">  </span><span class="p">(</span><span class="mi">162</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">18</span><span class="p">,</span><span class="mi">15</span><span class="p">)</span><span class="w">  </span><span class="p">(</span><span class="mi">162</span><span class="p">,</span><span class="mi">14</span><span class="p">)</span><span class="w">     </span><span class="mf">0.10</span><span class="w">         </span><span class="mi">5</span><span class="o">/</span><span class="mi">14</span><span class="w">       </span><span class="mi">5504</span>
-<span class="o">==================================================================</span>
-</code></pre></div>
-
-<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_pattern</span><span class="p">(</span>
-    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;train&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/real_pattern_train.png&#39;</span>
-<span class="p">)</span>
-</code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="n">scenario_builder</span><span class="o">.</span><span class="n">visualize_missing_pattern</span><span class="p">(</span>
-    <span class="n">client_ids</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">data_type</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="s1">&#39;./plots/real_pattern_test.png&#39;</span>
-<span class="p">)</span>
-</code></pre></div>
+from fedimpute.data_prep import load_data, display_data, column_check
+from fedimpute.scenario import ScenarioBuilder
+data, data_config = load_data("fed_heart_disease")
+scenario_builder = ScenarioBuilder()
+scenario_data = scenario_builder.create_real_scenario(
+    data, data_config,
+)
+scenario_builder.summarize_scenario()</code></pre>
+<pre class="highlight"><code>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+==================================================================
+Scenario Summary
+==================================================================
+Total clients: 4
+Global Test Data: (94, 15)
+Missing Mechanism Category: MCAR
+Clients Data Summary:
+     Train     Test      Miss     MS Ratio    MS Feature    Seed
+--  --------  -------  --------  ----------  ------------  ------
+C1  (244,15)  (28,15)  (244,14)     0.00         0/14       6077
+C2  (237,15)  (27,15)  (237,14)     0.05         4/14       577
+C3  (99,15)   (11,15)  (99,14)      0.01         3/14       7231
+C4  (162,15)  (18,15)  (162,14)     0.10         5/14       5504
+==================================================================</code></pre>
+<pre class="highlight"><code class="language-python">scenario_builder.visualize_missing_pattern(
+    client_ids=[0, 1, 2, 3], data_type='train', fontsize=20, save_path='./plots/real_pattern_train.png'
+)</code></pre>
+<pre class="highlight"><code class="language-python">scenario_builder.visualize_missing_pattern(
+    client_ids=[0, 1, 2, 3], data_type='test', fontsize=20, save_path='./plots/real_pattern_test.png'
+)</code></pre>
 <h1 id="running-federated-imputation">Running Federated Imputation</h1>
-<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.execution_environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">FedImputeEnv</span>
+<pre class="highlight"><code class="language-python">%load_ext autoreload
+%autoreload 2
+from fedimpute.execution_environment import FedImputeEnv
 
-<span class="n">env</span> <span class="o">=</span> <span class="n">FedImputeEnv</span><span class="p">(</span><span class="n">debug_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">env</span><span class="o">.</span><span class="n">configuration</span><span class="p">(</span><span class="n">imputer</span> <span class="o">=</span> <span class="s1">&#39;mice&#39;</span><span class="p">,</span> <span class="n">fed_strategy</span><span class="o">=</span><span class="s1">&#39;fedmice&#39;</span><span class="p">,</span> <span class="n">workflow_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;early_stopping_metric&#39;</span><span class="p">:</span> <span class="s1">&#39;loss&#39;</span><span class="p">})</span>
-<span class="n">env</span><span class="o">.</span><span class="n">setup_from_scenario_builder</span><span class="p">(</span><span class="n">scenario_builder</span> <span class="o">=</span> <span class="n">scenario_builder</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">env</span><span class="o">.</span><span class="n">show_env_info</span><span class="p">()</span>
-<span class="n">env</span><span class="o">.</span><span class="n">run_fed_imputation</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
-<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">clients</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">server</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mSetting</span><span class="w"> </span><span class="n">up</span><span class="w"> </span><span class="n">workflow</span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mEnvironment</span><span class="w"> </span><span class="n">setup</span><span class="w"> </span><span class="n">complete</span><span class="p">.</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-<span class="o">============================================================</span>
-<span class="n">Environment</span><span class="w"> </span><span class="n">Information</span><span class="o">:</span>
-<span class="o">============================================================</span>
-<span class="nl">Workflow</span><span class="p">:</span><span class="w"> </span><span class="n">ICE</span><span class="w"> </span><span class="p">(</span><span class="n">Imputation</span><span class="w"> </span><span class="n">via</span><span class="w"> </span><span class="n">Chain</span><span class="w"> </span><span class="n">Equation</span><span class="p">)</span>
-<span class="nl">Clients</span><span class="p">:</span>
-<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">1</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">2</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Client</span><span class="w"> </span><span class="mi">3</span><span class="o">:</span><span class="w"> </span><span class="n">imputer</span><span class="o">:</span><span class="w"> </span><span class="n">mice</span><span class="p">,</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="nl">Server</span><span class="p">:</span><span class="w"> </span><span class="n">fed</span><span class="o">-</span><span class="n">strategy</span><span class="o">:</span><span class="w"> </span><span class="n">fedmice</span>
-<span class="o">============================================================</span>
+env = FedImputeEnv(debug_mode=False)
+env.configuration(imputer = 'mice', fed_strategy='fedmice', workflow_params = {'early_stopping_metric': 'loss'})
+env.setup_from_scenario_builder(scenario_builder = scenario_builder, verbose=1)
+env.show_env_info()
+env.run_fed_imputation(verbose=1)</code></pre>
+<pre class="highlight"><code>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+[1mSetting up clients...[0m
+[1mSetting up server...[0m
+[1mSetting up workflow...[0m
+[1mEnvironment setup complete.[0m
+============================================================
+Environment Information:
+============================================================
+Workflow: ICE (Imputation via Chain Equation)
+Clients:
+ - Client 0: imputer: mice, fed-strategy: fedmice
+ - Client 1: imputer: mice, fed-strategy: fedmice
+ - Client 2: imputer: mice, fed-strategy: fedmice
+ - Client 3: imputer: mice, fed-strategy: fedmice
+Server: fed-strategy: fedmice
+============================================================
 
-<span class="err"></span><span class="p">[</span><span class="mi">32</span><span class="n">m</span><span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mImputation</span><span class="w"> </span><span class="n">Start</span><span class="w"> </span><span class="p">...</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-
-
-
-<span class="n">ICE</span><span class="w"> </span><span class="n">Iterations</span><span class="o">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">20</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+[32m[1mImputation Start ...[0m
 
 
 
-<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">14</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+ICE Iterations:   0%|          | 0/20 [00:00&lt;?, ?it/s]
 
 
 
-<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">14</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+Feature_idx:   0%|          | 0/14 [00:00&lt;?, ?it/s]
 
 
 
-<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">14</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+Feature_idx:   0%|          | 0/14 [00:00&lt;?, ?it/s]
 
 
 
-<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">14</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+Feature_idx:   0%|          | 0/14 [00:00&lt;?, ?it/s]
 
 
 
-<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">14</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+Feature_idx:   0%|          | 0/14 [00:00&lt;?, ?it/s]
 
 
 
-<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">14</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+Feature_idx:   0%|          | 0/14 [00:00&lt;?, ?it/s]
 
 
 
-<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">14</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+Feature_idx:   0%|          | 0/14 [00:00&lt;?, ?it/s]
 
 
 
-<span class="nl">Feature_idx</span><span class="p">:</span><span class="w">   </span><span class="mi">0</span><span class="o">%|</span><span class="w">          </span><span class="o">|</span><span class="w"> </span><span class="mi">0</span><span class="o">/</span><span class="mi">14</span><span class="w"> </span><span class="p">[</span><span class="mo">00</span><span class="o">:</span><span class="mo">00</span><span class="o">&lt;?</span><span class="p">,</span><span class="w"> </span><span class="o">?</span><span class="n">it</span><span class="o">/</span><span class="n">s</span><span class="p">]</span>
+Feature_idx:   0%|          | 0/14 [00:00&lt;?, ?it/s]
 
 
-<span class="err"></span><span class="p">[</span><span class="mi">32</span><span class="n">m</span><span class="err"></span><span class="p">[</span><span class="mi">1</span><span class="n">mFinished</span><span class="p">.</span><span class="w"> </span><span class="n">Running</span><span class="w"> </span><span class="n">time</span><span class="o">:</span><span class="w"> </span><span class="mf">0.6903</span><span class="w"> </span><span class="n">seconds</span><span class="err"></span><span class="p">[</span><span class="mi">0</span><span class="n">m</span>
-</code></pre></div>
 
+Feature_idx:   0%|          | 0/14 [00:00&lt;?, ?it/s]
+
+
+[32m[1mFinished. Running time: 0.6903 seconds[0m</code></pre>
 <h1 id="evaluation">Evaluation</h1>
-<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">load_ext</span> <span class="n">autoreload</span>
-<span class="o">%</span><span class="n">autoreload</span> <span class="mi">2</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">fedimpute.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evaluator</span>
+<pre class="highlight"><code class="language-python">%load_ext autoreload
+%autoreload 2
+from fedimpute.evaluation import Evaluator
 
-<span class="n">evaluator</span> <span class="o">=</span> <span class="n">Evaluator</span><span class="p">()</span>
+evaluator = Evaluator()
 
-<span class="n">X_train_imps</span><span class="p">,</span> <span class="n">y_trains</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;train_imp&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_tests</span><span class="p">,</span> <span class="n">y_tests</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="n">include_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">X_test_imps</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">client_ids</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;test_imp&#39;</span><span class="p">)</span>
-<span class="n">X_global_test</span><span class="p">,</span> <span class="n">y_global_test</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;global_test&#39;</span><span class="p">,</span> <span class="n">include_y</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
-<span class="n">X_global_test_imp</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;global_test_imp&#39;</span><span class="p">)</span>
-<span class="n">data_config</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">data_type</span> <span class="o">=</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code><span class="n">The</span><span class="w"> </span><span class="n">autoreload</span><span class="w"> </span><span class="n">extension</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">loaded</span><span class="p">.</span><span class="w"> </span><span class="n">To</span><span class="w"> </span><span class="n">reload</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">use</span><span class="o">:</span>
-<span class="w">  </span><span class="nf">%reload_ext</span><span class="w"> </span><span class="n">autoreload</span>
-</code></pre></div>
-
+X_train_imps, y_trains = env.get_data(client_ids='all', data_type = 'train_imp', include_y=True)
+X_tests, y_tests = env.get_data(client_ids='all', data_type = 'test', include_y=True)
+X_test_imps = env.get_data(client_ids='all', data_type = 'test_imp')
+X_global_test, y_global_test = env.get_data(data_type = 'global_test', include_y = True)
+X_global_test_imp = env.get_data(data_type = 'global_test_imp')
+data_config = env.get_data(data_type = 'config')</code></pre>
+<pre class="highlight"><code>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload</code></pre>
 <h3 id="federated-prediction">Federated Prediction</h3>
-<div class="highlight"><pre><span></span><code><span class="n">evaluator</span><span class="o">.</span><span class="n">run_fed_regression_analysis</span><span class="p">(</span>
-    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
-    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span>
-<span class="p">)</span>
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_fed_regression_results</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code>                      Federated Logit Regression Result                       
+<pre class="highlight"><code class="language-python">evaluator.run_fed_regression_analysis(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    data_config = data_config
+)
+evaluator.show_fed_regression_results()</code></pre>
+<pre class="highlight"><code>                      Federated Logit Regression Result                       
 ==============================================================================
 Dep. Variable:                    num   No. Observations:                  742
 Model:                          Logit   Df Residuals:                      727
@@ -259,8 +246,8 @@ Method:                           MLE   Df Model:                           14
 Date:                Mon, 21 Apr 2025   Pseudo R-squ.:                  0.4122
 Time:                        16:45:26   Log-Likelihood:                -299.78
 converged:                       True   LL-Null:                       -509.99
-<span class="gh">Covariance Type:            nonrobust   LLR p-value:                 6.246e-81</span>
-<span class="gh">==============================================================================</span>
+Covariance Type:            nonrobust   LLR p-value:                 6.246e-81
+==============================================================================
                  coef    std err          z      P&gt;|z|      [0.025      0.975]
 ------------------------------------------------------------------------------
 const         -2.0137      0.211     -9.561      0.000      -2.426      -1.601
@@ -277,25 +264,22 @@ cp_4.0         1.1759      0.060     19.538      0.000       1.058       1.294
 fbs_0.0       -1.6318      0.101    -16.154      0.000      -1.830      -1.434
 fbs_1.0       -0.6695      0.103     -6.470      0.000      -0.872      -0.467
 exang_0.0     -0.3233      0.037     -8.806      0.000      -0.395      -0.251
-<span class="gh">exang_1.0      0.7180      0.038     19.114      0.000       0.644       0.792</span>
-<span class="gh">==============================================================================</span>
-</code></pre></div>
+exang_1.0      0.7180      0.038     19.114      0.000       0.644       0.792
+==============================================================================</code></pre>
+<pre class="highlight"><code class="language-python">ret = evaluator.run_fed_prediction(
+    X_train_imps = X_train_imps,
+    y_trains = y_trains,
+    X_tests = X_test_imps,
+    y_tests = y_tests,
+    X_test_global = X_global_test_imp,
+    y_test_global = y_global_test,
+    data_config = data_config,
+    model_name = 'lr',
+    seed= 0
+)
 
-<div class="highlight"><pre><span></span><code><span class="n">ret</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">run_fed_prediction</span><span class="p">(</span>
-    <span class="n">X_train_imps</span> <span class="o">=</span> <span class="n">X_train_imps</span><span class="p">,</span>
-    <span class="n">y_trains</span> <span class="o">=</span> <span class="n">y_trains</span><span class="p">,</span>
-    <span class="n">X_tests</span> <span class="o">=</span> <span class="n">X_test_imps</span><span class="p">,</span>
-    <span class="n">y_tests</span> <span class="o">=</span> <span class="n">y_tests</span><span class="p">,</span>
-    <span class="n">X_test_global</span> <span class="o">=</span> <span class="n">X_global_test_imp</span><span class="p">,</span>
-    <span class="n">y_test_global</span> <span class="o">=</span> <span class="n">y_global_test</span><span class="p">,</span>
-    <span class="n">data_config</span> <span class="o">=</span> <span class="n">data_config</span><span class="p">,</span>
-    <span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;lr&#39;</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span> <span class="mi">0</span>
-<span class="p">)</span>
-
-<span class="n">evaluator</span><span class="o">.</span><span class="n">show_fed_prediction_results</span><span class="p">()</span>
-</code></pre></div>
-<div class="codehilite"><pre><span></span><code>(149, 14) (149,)
+evaluator.show_fed_prediction_results()</code></pre>
+<pre class="highlight"><code>(149, 14) (149,)
 
 
                                                                 1.09it/s]
@@ -311,8 +295,7 @@ Downstream Prediction (Fed)
    Client 4       0.500       0.609       0.462       0.697
   ----------    ----------  ----------  ----------  ----------
     Global        0.809       0.804       0.891       0.903
-===============================================================
-</code></pre></div>
+===============================================================</code></pre>
               
             </div>
           </div><footer>
